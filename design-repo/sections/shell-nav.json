@@ -1,7 +1,18 @@
 {
   "id": "shell.nav",
   "kind": "section",
-  "category": "shell",
+  "semantic": {
+    "id": "shell.nav",
+    "category": "shell"
+  },
+  "source": {
+    "id": null,
+    "tag": "nav",
+    "file": "src/components/Navbar.jsx",
+    "lines": "5-21",
+    "citation": "mv.section.nav"
+  },
+  "retrievalEligible": true,
   "description": "Fixed top bar (z-index 20): intro paragraph, centred version tag, right cluster with an always-hidden community icon link, a small pill CTA to #signup and the logo slot.",
   "variants": {
     "default": {

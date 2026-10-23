@@ -18,7 +18,7 @@
   ],
   "properties": {
     "pageSpecVersion": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "template": {
       "enum": [
@@ -247,7 +247,8 @@
     "sectionId": {
       "enum": [
         "content.block-pairs",
-        "form.waitlist",
+        "cta.pitch-timeline",
+        "cta.waitlist-form",
         "hero.course-intro",
         "layer.webgl-object",
         "list.numbered-topics",
@@ -442,10 +443,10 @@
           "$ref": "#/definitions/node__content_block_pairs__feature_pairs"
         },
         {
-          "$ref": "#/definitions/node__content_block_pairs__pitch_timeline"
+          "$ref": "#/definitions/node__cta_pitch_timeline__default"
         },
         {
-          "$ref": "#/definitions/node__form_waitlist__default"
+          "$ref": "#/definitions/node__cta_waitlist_form__default"
         },
         {
           "$ref": "#/definitions/node__shell_footer_wordmark__default"
@@ -848,7 +849,7 @@
         }
       }
     },
-    "node__content_block_pairs__pitch_timeline": {
+    "node__cta_pitch_timeline__default": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -860,10 +861,10 @@
       ],
       "properties": {
         "section": {
-          "const": "content.block-pairs"
+          "const": "cta.pitch-timeline"
         },
         "variant": {
-          "const": "pitch-timeline"
+          "const": "default"
         },
         "anchorId": {
           "const": "cta"
@@ -1022,7 +1023,7 @@
         }
       }
     },
-    "node__form_waitlist__default": {
+    "node__cta_waitlist_form__default": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1034,7 +1035,7 @@
       ],
       "properties": {
         "section": {
-          "const": "form.waitlist"
+          "const": "cta.waitlist-form"
         },
         "variant": {
           "const": "default"

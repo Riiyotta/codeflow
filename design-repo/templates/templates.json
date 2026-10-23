@@ -1,9 +1,9 @@
 {
   "$comment": "One template per distinct page shape. The real site has exactly one route and one shape. Every node is required and non-repeatable because that is the only composition observed; optionality is NOT evidenced and must not be invented.",
-  "templatesVersion": "1.0.0",
+  "templatesVersion": "1.1.0",
   "templates": {
     "template.waitlist-landing": {
-      "description": "Single-page waitlist landing: nav, hero, numbered topic list, feature block pairs, pitch + timeline block pairs, waitlist form, wordmark footer, fixed WebGL object layer.",
+      "description": "Single-page waitlist landing: nav, hero, numbered topic list, feature block pairs, pitch + timeline conversion block, waitlist form conversion block, wordmark footer, fixed WebGL object layer.",
       "nodes": [
         {
           "section": "shell.nav",
@@ -30,13 +30,13 @@
           "repeatable": false
         },
         {
-          "section": "content.block-pairs",
-          "variant": "pitch-timeline",
+          "section": "cta.pitch-timeline",
+          "variant": "default",
           "required": true,
           "repeatable": false
         },
         {
-          "section": "form.waitlist",
+          "section": "cta.waitlist-form",
           "variant": "default",
           "required": true,
           "repeatable": false

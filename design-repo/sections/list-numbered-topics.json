@@ -1,7 +1,18 @@
 {
   "id": "list.numbered-topics",
   "kind": "section",
-  "category": "list",
+  "semantic": {
+    "id": "list.numbered-topics",
+    "category": "list"
+  },
+  "source": {
+    "id": "content",
+    "tag": "section",
+    "file": "src/components/CourseContent.jsx",
+    "lines": "13-30",
+    "citation": "mv.section.content"
+  },
+  "retrievalEligible": true,
   "description": "Course-content list: mono heading, a centred column of large condensed words with mono counters (desktop) and alternate-item offset, then a mono summary.",
   "variants": {
     "default": {

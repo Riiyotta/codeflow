@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0 (2026-10-23): section taxonomy, provenance, retrieval eligibility, wrapper gate (Situation B)
+
+Judged against a 11-point review rubric with real measurements (1440x900, local production build). Not a visual-parity run: there is no live-site capture in this repo, so no visual-parity number is claimed.
+
+- **Breaking id change (released as a minor bump; no PageSpec exists outside the bundled example):** `form.waitlist` is now `cta.waitlist-form`; the `pitch-timeline` variant of `content.block-pairs` is now its own section `cta.pitch-timeline` (variant `default`). The pitch block holds the join CTA, price note and price table, so it and the waitlist form are now category `cta` instead of hiding in generic content / form. `content.block-pairs` keeps only `feature-pairs`. Sections 7 -> 8, variants stay 8.
+- Section contracts gained a closed schema (`schema/section-contract.schema.json`), separate closed `semantic` `{id, category}` and `source` `{id, tag, file, lines, citation}` objects (the old top-level `category` is gone), and `retrievalEligible` (+ `retrievalReason`, 30+ chars when false). Only `layer.webgl-object` is `false`.
+- Validator: 5 new rules (`SECTION_CONTRACT_SCHEMA`, `SECTION_TAXONOMY_PINNED`, `CONVERSION_BLOCK_CLASSED_CTA`, `RETRIEVAL_ELIGIBILITY_PINNED`, `SECTION_SOURCE_STRUCTURE`), mirrored in `compatibility/graph.json` (21 -> 26 rules). Taxonomy and retrieval pins live in both `semantic_validate.py` and, independently, `verify_all.py`.
+- `verify_all.py`: 16 -> 21 checks (contract schema, taxonomy pin, retrieval pin, source provenance against the real files, wrapper gate, plus the existing ones). `extraction/wrapper_gate.py` + `wrapper-whitelist.json` (empty) + optional `measure_sections.mjs`; heights recorded in `measured-values.json` `sectionHeights` (new ledger entry `mv.measure.section-heights`, 94 -> 95).
+- Measured: hero 810px (limit 1800), largest section list 2258.94px = 32% of 7060px in-flow height (limit 50%). No whitelist needed.
+- Tests: adversarial suite 49 -> 99 cases (80 contract/page mutations, 19 wrapper-gate cases) with 4 controls; prove_drift 15 -> 37 drift cases + 4 warn-only cases + 2 controls. Two existing drift cases that would have become no-ops after the bump were re-targeted.
+- Versions: repository, allowlist, pageSpec, templates and graph to 1.1.0. `manifest.vcs` corrected: the project is now a git repo and the zip is gitignored.
+- Rubric items that do not apply: long-form decomposition (no article/legal content; the longest section is a 20-word topic list) and cookie/consent/modal/toast sections (none exist). Evidence is in the README.
+
 ## 1.0.0 (2026-10-23): initial build (Situation A, from scratch)
 
 - Built bottom-up from real evidence: CLONE_SPEC.md (Playwright-measured), the original Webflow stylesheet port `src/styles/webflow.css`, the global embed CSS `src/index.css`, the clone components and motion modules, and the saved original page. Every value cites an entry in `extraction/measured-values.json` (94 entries; every citation carries a quote that is checked against the cited lines).

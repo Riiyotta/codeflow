@@ -1,7 +1,18 @@
 {
   "id": "hero.course-intro",
   "kind": "section",
-  "category": "hero",
+  "semantic": {
+    "id": "hero.course-intro",
+    "category": "hero"
+  },
+  "source": {
+    "id": "intro",
+    "tag": "header",
+    "file": "src/components/Hero.jsx",
+    "lines": "15-38",
+    "citation": "mv.section.hero"
+  },
+  "retrievalEligible": true,
   "description": "Centred hero (min-height 90vh): scrambled eyebrow, 3-line condensed display heading whose last word renders behind the WebGL object, mono sub-lines, pill CTA to #signup and an xs price note.",
   "variants": {
     "default": {

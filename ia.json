@@ -74,7 +74,9 @@
       "category": "SHELL",
       "description": "Fixed full-screen transparent WebGL canvas behind all content (z-index -10) showing a dark glossy Rubik's cube. It drops in on load, tumbles and twists a layer every 1.68s, reacts to mouse movement, scroll position and clicks, darkens while a CTA button is hovered, and on '!' or a successful signup shows coloured stickers and flashes the page background. Words marked .z deliberately render behind it.",
       "scope": "Present behind every section of the single route /, last in DOM order.",
-      "implementedBy": "src/App.jsx ([data-gl=c] container) + src/motion/cube.js"
+      "implementedBy": "src/App.jsx ([data-gl=c] container) + src/motion/cube.js",
+      "retrievalEligible": false,
+      "retrievalReason": "Fixed full-viewport transparent WebGL canvas that carries no text, headings, links or content; it is a decorative runtime overlay, not a retrievable page section."
     }
   },
   "templates": [

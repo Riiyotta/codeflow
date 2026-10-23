@@ -42,6 +42,11 @@ RULES = {
     "PINNED_POLICY": "error",
     "BRAND_PASSOFF": "error",
     "NO_MARQUEE_SECTION": "error",
+    "SECTION_CONTRACT_SCHEMA": "error",
+    "SECTION_TAXONOMY_PINNED": "error",
+    "CONVERSION_BLOCK_CLASSED_CTA": "error",
+    "RETRIEVAL_ELIGIBILITY_PINNED": "error",
+    "SECTION_SOURCE_STRUCTURE": "error",
 }
 # SCHEMA is the Draft-07 layer itself, not a graph rule.
 NON_GRAPH_RULES = {"SCHEMA"}
@@ -61,11 +66,36 @@ PINNED_POLICIES = {
     "endpoint.analytics": "must-not-reuse-live-endpoint",
     "font.commercial-sans": "license-required",
 }
+# Section taxonomy, pinned (second source of truth next to each contract's `semantic.category`;
+# extraction/verify_all.py keeps its own independent copy). `semantic` = what the section IS;
+# `source` = where it came from in the real files. They are separate closed objects.
+SECTION_TAXONOMY_PINNED = {
+    "shell.nav": "shell",
+    "hero.course-intro": "hero",
+    "list.numbered-topics": "list",
+    "content.block-pairs": "content",
+    "cta.pitch-timeline": "cta",
+    "cta.waitlist-form": "cta",
+    "shell.footer-wordmark": "shell",
+    "layer.webgl-object": "layer",
+}
+# Utility / runtime UI (cookie/consent, modal, dialog, overlay, toast, decorative fixed layer) is not a
+# retrievable page section. Closed boolean on each contract; false needs a 30+ char retrievalReason.
+# Everything not listed here must be true (the default).
+RETRIEVAL_PINNED = {"layer.webgl-object": False}
+UTILITY_ID_RE = re.compile(r"(cookie|consent|modal|dialog|overlay|toast|popup|lightbox|drawer|snackbar)")
+# Fields that mark a block as a conversion block. Submit/action/timeline-style fields force category 'cta';
+# a CTA or price note may never sit in a generic content/list section.
+CONVERSION_FORCE_CTA_FIELDS = {"submit", "action", "timeline"}
+CONVERSION_NOT_IN_GENERIC_FIELDS = {"cta", "priceNote"}
+GENERIC_CATEGORIES = {"content", "list"}
+MIN_RETRIEVAL_REASON = 30
+
 SOURCE_REF_PREFIX = {"placeholder": "placeholder:", "generated": "generated:", "licensed-by-deployer": "licensed:"}
 
 # The one documented source duplicate (mv.structure.duplicate-cta-id).
 DOCUMENTED_DUPLICATE_ANCHORS = {
-    "cta": {("content.block-pairs", "feature-pairs"), ("content.block-pairs", "pitch-timeline")},
+    "cta": {("content.block-pairs", "feature-pairs"), ("cta.pitch-timeline", "default")},
 }
 BEHIND = ("behind-canvas", "behind-canvas-deep")
 NON_TEXT_KEYS = {"assetRole", "source", "ref", "section", "variant", "template", "route", "theme",
@@ -89,6 +119,7 @@ def load_repo(root=None):
         "motion": _load("tokens/llm/motion-patterns.json", root),
         "sections": {},
         "contracts": {},
+        "contractSchema": _load("schema/section-contract.schema.json", root),
     }
     sdir = os.path.join(root, "sections")
     for fn in sorted(os.listdir(sdir)):
@@ -175,6 +206,54 @@ def match_template(nodes, tnodes):
     return problems
 
 
+def check_section_contracts(repo, report):
+    """Repo-level rules on the section contracts themselves (taxonomy, provenance, retrieval eligibility)."""
+    from jsonschema import Draft7Validator
+    sections = repo["sections"]
+    validator = Draft7Validator(repo["contractSchema"])
+    for sid, c in sorted(sections.items()):
+        for e in sorted(validator.iter_errors(c), key=lambda e: list(e.path)):
+            report("SECTION_CONTRACT_SCHEMA", "%s: %s: %s" % (sid, "/".join(str(p) for p in e.path) or "$", e.message[:200]))
+    sources = {}
+    for sid, c in sorted(sections.items()):
+        sem, src = c.get("semantic") or {}, c.get("source") or {}
+        cat = sem.get("category")
+        # taxonomy
+        if sem.get("id") != c.get("id"):
+            report("SECTION_TAXONOMY_PINNED", "%s: semantic.id %r must equal the contract id" % (sid, sem.get("id")))
+        if cat != sid.split(".")[0]:
+            report("SECTION_TAXONOMY_PINNED", "%s: semantic.category %r must equal the id prefix %r" % (sid, cat, sid.split(".")[0]))
+        if sid not in SECTION_TAXONOMY_PINNED:
+            report("SECTION_TAXONOMY_PINNED", "%s has no pinned taxonomy entry; add it to SECTION_TAXONOMY_PINNED (and verify_all) after review" % sid)
+        elif cat != SECTION_TAXONOMY_PINNED[sid]:
+            report("SECTION_TAXONOMY_PINNED", "%s: semantic.category %r but pinned %r" % (sid, cat, SECTION_TAXONOMY_PINNED[sid]))
+        fields = {f for v in c.get("variants", {}).values() for f in v.get("contentFields", [])}
+        if fields & CONVERSION_FORCE_CTA_FIELDS and cat != "cta":
+            report("CONVERSION_BLOCK_CLASSED_CTA", "%s has conversion field(s) %s but category %r (must be 'cta')" % (sid, sorted(fields & CONVERSION_FORCE_CTA_FIELDS), cat))
+        if fields & CONVERSION_NOT_IN_GENERIC_FIELDS and cat in GENERIC_CATEGORIES:
+            report("CONVERSION_BLOCK_CLASSED_CTA", "%s hides conversion field(s) %s inside generic category %r" % (sid, sorted(fields & CONVERSION_NOT_IN_GENERIC_FIELDS), cat))
+        # retrieval eligibility
+        want = RETRIEVAL_PINNED.get(sid, True)
+        got = c.get("retrievalEligible", True)
+        if got is not want:
+            report("RETRIEVAL_ELIGIBILITY_PINNED", "%s: retrievalEligible is %r but pinned %r" % (sid, got, want))
+        if (UTILITY_ID_RE.search(sid) or cat == "layer") and got is not False:
+            report("RETRIEVAL_ELIGIBILITY_PINNED", "%s looks like utility/runtime UI (cookie/consent/modal/dialog/overlay/toast/layer) and must set retrievalEligible false" % sid)
+        if got is False and len(c.get("retrievalReason") or "") < MIN_RETRIEVAL_REASON:
+            report("RETRIEVAL_ELIGIBILITY_PINNED", "%s: retrievalEligible false needs a retrievalReason of %d+ characters" % (sid, MIN_RETRIEVAL_REASON))
+        # provenance structure (real-file range checks live in verify_all)
+        m = re.match(r"^(\d+)-(\d+)$", src.get("lines") or "")
+        if not m or int(m.group(1)) < 1 or int(m.group(2)) < int(m.group(1)):
+            report("SECTION_SOURCE_STRUCTURE", "%s: source.lines %r must be 'a-b' with 1 <= a <= b" % (sid, src.get("lines")))
+        anchors = {v.get("anchorId") for v in c.get("variants", {}).values()}
+        if anchors != {src.get("id")}:
+            report("SECTION_SOURCE_STRUCTURE", "%s: source.id %r must equal every variant anchorId %s" % (sid, src.get("id"), sorted(anchors, key=str)))
+        key = (src.get("file"), src.get("lines"))
+        if key in sources:
+            report("SECTION_SOURCE_STRUCTURE", "%s and %s claim the same source range %s:%s" % (sources[key], sid, key[0], key[1]))
+        sources[key] = sid
+
+
 def validate(spec, repo=None):
     repo = repo or load_repo()
     errors, warnings = [], []
@@ -191,6 +270,9 @@ def validate(spec, repo=None):
             report("PINNED_POLICY", "asset role %s must be pinned to %r but asset-roles.json says %r" % (role, expected, actual))
         if not roles.get(role, {}).get("pinned"):
             report("PINNED_POLICY", "asset role %s must be marked pinned:true" % role)
+
+    # --- section-contract layer (taxonomy / provenance / retrieval eligibility) ----
+    check_section_contracts(repo, report)
 
     # --- schema layer ------------------------------------------------------------
     from jsonschema import Draft7Validator
@@ -230,16 +312,9 @@ def validate(spec, repo=None):
         seen[k] = seen.get(k, 0) + 1
     for (sid, var), c in seen.items():
         cons = sections.get(sid, {}).get("constraints", {})
-        limit = 1 if (cons.get("onePerPage") or cons.get("maxPerPageBySectionVariant") == 1) else None
+        limit = 1 if cons.get("onePerPage") else None
         if limit and c > limit:
             report("ONE_PER_PAGE_BY_SECTION_VARIANT", "%s/%s appears %d times" % (sid, var, c))
-    per_section = {}
-    for sid, _ in keys:
-        per_section[sid] = per_section.get(sid, 0) + 1
-    for sid, c in per_section.items():
-        mx = sections.get(sid, {}).get("constraints", {}).get("maxPerPageBySection")
-        if mx and c > mx:
-            report("ONE_PER_PAGE_BY_SECTION_VARIANT", "%s appears %d times (max %d)" % (sid, c, mx))
 
     # --- position rules from section constraints ---------------------------------
     ids = [k[0] for k in keys]
@@ -278,8 +353,8 @@ def validate(spec, repo=None):
                 errors.append(("DUPLICATE_ANCHOR_ONLY_DOCUMENTED", "anchor #%s duplicated %d times and is not the documented duplicate" % (a, cnt)))
 
     cta_paths = [p for p, d in iter_dicts(nodes) if p.endswith(".cta") and "href" in d]
-    if cta_paths and anchors.get("signup") != {("form.waitlist", "default")}:
-        report("CTA_TARGETS_FORM", "CTAs target #signup but no form.waitlist node with anchorId 'signup' exists")
+    if cta_paths and anchors.get("signup") != {("cta.waitlist-form", "default")}:
+        report("CTA_TARGETS_FORM", "CTAs target #signup but no cta.waitlist-form node with anchorId 'signup' exists")
 
     for n in nodes:
         if n["section"] == "shell.footer-wordmark":

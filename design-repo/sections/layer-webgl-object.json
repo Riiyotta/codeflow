@@ -1,7 +1,19 @@
 {
   "id": "layer.webgl-object",
   "kind": "section",
-  "category": "layer",
+  "semantic": {
+    "id": "layer.webgl-object",
+    "category": "layer"
+  },
+  "source": {
+    "id": null,
+    "tag": "div",
+    "file": "src/App.jsx",
+    "lines": "29-29",
+    "citation": "mv.section.canvas"
+  },
+  "retrievalEligible": false,
+  "retrievalReason": "Fixed full-viewport transparent WebGL canvas that renders one 3D object and carries no text, headings, links or content; it is a decorative runtime overlay, not a retrievable page section.",
   "description": "Fixed, full-viewport, transparent WebGL canvas (z-index -10) placed AFTER the page wrapper. Content paints above it except behind-canvas words (z -11/-21), which paint below it at >991px. Renders one 3D object with matcap shading.",
   "variants": {
     "default": {

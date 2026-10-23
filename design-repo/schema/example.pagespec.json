@@ -1,5 +1,5 @@
 {
-  "pageSpecVersion": "1.0.0",
+  "pageSpecVersion": "1.1.0",
   "template": "template.waitlist-landing",
   "route": "/",
   "theme": "dark",
@@ -289,8 +289,8 @@
       }
     },
     {
-      "section": "content.block-pairs",
-      "variant": "pitch-timeline",
+      "section": "cta.pitch-timeline",
+      "variant": "default",
       "anchorId": "cta",
       "content": {
         "kicker": "Solve Webflow with code",
@@ -391,7 +391,7 @@
       }
     },
     {
-      "section": "form.waitlist",
+      "section": "cta.waitlist-form",
       "variant": "default",
       "anchorId": "signup",
       "content": {

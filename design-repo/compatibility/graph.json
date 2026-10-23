@@ -1,9 +1,10 @@
 {
   "$comment": "Rhythm / position / compliance rules JSON Schema cannot express. Each rule id here must exist in schema/semantic_validate.py RULES with the same severity (extraction/verify_all.py checks this).",
-  "graphVersion": "1.0.0",
+  "graphVersion": "1.1.0",
   "nodes": [
     "content.block-pairs",
-    "form.waitlist",
+    "cta.pitch-timeline",
+    "cta.waitlist-form",
     "hero.course-intro",
     "layer.webgl-object",
     "list.numbered-topics",
@@ -28,16 +29,16 @@
     },
     {
       "from": "content.block-pairs/feature-pairs",
-      "to": "content.block-pairs/pitch-timeline",
+      "to": "cta.pitch-timeline/default",
       "kind": "immediately-precedes"
     },
     {
-      "from": "content.block-pairs/pitch-timeline",
-      "to": "form.waitlist/default",
+      "from": "cta.pitch-timeline/default",
+      "to": "cta.waitlist-form/default",
       "kind": "immediately-precedes"
     },
     {
-      "from": "form.waitlist/default",
+      "from": "cta.waitlist-form/default",
       "to": "shell.footer-wordmark/default",
       "kind": "immediately-precedes"
     },
@@ -58,7 +59,7 @@
       "id": "ONE_PER_PAGE_BY_SECTION_VARIANT",
       "severity": "error",
       "description": "No (section, variant) pair may appear twice.",
-      "exception": "content.block-pairs legitimately appears twice because its two variants differ; that is not a violation."
+      "exception": "Every section is onePerPage in the current contracts; the keying on (section, variant) is kept so a future section with several variants stays valid."
     },
     {
       "id": "NAV_FIRST",
@@ -73,7 +74,7 @@
     {
       "id": "FORM_PRECEDES_FOOTER",
       "severity": "error",
-      "description": "form.waitlist must immediately precede shell.footer-wordmark."
+      "description": "cta.waitlist-form must immediately precede shell.footer-wordmark."
     },
     {
       "id": "FOOTER_PRECEDES_LAYER",
@@ -88,7 +89,7 @@
     {
       "id": "CTA_TARGETS_FORM",
       "severity": "error",
-      "description": "Every CTA href is '#signup' and a form.waitlist node with anchorId 'signup' must exist."
+      "description": "Every CTA href is '#signup' and a cta.waitlist-form node with anchorId 'signup' must exist."
     },
     {
       "id": "FOOTER_NAV_ANCHORS_RESOLVE",
@@ -98,8 +99,8 @@
     {
       "id": "DUPLICATE_ANCHOR_ONLY_DOCUMENTED",
       "severity": "warn",
-      "description": "Anchor ids should be unique; the documented source duplicate 'cta' (both content.block-pairs variants) is a warning, any other duplicate is an error.",
-      "exception": "anchor 'cta' on content.block-pairs/feature-pairs and content.block-pairs/pitch-timeline."
+      "description": "Anchor ids should be unique; the documented source duplicate 'cta' (content.block-pairs/feature-pairs and cta.pitch-timeline/default) is a warning, any other duplicate is an error.",
+      "exception": "anchor 'cta' on content.block-pairs/feature-pairs and cta.pitch-timeline/default."
     },
     {
       "id": "BEHIND_CANVAS_REQUIRES_LAYER",
@@ -157,6 +158,31 @@
       "id": "NO_MARQUEE_SECTION",
       "severity": "error",
       "description": "There is no marquee section: marquee CSS exists on the source with no DOM. Section ids are a closed set without one."
+    },
+    {
+      "id": "SECTION_CONTRACT_SCHEMA",
+      "severity": "error",
+      "description": "Every sections/*.json satisfies schema/section-contract.schema.json (closed: no unknown fields; semantic and source are separate closed objects; retrievalEligible is a boolean and a false value requires a 30+ character retrievalReason)."
+    },
+    {
+      "id": "SECTION_TAXONOMY_PINNED",
+      "severity": "error",
+      "description": "semantic.id equals the contract id, semantic.category equals the id prefix and the pinned table in the validator; a section missing from the pinned table is an error until reviewed."
+    },
+    {
+      "id": "CONVERSION_BLOCK_CLASSED_CTA",
+      "severity": "error",
+      "description": "A section with submit/action/timeline content fields must be category cta; a cta or priceNote field may not live in a generic content or list section."
+    },
+    {
+      "id": "RETRIEVAL_ELIGIBILITY_PINNED",
+      "severity": "error",
+      "description": "Utility/runtime UI (cookie/consent, modal, dialog, overlay, toast, decorative fixed layer) must set retrievalEligible false with a retrievalReason of 30+ characters; every other section must be true. Checked against a pinned table, not just the schema."
+    },
+    {
+      "id": "SECTION_SOURCE_STRUCTURE",
+      "severity": "error",
+      "description": "source.lines is a valid 'a-b' range, source.id equals every variant anchorId, and no two sections claim the same source range. verify_all.py checks the range against the real file."
     }
   ]
 }

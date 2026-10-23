@@ -8,8 +8,9 @@ Usage:
 If none of the cited evidence files exist there (design-repo shipped alone), the citation
 check is downgraded to a WARN instead of failing.
 
-Every drift-sensitive check here (allowlist parity, citation range + quote, allowlistVersion
-parity, manifest counts, pinned asset policies, graph/validator agreement) is proven to fail
+Every drift-sensitive check here (allowlist parity, citation range + quote, section source ranges,
+taxonomy and retrieval-eligibility pins, wrapper gate, allowlistVersion parity, manifest counts,
+pinned asset policies, graph/validator agreement) is proven to fail
 on injected drift by extraction/prove_drift.py.
 """
 import sys
@@ -23,6 +24,21 @@ import re
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = []
+
+# Independent pins (a second copy, deliberately NOT imported from schema/semantic_validate.py): editing one
+# side without the other fails a check. See MASTER-GUIDE 3.23 on pinned values.
+EXPECT_TAXONOMY = {
+    "shell.nav": "shell",
+    "hero.course-intro": "hero",
+    "list.numbered-topics": "list",
+    "content.block-pairs": "content",
+    "cta.pitch-timeline": "cta",
+    "cta.waitlist-form": "cta",
+    "shell.footer-wordmark": "shell",
+    "layer.webgl-object": "layer",
+}
+EXPECT_RETRIEVAL = {sid: sid != "layer.webgl-object" for sid in EXPECT_TAXONOMY}   # utility/runtime UI is the only false
+UTILITY_WORDS = ("cookie", "consent", "modal", "dialog", "overlay", "toast", "popup", "lightbox", "drawer", "snackbar")
 
 
 def rec(status, name, detail=""):
@@ -41,11 +57,15 @@ def J(rel):
         return json.load(f)
 
 
-def load_sv():
-    spec = importlib.util.spec_from_file_location("semantic_validate", os.path.join(REPO, "schema", "semantic_validate.py"))
+def load_module(name, rel):
+    spec = importlib.util.spec_from_file_location(name, os.path.join(REPO, rel))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def load_sv():
+    return load_module("semantic_validate", os.path.join("schema", "semantic_validate.py"))
 
 
 def token_leaves(o):
@@ -83,6 +103,8 @@ def main(argv):
     templates = J("templates/templates.json")
     graph = J("compatibility/graph.json")
     ledger = J("extraction/measured-values.json")
+    contract_schema = J("schema/section-contract.schema.json")
+    whitelist = J("extraction/wrapper-whitelist.json")
     sections = {d["id"]: d for d in (J(os.path.relpath(p, REPO)) for p in sorted(glob.glob(os.path.join(REPO, "sections", "*.json"))))}
     prims = sorted(J(os.path.relpath(p, REPO))["id"] for p in glob.glob(os.path.join(REPO, "primitives", "*.json")))
     comps = sorted(J(os.path.relpath(p, REPO))["id"] for p in glob.glob(os.path.join(REPO, "components", "*.json")))
@@ -117,6 +139,8 @@ def main(argv):
         c = sections.get(sid)
         if not c:
             continue
+        if sa.get("retrievalEligible") is not c.get("retrievalEligible", True):
+            probs.append("%s retrievalEligible differs between allowlist (%r) and contract (%r)" % (sid, sa.get("retrievalEligible"), c.get("retrievalEligible", True)))
         if set(sa["variants"]) != set(c["variants"]):
             probs.append("%s variants allowlist %s != contract %s" % (sid, sorted(sa["variants"]), sorted(c["variants"])))
         for var, va in sa["variants"].items():
@@ -187,6 +211,7 @@ def main(argv):
         "sectionVariants": sum(len(c["variants"]) for c in sections.values()),
         "templates": len(templates["templates"]), "routes": len(templates["routes"]),
         "assetRoles": len(roles["roles"]), "pinnedAssetRoles": sum(1 for r in roles["roles"].values() if r.get("pinned")),
+        "retrievalIneligibleSections": sum(1 for c in sections.values() if c.get("retrievalEligible", True) is False),
         "motionPatterns": len(motion["patterns"]), "compatibilityRules": len(graph["rules"]),
         "measuredValueEntries": len(ledger["entries"]),
     }
@@ -383,7 +408,108 @@ def main(argv):
                 probs.append("%s/%s %s budget below real count" % (n["section"], n["variant"], path))
     check("maxWords budget paths resolve", probs)
 
-    # 15. hygiene: no absolute machine paths, no junk files
+    # 15. every section contract satisfies the closed section-contract schema; semantic and source stay separate
+    probs = []
+    cv = Draft7Validator(contract_schema)
+    try:
+        Draft7Validator.check_schema(contract_schema)
+    except Exception as e:  # noqa
+        probs.append("section-contract schema invalid: %s" % e)
+    for sid, c in sorted(sections.items()):
+        for e in cv.iter_errors(c):
+            probs.append("%s: %s: %s" % (sid, "/".join(str(p) for p in e.path) or "$", e.message[:140]))
+        if c.get("semantic", {}).get("id") != sid or c.get("semantic", {}).get("category") != sid.split(".")[0]:
+            probs.append("%s: semantic {id, category} must match the contract id and its prefix" % sid)
+    check("section contracts: closed schema, semantic {id,category} vs source {id,tag,file,lines,citation} (%d contracts)" % len(sections), probs)
+
+    # 16. taxonomy + conversion classing pinned by this file's own table
+    probs = []
+    for sid, cat in EXPECT_TAXONOMY.items():
+        got = sections.get(sid, {}).get("semantic", {}).get("category")
+        if got != cat:
+            probs.append("%s: category %r, verify_all pins %r" % (sid, got, cat))
+    for sid in sections:
+        if sid not in EXPECT_TAXONOMY:
+            probs.append("%s has no entry in verify_all EXPECT_TAXONOMY (review it, then pin it)" % sid)
+    for sid, c in sections.items():
+        fields = {f for v in c["variants"].values() for f in v["contentFields"]}
+        if fields & {"submit", "action", "timeline"} and c.get("semantic", {}).get("category") != "cta":
+            probs.append("%s carries conversion fields %s but is not category cta" % (sid, sorted(fields & {"submit", "action", "timeline"})))
+        if fields & {"cta", "priceNote"} and c.get("semantic", {}).get("category") in ("content", "list"):
+            probs.append("%s hides a CTA/price note inside generic category %s" % (sid, c["semantic"]["category"]))
+    check("section taxonomy pinned + conversion blocks classed cta (%d sections)" % len(EXPECT_TAXONOMY), probs)
+
+    # 17. retrieval eligibility pinned by this file's own table
+    probs = []
+    for sid, c in sections.items():
+        got = c.get("retrievalEligible", True)
+        if got is not EXPECT_RETRIEVAL.get(sid, True):
+            probs.append("%s: retrievalEligible %r, verify_all pins %r" % (sid, got, EXPECT_RETRIEVAL.get(sid, True)))
+        if got is False and len(c.get("retrievalReason") or "") < 30:
+            probs.append("%s: retrievalEligible false without a 30+ char retrievalReason" % sid)
+        if got is not False and "retrievalReason" in c:
+            probs.append("%s: retrievalReason present on an eligible section" % sid)
+        if (any(w in sid for w in UTILITY_WORDS) or c.get("semantic", {}).get("category") == "layer") and got is not False:
+            probs.append("%s looks like utility/runtime UI but is retrieval-eligible" % sid)
+    check("retrieval eligibility pinned (utility/runtime UI excluded, reason 30+ chars)", probs)
+
+    # 18. source provenance against the real files (graceful when no sibling source tree)
+    probs, checked, absent = [], 0, 0
+    tree_present = any(os.path.exists(os.path.join(source_root, c["source"]["file"])) for c in sections.values())
+    for sid, c in sorted(sections.items()):
+        src = c["source"]
+        if os.path.isabs(src["file"]) or ".." in src["file"].split("/"):
+            probs.append("%s: source.file must be project-relative: %s" % (sid, src["file"]))
+            continue
+        cit = ledger["entries"].get(src["citation"])
+        if cit is None:
+            probs.append("%s: source.citation %s is not a ledger entry" % (sid, src["citation"]))
+        elif not any(x["cite"].rsplit(":", 1)[0] == src["file"] for x in cit.get("citations", [])):
+            probs.append("%s: ledger entry %s does not cite %s" % (sid, src["citation"], src["file"]))
+        full = os.path.join(source_root, src["file"])
+        if not os.path.exists(full):
+            absent += 1
+            if tree_present:
+                probs.append("%s: source.file %s does not exist in the source tree" % (sid, src["file"]))
+            continue
+        checked += 1
+        with open(full, encoding="utf-8") as f:
+            flines = f.read().split("\n")
+        a, b = (int(x) for x in src["lines"].split("-"))
+        if a < 1 or b < a or b > len(flines):
+            probs.append("%s: source.lines %s out of range (%s has %d lines)" % (sid, src["lines"], src["file"], len(flines)))
+            continue
+        first, last = flines[a - 1], flines[b - 1]
+        if "<" + src["tag"] not in first:
+            probs.append("%s: line %d of %s does not open <%s>: %r" % (sid, a, src["file"], src["tag"], first.strip()[:60]))
+        if src["id"] is not None and 'id="%s"' % src["id"] not in first:
+            probs.append("%s: line %d of %s lacks id=\"%s\": %r" % (sid, a, src["file"], src["id"], first.strip()[:60]))
+        if src["id"] is None and ' id="' in first:
+            probs.append("%s: source.id is null but the element has an id attribute" % sid)
+        if "</%s>" % src["tag"] not in last:
+            probs.append("%s: line %d of %s does not close </%s>: %r" % (sid, b, src["file"], src["tag"], last.strip()[:60]))
+    if checked == 0:
+        rec("WARN", "section source provenance", "no source files under %s (design-repo shipped alone?) - %d contracts not range-checked; structure and ledger links were still checked%s" % (os.path.basename(source_root) or source_root, absent, ("; PROBLEMS: " + "; ".join(probs)) if probs else ""))
+        if probs:
+            RESULTS[-1] = ("FAIL",) + RESULTS[-1][1:]
+    else:
+        check("section source provenance: file + line range + opening/closing tag verified (%d of %d contracts)" % (checked, len(sections)), probs)
+
+    # 19. whole-page-wrapper quality gate (measured heights)
+    wg = load_module("wrapper_gate", os.path.join("extraction", "wrapper_gate.py"))
+    nodes = [n for t in templates["templates"].values() for n in t["nodes"]]
+    cats = {sid: c.get("semantic", {}).get("category") for sid, c in sections.items()}
+    gerr, gwarn, ginfo = wg.evaluate(nodes, cats, ledger.get("sectionHeights"), whitelist.get("entries"))
+    sh = ledger.get("sectionHeights") or {}
+    summary = "hero %s, page %s" % (
+        ", ".join("%s=%spx" % (k.split("/")[0], v.get("heightPx")) for k, v in sh.get("sections", {}).items() if cats.get(k.split("/")[0]) == "hero"), sh.get("pageHeight"))
+    check("whole-page-wrapper gate (%s; %d whitelisted)" % (summary, len(whitelist.get("entries", []))), ["%s: %s" % x for x in gerr])
+    for code, msg in gwarn:
+        rec("WARN", "whole-page-wrapper gate warning " + code, msg)
+    for msg in ginfo:
+        print("note: " + msg)
+
+    # 20. hygiene: no absolute machine paths, no junk files
     probs = []
     pats = ["/" + "Users/", "/" + "home/", "C:" + "\\" + "Users"]
     for p in glob.glob(os.path.join(REPO, "**", "*"), recursive=True) + glob.glob(os.path.join(REPO, "**", ".*"), recursive=True):

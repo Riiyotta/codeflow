@@ -1356,6 +1356,80 @@
           "quote": ".lead-field{border-style:solid solid none"
         }
       ]
+    },
+    "mv.measure.section-heights": {
+      "claim": "Every template section was measured at a 1440x900 viewport on a local production build of the source page; heights are rendered getBoundingClientRect().height after 3s of motion settling, written to sectionHeights by extraction/measure_sections.mjs.",
+      "evidenceLevel": "qa-measured",
+      "basis": "Playwright/Chromium measurement of a local vite build of this project (no live-site capture exists in this repo, so this is a clone measurement, not a live-site measurement). Re-run extraction/measure_sections.mjs --write after any page change."
+    }
+  },
+  "sectionHeights": {
+    "$comment": "Rendered height of every template section at 1440x900, written by extraction/measure_sections.mjs and read by extraction/wrapper_gate.py. heightPx/position/inFlow/pageHeight/measuredOn are machine-written; selector/nth say how each section was found on the source page. inFlow=false means position fixed/absolute (an overlay that takes no page height).",
+    "evidence": "mv.measure.section-heights",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "measuredOn": "2026-10-23",
+    "tool": "playwright chromium 153.0.8010.12 via measure_sections.mjs",
+    "pageHeight": 7060,
+    "sections": {
+      "shell.nav/default": {
+        "selector": "nav.nav",
+        "nth": 0,
+        "heightPx": 74.97,
+        "position": "fixed",
+        "inFlow": false
+      },
+      "hero.course-intro/default": {
+        "selector": "header#intro",
+        "nth": 0,
+        "heightPx": 810,
+        "position": "static",
+        "inFlow": true
+      },
+      "list.numbered-topics/default": {
+        "selector": "section#content",
+        "nth": 0,
+        "heightPx": 2258.94,
+        "position": "static",
+        "inFlow": true
+      },
+      "content.block-pairs/feature-pairs": {
+        "selector": "section#cta",
+        "nth": 0,
+        "heightPx": 1177.73,
+        "position": "static",
+        "inFlow": true
+      },
+      "cta.pitch-timeline/default": {
+        "selector": "section#cta",
+        "nth": 1,
+        "heightPx": 1466.59,
+        "position": "static",
+        "inFlow": true
+      },
+      "cta.waitlist-form/default": {
+        "selector": "section#signup",
+        "nth": 0,
+        "heightPx": 655.39,
+        "position": "static",
+        "inFlow": true
+      },
+      "shell.footer-wordmark/default": {
+        "selector": "footer.footer",
+        "nth": 0,
+        "heightPx": 691.03,
+        "position": "static",
+        "inFlow": true
+      },
+      "layer.webgl-object/default": {
+        "selector": "[data-gl=\"c\"]",
+        "nth": 0,
+        "heightPx": 900,
+        "position": "fixed",
+        "inFlow": false
+      }
     }
   }
 }

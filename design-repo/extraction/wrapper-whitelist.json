@@ -1,0 +1,4 @@
+{
+  "$comment": "Reviewed exceptions to the whole-page-wrapper gate (extraction/wrapper_gate.py). Empty on purpose: no section in this repo exceeds a limit (see extraction/measured-values.json sectionHeights). An entry exempts ONE (section, variant) from the listed rules only while its measured height stays <= maxHeightPx. reviewer must start with 'human:' or 'agent-attestation:'; an agent-attestation is an automated reviewer's claim, not a human sign-off.",
+  "entries": []
+}

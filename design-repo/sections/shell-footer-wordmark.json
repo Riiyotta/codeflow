@@ -1,7 +1,18 @@
 {
   "id": "shell.footer-wordmark",
   "kind": "section",
-  "category": "shell",
+  "semantic": {
+    "id": "shell.footer-wordmark",
+    "category": "shell"
+  },
+  "source": {
+    "id": null,
+    "tag": "footer",
+    "file": "src/components/Footer.jsx",
+    "lines": "11-65",
+    "citation": "mv.section.footer"
+  },
+  "retrievalEligible": true,
   "description": "Footer: social link, a 4-word giant condensed wordmark whose characters drop in from above (2 words behind the WebGL object), a site-nav block, logo slot and legal/credit block.",
   "variants": {
     "default": {

@@ -1,6 +1,6 @@
 {
-  "$comment": "Closed list of what a generator may set. sections.*.variants.*.settableProperties must equal the schema node's properties for that (section, variant); verify_all.py enforces parity with the contract files and the schema.",
-  "allowlistVersion": "1.0.0",
+  "$comment": "Closed list of what a generator may set. sections.*.variants.*.settableProperties must equal the schema node's properties for that (section, variant); verify_all.py enforces parity with the contract files and the schema. sections.*.retrievalEligible must equal the section contract's retrievalEligible (default true); verify_all.py enforces it and independently pins it.",
+  "allowlistVersion": "1.1.0",
   "primitives": [
     "primitive.body-text",
     "primitive.button-pill",
@@ -23,6 +23,7 @@
   ],
   "sections": {
     "content.block-pairs": {
+      "retrievalEligible": true,
       "variants": {
         "feature-pairs": {
           "settableProperties": [
@@ -35,8 +36,13 @@
           "contentFields": [
             "rows"
           ]
-        },
-        "pitch-timeline": {
+        }
+      }
+    },
+    "cta.pitch-timeline": {
+      "retrievalEligible": true,
+      "variants": {
+        "default": {
           "settableProperties": [
             "anchorId",
             "content",
@@ -55,7 +61,8 @@
         }
       }
     },
-    "form.waitlist": {
+    "cta.waitlist-form": {
+      "retrievalEligible": true,
       "variants": {
         "default": {
           "settableProperties": [
@@ -79,6 +86,7 @@
       }
     },
     "hero.course-intro": {
+      "retrievalEligible": true,
       "variants": {
         "default": {
           "settableProperties": [
@@ -99,6 +107,7 @@
       }
     },
     "layer.webgl-object": {
+      "retrievalEligible": false,
       "variants": {
         "default": {
           "settableProperties": [
@@ -117,6 +126,7 @@
       }
     },
     "list.numbered-topics": {
+      "retrievalEligible": true,
       "variants": {
         "default": {
           "settableProperties": [
@@ -135,6 +145,7 @@
       }
     },
     "shell.footer-wordmark": {
+      "retrievalEligible": true,
       "variants": {
         "default": {
           "settableProperties": [
@@ -155,6 +166,7 @@
       }
     },
     "shell.nav": {
+      "retrievalEligible": true,
       "variants": {
         "default": {
           "settableProperties": [

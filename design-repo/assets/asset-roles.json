@@ -93,7 +93,7 @@
       "description": "Waitlist form submit target. The original posts to a live MailChimp list.",
       "generationPolicy": "must-not-reuse-live-endpoint",
       "pinned": true,
-      "usedBy": ["form.waitlist"],
+      "usedBy": ["cta.waitlist-form"],
       "evidence": "mv.endpoint.mailchimp"
     },
     "endpoint.analytics": {

@@ -1,0 +1,367 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "codeflow-waitlist/section-contract.schema.json",
+  "title": "Section contract (closed)",
+  "description": "Closed Draft-07 schema every sections/*.json must satisfy. `semantic` is the taxonomy (what the section IS for retrieval/classification); `source` is provenance (where in the real source it came from). They are separate closed objects and must not be merged. retrievalEligible is a closed boolean: false marks utility/runtime UI (cookie/consent, modal, dialog, overlay, toast, decorative fixed layer) and then needs retrievalReason (30+ chars); default true.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "semantic",
+    "source",
+    "description",
+    "variants",
+    "constraints",
+    "responsive",
+    "uses",
+    "knownQuirks",
+    "evidence",
+    "budgetPolicy"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]+\\.[a-z0-9-]+$"
+    },
+    "kind": {
+      "const": "section"
+    },
+    "semantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z]+\\.[a-z0-9-]+$"
+        },
+        "category": {
+          "enum": [
+            "shell",
+            "hero",
+            "list",
+            "content",
+            "cta",
+            "layer"
+          ]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tag",
+        "file",
+        "lines",
+        "citation"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "The id attribute on the source element, or null when it has none."
+        },
+        "tag": {
+          "enum": [
+            "nav",
+            "header",
+            "section",
+            "footer",
+            "div",
+            "main",
+            "aside"
+          ]
+        },
+        "file": {
+          "type": "string",
+          "pattern": "^(?!.*\\.\\.)src/[A-Za-z0-9_./-]+$",
+          "description": "Project-relative source file (inside the project root, never absolute)."
+        },
+        "lines": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*-[1-9][0-9]*$",
+          "description": "Inclusive line range of the element in `file`; checked against the real file by verify_all.py."
+        },
+        "citation": {
+          "type": "string",
+          "pattern": "^mv\\.[a-z0-9-]+(\\.[a-z0-9-]+)+$",
+          "description": "Ledger entry in extraction/measured-values.json that also cites this file."
+        }
+      }
+    },
+    "retrievalEligible": {
+      "type": "boolean",
+      "default": true
+    },
+    "retrievalReason": {
+      "type": "string",
+      "minLength": 30
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "variants": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "anchorId",
+          "contentFields",
+          "maxWords",
+          "realWordCounts",
+          "motion"
+        ],
+        "properties": {
+          "anchorId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "contentFields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "maxWords": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "realWordCounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "motion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "allowedPatterns",
+              "reducedMotionFallback",
+              "fallbackEvidence"
+            ],
+            "properties": {
+              "allowedPatterns": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$"
+                }
+              },
+              "reducedMotionFallback": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fallbackEvidence": {
+                "type": "string",
+                "pattern": "^mv\\."
+              }
+            }
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "onePerPage": {
+          "const": true
+        },
+        "mustBeFirst": {
+          "const": true
+        },
+        "mustBeLast": {
+          "const": true
+        },
+        "mustFollowNav": {
+          "const": true
+        },
+        "mustPrecedeFooter": {
+          "const": true
+        },
+        "mustPrecedeLayer": {
+          "const": true
+        }
+      }
+    },
+    "responsive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base",
+        "max991",
+        "max767",
+        "max479"
+      ],
+      "properties": {
+        "base": {
+          "type": "object",
+          "minProperties": 1,
+          "required": [
+            "evidence"
+          ],
+          "properties": {
+            "evidence": {
+              "type": "string",
+              "pattern": "^mv\\.[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+            }
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max991": {
+          "type": "object",
+          "minProperties": 1,
+          "required": [
+            "evidence"
+          ],
+          "properties": {
+            "evidence": {
+              "type": "string",
+              "pattern": "^mv\\.[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+            }
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max767": {
+          "type": "object",
+          "minProperties": 1,
+          "required": [
+            "evidence"
+          ],
+          "properties": {
+            "evidence": {
+              "type": "string",
+              "pattern": "^mv\\.[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+            }
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max479": {
+          "type": "object",
+          "minProperties": 1,
+          "required": [
+            "evidence"
+          ],
+          "properties": {
+            "evidence": {
+              "type": "string",
+              "pattern": "^mv\\.[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+            }
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "uses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primitives",
+        "components"
+      ],
+      "properties": {
+        "primitives": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^primitive\\.[a-z0-9-]+$"
+          }
+        },
+        "components": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^component\\.[a-z0-9-]+$"
+          }
+        }
+      }
+    },
+    "knownQuirks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^mv\\.[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+      }
+    },
+    "budgetPolicy": {
+      "type": "string",
+      "pattern": "^mv\\."
+    },
+    "behaviour": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "if": {
+    "required": [
+      "retrievalEligible"
+    ],
+    "properties": {
+      "retrievalEligible": {
+        "const": false
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "retrievalReason"
+    ]
+  },
+  "else": {
+    "not": {
+      "required": [
+        "retrievalReason"
+      ]
+    }
+  }
+}

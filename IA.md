@@ -79,6 +79,8 @@ _Page chrome and layers that sit outside the content flow: fixed nav, footer, an
 
 · Present behind every section of the single route /, last in DOM order. · appears on 1 routes · implemented by `src/App.jsx ([data-gl=c] container) + src/motion/cube.js`
 
+· **excluded from retrieval** (utility/runtime UI): Fixed full-viewport transparent WebGL canvas that carries no text, headings, links or content; it is a decorative runtime overlay, not a retrievable page section.
+
 ### HERO
 
 _The page-opening headline block with the primary call to action._

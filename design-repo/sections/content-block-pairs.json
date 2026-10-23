@@ -1,8 +1,19 @@
 {
   "id": "content.block-pairs",
   "kind": "section",
-  "category": "content",
-  "description": "Section built from pairs of text blocks. Two variants appear once each on the real page, back to back, BOTH with anchor id 'cta' (duplicate id on the source).",
+  "semantic": {
+    "id": "content.block-pairs",
+    "category": "content"
+  },
+  "source": {
+    "id": "cta",
+    "tag": "section",
+    "file": "src/components/Features.jsx",
+    "lines": "21-66",
+    "citation": "mv.section.features"
+  },
+  "retrievalEligible": true,
+  "description": "Section built from two rows of two labelled text blocks (label, two-line heading, body, optional mono note) describing the course format, skills level, community and live builds. Appears once on the real page; it shares anchor id 'cta' with the cta.pitch-timeline section that follows it (duplicate id on the source).",
   "variants": {
     "feature-pairs": {
       "anchorId": "cta",
@@ -38,72 +49,10 @@
         "reducedMotionFallback": "final-state-instant",
         "fallbackEvidence": "mv.motion.no-reduced-motion"
       }
-    },
-    "pitch-timeline": {
-      "anchorId": "cta",
-      "contentFields": [
-        "kicker",
-        "heading",
-        "cta",
-        "priceNote",
-        "row",
-        "timeline"
-      ],
-      "maxWords": {
-        "kicker": 6,
-        "heading.lines[][].text": 4,
-        "cta.label": 5,
-        "priceNote.line1": 6,
-        "priceNote.line2": 4,
-        "row.left.label": 3,
-        "row.right.label": 3,
-        "row.left.headingLines[]": 4,
-        "row.right.headingLines[]": 4,
-        "row.left.body": 45,
-        "row.right.body": 45,
-        "row.left.monoNote[]": 14,
-        "row.right.monoNote[]": 14,
-        "timeline.cornerLabel": 3,
-        "timeline.columns[].title": 6,
-        "timeline.columns[].date": 6,
-        "timeline.rows[].price": 4
-      },
-      "realWordCounts": {
-        "kicker": 4,
-        "heading.lines[][].text": 2,
-        "cta.label": 3,
-        "priceNote.line1": 4,
-        "priceNote.line2": 2,
-        "row.left.label": 1,
-        "row.right.label": 1,
-        "row.left.headingLines[]": 2,
-        "row.right.headingLines[]": 2,
-        "row.left.body": 30,
-        "row.right.body": 30,
-        "row.left.monoNote[]": 9,
-        "row.right.monoNote[]": 9,
-        "timeline.cornerLabel": 1,
-        "timeline.columns[].title": 4,
-        "timeline.columns[].date": 4,
-        "timeline.rows[].price": 2
-      },
-      "motion": {
-        "allowedPatterns": [
-          "scramble-text",
-          "text-reveal-word",
-          "alpha-fade",
-          "cta-hover",
-          "scale-line",
-          "scale-dot"
-        ],
-        "reducedMotionFallback": "final-state-instant",
-        "fallbackEvidence": "mv.motion.no-reduced-motion"
-      }
     }
   },
   "constraints": {
-    "maxPerPageBySectionVariant": 1,
-    "maxPerPageBySection": 2
+    "onePerPage": true
   },
   "responsive": {
     "base": {
@@ -117,7 +66,6 @@
     },
     "max767": {
       "blocks": "90% wide, margin-bottom 3em",
-      "timelineTable": "hidden (pitch-timeline variant)",
       "evidence": "mv.responsive.data-hide"
     },
     "max479": {
@@ -128,24 +76,20 @@
   "uses": {
     "primitives": [
       "primitive.mono-label",
-      "primitive.display-heading",
-      "primitive.button-pill"
+      "primitive.display-heading"
     ],
     "components": [
-      "component.text-block",
-      "component.price-note",
-      "component.timeline-table"
+      "component.text-block"
     ]
   },
   "knownQuirks": [
-    "Duplicate id 'cta' on both variants; the footer 'CTA' link resolves to the first (feature-pairs). anchorId is const 'cta' for both variants; graph rule DUPLICATE_ANCHOR_ONLY_DOCUMENTED warns on it and errors on any other duplicate.",
-    "Right-hand blocks carry the undefined class mt-xl (no-op); do not invent a margin (mv.structure.mt-xl-undefined).",
-    "In the pitch-timeline table, row 2's DOM order puts the rule-line before the last column; visual result is a dot in column 3."
+    "Duplicate id 'cta' on this section and on cta.pitch-timeline; the footer 'CTA' link resolves to the first (feature-pairs). anchorId is const 'cta' on both sections; graph rule DUPLICATE_ANCHOR_ONLY_DOCUMENTED warns on it and errors on any other duplicate.",
+    "Right-hand blocks carry the undefined class mt-xl (no-op); do not invent a margin (mv.structure.mt-xl-undefined)."
   ],
   "evidence": [
     "mv.section.features",
-    "mv.section.pitch",
-    "mv.structure.duplicate-cta-id"
+    "mv.structure.duplicate-cta-id",
+    "mv.structure.mt-xl-undefined"
   ],
   "budgetPolicy": "mv.copy.budget-policy"
 }

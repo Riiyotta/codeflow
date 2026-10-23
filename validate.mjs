@@ -51,6 +51,15 @@ const badCat = Object.entries(ia.sections).filter(([, s]) => !cats.has(s.categor
 ok('sections with an unknown category', badCat.length, 0);
 if (badCat.length) console.log('        ' + badCat.map(([id]) => id).join(', '));
 
+console.log('\nRETRIEVAL ELIGIBILITY');
+const badRetr = Object.entries(ia.sections).filter(([, s]) =>
+  ('retrievalEligible' in s && typeof s.retrievalEligible !== 'boolean') ||
+  (s.retrievalEligible === false && (typeof s.retrievalReason !== 'string' || s.retrievalReason.length < 30)) ||
+  (s.retrievalEligible !== false && 'retrievalReason' in s));
+ok('sections with a malformed retrievalEligible/retrievalReason', badRetr.length, 0);
+if (badRetr.length) console.log('        ' + badRetr.map(([id]) => id).join(', '));
+console.log(`  info  retrieval-excluded sections: ${Object.entries(ia.sections).filter(([, s]) => s.retrievalEligible === false).map(([id]) => id).join(', ') || '(none)'}`);
+
 console.log('\nCHROME PARTITION');
 const chromeGroups = {};
 for (const t of ia.templates) {

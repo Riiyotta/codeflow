@@ -137,6 +137,10 @@ for (const cat of Object.keys(categories)) {
     const implLine = s.implementedBy ? ` · implemented by \`${s.implementedBy}\`` : '';
     L.push(`· ${s.scope || ''} · appears on ${routesFor(id)} routes${implLine}`);
     L.push('');
+    if (s.retrievalEligible === false) {
+      L.push(`· **excluded from retrieval** (utility/runtime UI): ${s.retrievalReason}`);
+      L.push('');
+    }
   }
 }
 

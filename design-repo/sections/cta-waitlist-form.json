@@ -1,8 +1,19 @@
 {
-  "id": "form.waitlist",
+  "id": "cta.waitlist-form",
   "kind": "section",
-  "category": "form",
-  "description": "Waitlist signup: left half heading/body/perk list, right half name + email form with scaling underlines, a locked submit that unlocks when the name is valid, success (triggers webgl-solve) and failure states.",
+  "semantic": {
+    "id": "cta.waitlist-form",
+    "category": "cta"
+  },
+  "source": {
+    "id": "signup",
+    "tag": "section",
+    "file": "src/components/Signup.jsx",
+    "lines": "5-59",
+    "citation": "mv.section.signup"
+  },
+  "retrievalEligible": true,
+  "description": "Conversion block: waitlist signup. Left half heading/body/perk list, right half name + email form with scaling underlines, a locked submit that unlocks when the name is valid, success (triggers webgl-solve) and failure states. The success and failure states are in-section states, not separate overlay sections.",
   "variants": {
     "default": {
       "anchorId": "signup",
