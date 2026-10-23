@@ -1,0 +1,28 @@
+{
+  "id": "primitive.button-pill",
+  "kind": "primitive",
+  "description": "Outlined pill link-button: label + arrow icon; fills with the text colour on hover.",
+  "props": {
+    "label": "string",
+    "href": "in-page anchor (always '#signup' on this site)",
+    "size": "enum default|small (nav)"
+  },
+  "tokens": [
+    "component.button.pill",
+    "typography.role.button",
+    "typography.role.buttonSmall",
+    "spacing.button",
+    "radius.pill"
+  ],
+  "assetRoles": [
+    "icon.arrow"
+  ],
+  "evidence": [
+    "mv.spacing.button",
+    "mv.color.button-hover",
+    "mv.radius.pill"
+  ],
+  "states": {
+    "locked": "Submit variant only: opacity .3, cursor not-allowed, hover keeps transparent background (mv.form.lock)."
+  }
+}

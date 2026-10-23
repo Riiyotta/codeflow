@@ -1,0 +1,97 @@
+{
+  "id": "shell.footer-wordmark",
+  "kind": "section",
+  "category": "shell",
+  "description": "Footer: social link, a 4-word giant condensed wordmark whose characters drop in from above (2 words behind the WebGL object), a site-nav block, logo slot and legal/credit block.",
+  "variants": {
+    "default": {
+      "anchorId": null,
+      "contentFields": [
+        "social",
+        "wordmark",
+        "siteNav",
+        "privacy",
+        "credit",
+        "logo"
+      ],
+      "maxWords": {
+        "social.label": 5,
+        "wordmark[].text": 3,
+        "siteNav.label": 3,
+        "siteNav.links[].label": 4,
+        "privacy.label": 4,
+        "credit.years": 6,
+        "credit.madeBy": 4,
+        "credit.linkLabel": 3
+      },
+      "realWordCounts": {
+        "social.label": 3,
+        "wordmark[].text": 1,
+        "siteNav.label": 1,
+        "siteNav.links[].label": 2,
+        "privacy.label": 2,
+        "credit.years": 4,
+        "credit.madeBy": 2,
+        "credit.linkLabel": 1
+      },
+      "motion": {
+        "allowedPatterns": [
+          "scramble-text",
+          "text-reveal-char-drop",
+          "alpha-fade",
+          "link-hover-opacity"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "onePerPage": true,
+    "mustPrecedeLayer": true
+  },
+  "responsive": {
+    "base": {
+      "wordmark": "18vw",
+      "evidence": "mv.type.display"
+    },
+    "max991": {
+      "siteNav": "hidden",
+      "logo": "hidden",
+      "behindCanvasWords": "static, z-index 0",
+      "evidence": "mv.responsive.footer"
+    },
+    "max767": {
+      "wordmark": "15vw",
+      "evidence": "mv.type.display"
+    },
+    "max479": {
+      "wordmark": "20vw",
+      "lastRow": "wraps",
+      "legal": "left-aligned, full width, margin-top 1rem",
+      "paddingTop": "5vh",
+      "evidence": "mv.responsive.footer"
+    }
+  },
+  "uses": {
+    "primitives": [
+      "primitive.display-heading",
+      "primitive.mono-label",
+      "primitive.link-underline",
+      "primitive.logo-slot"
+    ],
+    "components": [
+      "component.wordmark-stack"
+    ]
+  },
+  "knownQuirks": [
+    "wordmark[1] uses the deeper layer (-21) and wordmark[2] the normal behind-canvas layer (-11) on the source.",
+    "The real wordmark spells the real brand; in generated output it must not (BRAND_PASSOFF).",
+    "All author links are assetRefs with role identity.author-link (placeholder only)."
+  ],
+  "evidence": [
+    "mv.section.footer",
+    "mv.identity.author-links"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy"
+}

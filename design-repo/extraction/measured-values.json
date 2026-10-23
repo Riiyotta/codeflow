@@ -1,0 +1,1361 @@
+{
+  "$comment": "Citation ledger. Every token, contract and rule in this design-repo points at an entry id here (field 'evidence'). Citation paths are relative to the SOURCE PROJECT ROOT (the folder that contains design-repo/), never absolute. When design-repo/ is shipped alone (no sibling source tree), extraction/verify_all.py downgrades citation checks to a warning instead of failing. Each citation carries a 'quote' that must appear (whitespace-normalised) inside the cited line range: this catches in-range-but-wrong citations, not only out-of-range ones. Note: the saved original page's filename contains an em dash followed by a NO-BREAK SPACE (U+00A0), escaped below as \\u00a0.",
+  "ledgerVersion": "1.0.0",
+  "measuredOn": "2026-10-23",
+  "evidenceLevels": {
+    "source-css": "Read directly from a stylesheet (original Webflow CSS port or global embed CSS).",
+    "source-markup": "Read directly from the saved original HTML or the clone's markup.",
+    "source-code": "Read directly from motion/behaviour source code.",
+    "playwright-measured": "Computed style / rect / frame samples recorded in CLONE_SPEC.md from a Playwright run against the live original.",
+    "qa-measured": "Reported by the 2026-10-23 pixel/motion QA pass (clone vs live original). No QA artifact file exists on disk in the source project; recorded verbatim from the QA report handed to this build.",
+    "requester-reported": "Stated by the requester of this build; not present in any on-disk evidence file.",
+    "inferred": "Design-repo policy or inference, not a measurement. Always says so in 'basis'."
+  },
+  "entries": {
+    "mv.stack.original": {
+      "claim": "Original site is a single-route Webflow export plus a custom bundle (GSAP 3.13 SplitText/ScrambleText/CustomEase, Lenis 1.3.4, OGL WebGL).",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:7",
+          "quote": "GSAP 3.13.0"
+        },
+        {
+          "cite": "CLONE_SPEC.md:7",
+          "quote": "Lenis 1.3.4"
+        }
+      ]
+    },
+    "mv.stack.clone": {
+      "claim": "Clone is React 18 + Vite 5; the Webflow stylesheet is ported to src/styles/webflow.css, global embed CSS lives in src/index.css; tailwind.config.js holds colour/font tokens but no Tailwind layers are emitted (preflight off, no @tailwind directives).",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "package.json:15",
+          "quote": "\"react\": \"^18.3.1\""
+        },
+        {
+          "cite": "package.json:23",
+          "quote": "\"vite\": \"^5.4.21\""
+        },
+        {
+          "cite": "src/index.css:3",
+          "quote": "No @tailwind directives"
+        },
+        {
+          "cite": "tailwind.config.js:5",
+          "quote": "preflight: false"
+        }
+      ]
+    },
+    "mv.structure.routes-single": {
+      "claim": "Exactly one route: '/'. The clone has no router; App renders one page.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:3",
+          "quote": "single route `/`"
+        },
+        {
+          "cite": "src/App.jsx:11-13",
+          "quote": "export default function App()"
+        }
+      ]
+    },
+    "mv.structure.section-order": {
+      "claim": "Real render order: nav, header#intro (hero), section#content, section#cta (1st), section#cta (2nd), section#signup, footer; then a fixed WebGL canvas layer placed after the page wrapper.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "src/App.jsx:17-30",
+          "quote": "<Navbar /> <div className=\"w\"> <Hero /> <CourseContent /> <Features /> <Pricing /> <Signup /> <Footer />"
+        },
+        {
+          "cite": "CLONE_SPEC.md:141-149",
+          "quote": "header#intro.s.hero"
+        }
+      ]
+    },
+    "mv.structure.duplicate-cta-id": {
+      "claim": "Two sections carry id=\"cta\" on the original (and the clone keeps it). The footer 'CTA' link therefore resolves to the first one.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:146",
+          "quote": "duplicate id on the original"
+        },
+        {
+          "cite": "Join Waitlist — thecodeflow.co.html:27",
+          "quote": "<section id=\"cta\" class=\"s\">"
+        },
+        {
+          "cite": "src/components/Features.jsx:21",
+          "quote": "<section id=\"cta\" className=\"s\">"
+        },
+        {
+          "cite": "src/components/Pricing.jsx:9",
+          "quote": "<section id=\"cta\" className=\"s\">"
+        }
+      ]
+    },
+    "mv.structure.mt-xl-undefined": {
+      "claim": "Right-hand text blocks carry class mt-xl, which is not defined anywhere in the stylesheet (no-op).",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:83",
+          "quote": "**not defined in CSS** (no-op)"
+        },
+        {
+          "cite": "src/components/Features.jsx:6",
+          "quote": "'tb-w mt-xl'"
+        },
+        {
+          "cite": "Join Waitlist — thecodeflow.co.html:27",
+          "quote": "class=\"tb-w mt-xl\""
+        }
+      ]
+    },
+    "mv.structure.invalid-nth-child": {
+      "claim": "The original counter CSS has two invalid nth-child selectors (n*2+2, n*3+1) that browsers drop; only even list items get translateX(10%) at >=991px.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:39-40",
+          "quote": "INVALID selector -> ignored by browser"
+        },
+        {
+          "cite": "CLONE_SPEC.md:54",
+          "quote": "only the **even** `li` get `transform: translateX(10%)`"
+        },
+        {
+          "cite": "src/index.css:20-21",
+          "quote": "[data-counter] li:nth-child(2n) { transform: translateX(10%); }"
+        }
+      ]
+    },
+    "mv.structure.discord-hidden": {
+      "claim": "The nav contains a Discord icon link, but .link-c{display:none} hides it at every width.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:158",
+          "quote": "so it is never visible"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".link-c{display:none}"
+        },
+        {
+          "cite": "src/components/Navbar.jsx:15",
+          "quote": "arial-label=\"discord\""
+        }
+      ]
+    },
+    "mv.structure.marquee-no-dom": {
+      "claim": "Marquee CSS (.scroller-*) exists but there is no marquee DOM on the live page. No marquee section exists in this design-repo, by design.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:329",
+          "quote": "**The live page has no marquee.**"
+        },
+        {
+          "cite": "src/index.css:36",
+          "quote": ".scroller-item { animation-name: marquee;"
+        }
+      ]
+    },
+    "mv.structure.data-delay-unused": {
+      "claim": "data-delay=\"1\" is present on the hero sub-lines but is not read by the motion code (no effect).",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:181",
+          "quote": "`data-delay` is **not read by app.js** (no effect)."
+        },
+        {
+          "cite": "src/components/Hero.jsx:31",
+          "quote": "data-delay=\"1\""
+        }
+      ]
+    },
+    "mv.color.black": {
+      "claim": "--black #0c0c0c is the page background (and is the variable animated by the solve flash).",
+      "evidenceLevel": "source-css",
+      "value": "#0c0c0c",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ":root{--black:#0c0c0c"
+        },
+        {
+          "cite": "CLONE_SPEC.md:16",
+          "quote": "`#0c0c0c` (page bg"
+        }
+      ]
+    },
+    "mv.color.blush": {
+      "claim": "--white is actually pink #f5d0e6, used for all text, borders, lines and dots.",
+      "evidenceLevel": "source-css",
+      "value": "#f5d0e6",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "--white:#f5d0e6"
+        },
+        {
+          "cite": "CLONE_SPEC.md:17",
+          "quote": "used for all text, borders, lines, dots"
+        }
+      ]
+    },
+    "mv.color.grey": {
+      "claim": "--grey #707070 is the focused-input bottom border colour, which is invisible because the bottom border style is none.",
+      "evidenceLevel": "source-css",
+      "value": "#707070",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "--grey:#707070"
+        },
+        {
+          "cite": "CLONE_SPEC.md:337",
+          "quote": "so it has no visible effect"
+        }
+      ]
+    },
+    "mv.color.dark-unused": {
+      "claim": "--dark #181818 is declared but unused.",
+      "evidenceLevel": "source-css",
+      "value": "#181818",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "--dark:#181818"
+        },
+        {
+          "cite": "CLONE_SPEC.md:19",
+          "quote": "`#181818` (unused)"
+        }
+      ]
+    },
+    "mv.color.webgl-clear": {
+      "claim": "Shader background constant COL_BG = vec3(0.0588) = #0f0f0f (15/255).",
+      "evidenceLevel": "source-code",
+      "value": "#0f0f0f",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:23",
+          "quote": "`COL_BG = vec3(0.0588)` = `#0f0f0f`"
+        },
+        {
+          "cite": "src/motion/cube.js:52",
+          "quote": "const vec3 BG = vec3(15.0 / 255.0);"
+        }
+      ]
+    },
+    "mv.color.solve-flash": {
+      "claim": "Solve easter egg tweens --black to a random choice of #b71234 or #0046ad, then back.",
+      "evidenceLevel": "source-code",
+      "value": [
+        "#b71234",
+        "#0046ad"
+      ],
+      "citations": [
+        {
+          "cite": "src/motion/cube.js:229",
+          "quote": "['#b71234', '#0046ad']"
+        },
+        {
+          "cite": "CLONE_SPEC.md:458",
+          "quote": "random([\"#b71234\",\"#0046ad\"])"
+        }
+      ]
+    },
+    "mv.color.placeholder": {
+      "claim": "Input placeholder colour #999 (Webflow default).",
+      "evidenceLevel": "source-css",
+      "value": "#999",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "::placeholder,.w-select::placeholder{color:#999}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:297",
+          "quote": "placeholder `#999` (Webflow default)"
+        }
+      ]
+    },
+    "mv.color.submit-text": {
+      "claim": "Submit button text is #fff (from .w-button), overriding the pink.",
+      "evidenceLevel": "source-css",
+      "value": "#fff",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".w-button{color:#fff"
+        },
+        {
+          "cite": "CLONE_SPEC.md:298",
+          "quote": "**text color #fff**"
+        }
+      ]
+    },
+    "mv.color.button-hover": {
+      "claim": "Pill button hover: background --white (#f5d0e6), text --black; transition color .2s, background-color .4s.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".button-c:hover{background-color:var(--white);color:var(--black)}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "transition:color .2s,background-color .4s"
+        }
+      ]
+    },
+    "mv.font.faces": {
+      "claim": "Loaded faces: Helvetica Neue 400/700, Helvetica Neue Condensed 700, Firacode 400/700; all font-display:block.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:96-100",
+          "quote": "`Helvetica Neue Condensed` | 700 normal"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "@font-face{font-family:Helvetica Neue Condensed;src:url(/assets/fonts/HelveticaNeueBoldCondensed.woff2)"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "@font-face{font-family:Firacode;src:url(/assets/fonts/FiraCode-Regular.woff2)"
+        }
+      ]
+    },
+    "mv.font.unused-neuemontreal": {
+      "claim": "Neuemontreal faces are declared in the CSS but never used; excluded from tokens.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:102",
+          "quote": "it is **never used or loaded**, so skip it"
+        }
+      ]
+    },
+    "mv.font.licensing": {
+      "claim": "Helvetica Neue and Helvetica Neue Condensed are commercial typefaces; the evidence ships them as woff2 files copied from the original's CDN with no licence file. No licence file for Firacode exists in the project either.",
+      "evidenceLevel": "inferred",
+      "basis": "The commercial status of Helvetica Neue is general knowledge, not a measurement. No licence text exists anywhere in the source project (checked: public/assets/fonts holds only .woff2 files).",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:92",
+          "quote": "Local copies are in"
+        }
+      ]
+    },
+    "mv.type.roles": {
+      "claim": "Computed text roles (family / size / line-height / letter-spacing / weight / transform) at 1440 and 375.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:106-130",
+          "quote": "| role | selector | family | size / line-height | ls | weight | transform |"
+        }
+      ]
+    },
+    "mv.type.body": {
+      "claim": "Body: Helvetica Neue 14px / 1.1em, colour --white, cursor crosshair.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:26",
+          "quote": "cursor:crosshair; font-family:\"Helvetica Neue\",Arial,sans-serif; font-size:14px; line-height:1.1em"
+        }
+      ]
+    },
+    "mv.type.display": {
+      "claim": "Display sizes: hero 9vw (11vw <=991 and <=767, 3.9rem <=479) lh .8em; list 7vw (9vw <=767, 12vw <=479) lh .9em; block 5vw (11vw <=767, 13vw <=479; .py-xs 9vw/12vw/14vw) lh .8em; footer 18vw (15vw <=767, 20vw <=479) lh .8em.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:115-117",
+          "quote": "9vw = 129.6 / 0.8em = 103.68"
+        },
+        {
+          "cite": "CLONE_SPEC.md:129",
+          "quote": "18vw = 259.2 / 0.8em = 207.36"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".hero-he{white-space:break-spaces;word-break:keep-all;overflow-wrap:break-word;font-size:3.9rem}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".li-he{font-size:7vw;line-height:.9em}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".ft-btxt{font-family:Helvetica Neue Condensed,Arial,sans-serif;font-size:18vw;font-weight:700;line-height:.8em"
+        }
+      ]
+    },
+    "mv.type.mono": {
+      "claim": "Mono labels: Firacode .8rem / 1em, letter-spacing .1em, uppercase; .xs = 10px; at <=479 .font-fira becomes 1em.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".font-fira{letter-spacing:.1em;text-transform:uppercase;font-family:Firacode,Arial,sans-serif;font-size:.8rem;line-height:1em}.font-fira.xs{font-size:10px}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:113",
+          "quote": "**1em**, i.e. inherits"
+        }
+      ]
+    },
+    "mv.type.cta-tx-discrepancy": {
+      "claim": "Correction to CLONE_SPEC §1: '.cta-tx sets 1rem' only holds at <=479px. In both the original stylesheet and the port, .cta-tx{font-size:1rem} appears once, inside the max-width:479px block; at wider widths CTA text inherits .button-c 1.2rem (nav .button-c.sm 1rem).",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:120",
+          "quote": "(`.cta-tx` sets 1rem = 16 text)"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".join-li{font-size:.6rem}.cta-tx{font-size:1rem}}"
+        }
+      ]
+    },
+    "mv.radius.pill": {
+      "claim": "Pill buttons: border-radius 3em (48px at 16px font, 57.6px at 19.2px).",
+      "evidenceLevel": "source-css",
+      "value": "3em",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "background-color:#3898ec00;border-radius:3em"
+        },
+        {
+          "cite": "CLONE_SPEC.md:335",
+          "quote": "`border-radius:3em` (48px at 16px, 57.6px at 19.2px)"
+        }
+      ]
+    },
+    "mv.radius.dot": {
+      "claim": "Timeline dot: 0.7em circle (border-radius 50%), --white.",
+      "evidenceLevel": "source-css",
+      "value": "50%",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".dot{background-color:var(--white);border-radius:50%;width:.7em;height:.7em}"
+        }
+      ]
+    },
+    "mv.spacing.section": {
+      "claim": "Section padding 10vh 3vw 5vh, min-height 50vh; hero padding-top 5vh / bottom 1vh / min-height 90vh; signup padding-top 20vh; footer padding-top 15vh (5vh <=479) bottom 1vh; <=767 sections padding-top 5vh.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".s{flex-direction:column;min-height:50vh;margin-left:auto;margin-right:auto;padding:10vh 3vw 5vh}.s.hero{justify-content:center;min-height:90vh;padding-top:5vh;padding-bottom:1vh;display:flex}.s.footer{min-height:auto;padding-top:15vh;padding-bottom:1vh}.s.flex-vb{justify-content:flex-end;padding-top:20vh;display:flex}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:69-72",
+          "quote": "≤767: `padding-top:5vh`"
+        }
+      ]
+    },
+    "mv.spacing.container": {
+      "claim": "Container .c: width 80% (90% <=991), margin 2em auto; .c.py-lg margin 10em vertical; .c.flex-hb gap 2em; .mt-md margin-top 3rem; .tb-he.py-xs margin 1rem 0.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".c{flex:none;width:80%;margin:2em auto}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".c.flex-hb{grid-column-gap:2em;grid-row-gap:2em;justify-content:space-between;display:flex}.c.py-lg{margin-top:10em;margin-bottom:10em}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".mt-md{margin-top:3rem}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".tb-he.py-xs{margin-top:1rem;margin-bottom:1rem}"
+        }
+      ]
+    },
+    "mv.spacing.button": {
+      "claim": "Pill button: padding .6em 1.2em, margin 1.2em 1rem, gap 3em (2em <=767, 1rem <=479), border 1px --white.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".button-c{grid-column-gap:3em;grid-row-gap:3em;border:1px solid var(--white)"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "margin:1.2em 1rem;padding:.6em 1.2em"
+        },
+        {
+          "cite": "CLONE_SPEC.md:182",
+          "quote": "`.button-c` gap is 2em at ≤767 and 1rem at ≤479"
+        }
+      ]
+    },
+    "mv.spacing.unused-vars": {
+      "claim": "--space--py 5vh / --space--px 3vw are declared but only used by the unused .fx-w.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:20",
+          "quote": "(unused, only on `.fx-w`)"
+        }
+      ]
+    },
+    "mv.breakpoints": {
+      "claim": "Webflow breakpoints max-width 991 / 767 / 479; counters use min-width:991px.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:57",
+          "quote": "`max-width:991px` (tablet), `max-width:767px` (mobile landscape), `max-width:479px` (mobile portrait)"
+        },
+        {
+          "cite": "src/index.css:19",
+          "quote": "@media (min-width: 991px)"
+        }
+      ]
+    },
+    "mv.layering.stack": {
+      "claim": "Nav z-index 20 fixed; canvas fixed full-viewport z-index -10, placed after the page wrapper; .pw/.w create no stacking context.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:60-61",
+          "quote": "`position:fixed; inset:0; width:100vw; height:100vh; z-index:-10`"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".canvas{z-index:-10;width:100vw;height:100vh;position:fixed;inset:0%}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".nav{z-index:20;"
+        }
+      ]
+    },
+    "mv.layering.z-words": {
+      "claim": ".z words render BEHIND the WebGL canvas (z-index -11; .z.minus -21). Used on hero 'LIMITS', list items MANIPULATIONS/COMPILERS/PERFORMANCE, 'THE' in FIND THE MISSING PIECE, footer CODE (.z.minus) and FLOW.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".z{z-index:-11;position:relative}.z.minus{z-index:-21;position:relative}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:62-63",
+          "quote": "`.z` is used on: the hero word \"LIMITS\""
+        },
+        {
+          "cite": "src/components/CourseContent.jsx:9",
+          "quote": "const BEHIND = new Set(['MANIPULATIONS', 'COMPILERS', 'PERFORMANCE'])"
+        }
+      ]
+    },
+    "mv.layering.z-tablet-reset": {
+      "claim": "At <=991 .z becomes position:static; z-index:0, so the 'behind-canvas' words paint in front of the canvas at tablet/mobile widths.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".z{z-index:0;position:static}.nav-cent{display:none}}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:62",
+          "quote": "At ≤991px `.z` becomes `position:static; z-index:0`"
+        }
+      ]
+    },
+    "mv.layout.primitives": {
+      "claim": "Layout primitives (.w, .s, .c, .tb-w 45%/70%/90%, ._1-2 50% x 26vw, timeline ._1-4 30% and .table-first 10%).",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:65-83",
+          "quote": "| `.tb-w` | `flex:none; width:45%`. ≤991: 70%. ≤767: `width:90%; margin-bottom:3em` |"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "._1-4{width:30%}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".table-first{justify-content:flex-start;align-items:center;width:10%;padding-left:1em"
+        }
+      ]
+    },
+    "mv.icon.sizes": {
+      "claim": "Logo .logo.xs width 2.5rem (rendered 40x38); arrow .btn-ic width .8em; Discord .icon width 1rem margin 1rem.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".logo.xs{flex:none;width:2.5rem}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".btn-ic{width:.8em;font-size:.8em;line-height:1em}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".icon{width:1rem;margin:1rem}"
+        }
+      ]
+    },
+    "mv.section.nav": {
+      "claim": "Nav: fixed bar with intro paragraph (40%), centre version tag (20%), right cluster (hidden Discord link, small CTA to #signup, logo).",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:152-160",
+          "quote": "### 2.1 Nav `nav.nav`"
+        },
+        {
+          "cite": "src/components/Navbar.jsx:5-21",
+          "quote": "<CtaButton className=\"sm\">Join Waitlist</CtaButton>"
+        }
+      ]
+    },
+    "mv.section.hero": {
+      "claim": "Hero header#intro: scrambled eyebrow, 3-line display h1 with a behind-canvas last word, two mono sub-lines (regular + bold), pill CTA to #signup, price note.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:165-180",
+          "quote": "### 2.2 Hero `header#intro.s.hero`"
+        },
+        {
+          "cite": "src/components/Hero.jsx:15-38",
+          "quote": "<header id=\"intro\" className=\"s hero\">"
+        }
+      ]
+    },
+    "mv.section.content": {
+      "claim": "section#content: mono heading, 20-item counter list of display words (3 behind canvas), mono summary.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:184-211",
+          "quote": "li > h3.li-he[data-a=word]  ×20, in order:"
+        },
+        {
+          "cite": "src/components/CourseContent.jsx:3-7",
+          "quote": "'API AND DATA', 'DOM', 'MANIPULATIONS'"
+        }
+      ]
+    },
+    "mv.section.features": {
+      "claim": "First section#cta: two rows (.c.flex-hb.py-lg) of two text blocks (label / 2-line heading / body / optional mono note).",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:215-230",
+          "quote": "Two `div.c.flex-hb.py-lg` rows."
+        },
+        {
+          "cite": "src/components/Features.jsx:4-17",
+          "quote": "export function Block({ label, l1, l2, children, mono, right })"
+        }
+      ]
+    },
+    "mv.section.pitch": {
+      "claim": "Second section#cta: kicker + 2-line display heading (one behind-canvas word) + CTA + price note; one row of two text blocks; a 3-column price timeline table (header row + 2 rows) hidden <=767.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:234-269",
+          "quote": "### 2.5 Second `section#cta.s`"
+        },
+        {
+          "cite": "src/components/Pricing.jsx:44",
+          "quote": "<div data-hide=\"mobile\" className=\"c fs\">"
+        }
+      ]
+    },
+    "mv.section.signup": {
+      "claim": "section#signup: left column heading/body/3 perks; right column name+email form with animated underlines, locked submit, success and failure states.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:271-296",
+          "quote": "### 2.6 Signup `section#signup.s.flex-vb`"
+        },
+        {
+          "cite": "src/components/Signup.jsx:5-59",
+          "quote": "<section id=\"signup\" className=\"s flex-vb\">"
+        }
+      ]
+    },
+    "mv.section.footer": {
+      "claim": "Footer: social link row; giant 4-word condensed wordmark (THE / CODE / FLOW / CO) interleaved with a site-nav block and a logo/legal block; CODE and FLOW render behind the canvas.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:301-323",
+          "quote": "### 2.7 Footer `footer.s.footer`"
+        },
+        {
+          "cite": "src/components/Footer.jsx:34-41",
+          "quote": "<div className=\"z minus\">"
+        }
+      ]
+    },
+    "mv.section.canvas": {
+      "claim": "Fixed full-viewport WebGL layer after the page wrapper rendering a 3-layer Rubik's cube with a matcap shader.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "src/App.jsx:28-30",
+          "quote": "<div data-gl=\"c\" className=\"canvas\""
+        },
+        {
+          "cite": "CLONE_SPEC.md:421-422",
+          "quote": "### 5.9 WebGL (OGL): the Rubik's cube"
+        }
+      ]
+    },
+    "mv.responsive.nav": {
+      "claim": "Nav: <=991 intro 50% wide, centre tag hidden, right cluster flex:1; <=767 intro hidden, solid --black background, cluster row-reversed (logo left, CTA right); <=479 full width, cluster padded 1.4rem, CTA margins 0.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:161-163",
+          "quote": "≤767: `.nav{background:#0c0c0c; margin-top:0}`"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".nav-par{width:50%;display:block}.nav-cta-w{flex:1}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".nav{background-color:var(--black);margin-top:0}.nav-par{display:none}.nav-cta-w{flex-direction:row-reverse;justify-content:space-between}"
+        }
+      ]
+    },
+    "mv.responsive.counters": {
+      "claim": "List counters (\"001 \"...) and even-item 10% offsets only at >=991px; below that, no offset and no counter.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/index.css:19-31",
+          "quote": "content: '0' counter(itemcounter, decimal-leading-zero) ' ';"
+        },
+        {
+          "cite": "CLONE_SPEC.md:54",
+          "quote": "Below 991px there is no offset and no counter."
+        }
+      ]
+    },
+    "mv.responsive.data-hide": {
+      "claim": "data-hide=tablet hides at <=991; data-hide=mobile hides at <=767 (timeline table, Discord link).",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/index.css:39-40",
+          "quote": "@media (max-width: 767px) { [data-hide='mobile'] { display: none; } }"
+        }
+      ]
+    },
+    "mv.responsive.flex-hb": {
+      "claim": "Two-column rows (.c.flex-hb) stack into a column at <=991; text blocks widen to 70% (<=991) and 90% (<=767).",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".c.flex-hb{flex-direction:column;align-items:flex-start}"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".tb-w{width:90%;margin-bottom:3em}"
+        }
+      ]
+    },
+    "mv.responsive.footer": {
+      "claim": "Footer: tablet-hidden blocks (site nav, footer logo) disappear <=991; at <=479 the last row wraps, legal block left-aligns full width, padding-top 5vh.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".ft-block.flex-hb{justify-content:flex-start}.div-block-4{align-items:flex-start;width:100%}.ft-row.mob-vert{flex-flow:wrap}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:326",
+          "quote": "The tablet-hidden blocks disappear."
+        }
+      ]
+    },
+    "mv.responsive.hero": {
+      "claim": "Hero heading nowrap at desktop; wraps (white-space normal) at <=767; break-spaces at 3.9rem <=479. Hero is 810px tall at 1440x900, 731 at 375x812.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".hero-he{white-space:normal;word-break:normal;font-size:11vw}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:182",
+          "quote": "At 375: hero h731"
+        }
+      ]
+    },
+    "mv.responsive.signup": {
+      "claim": "Signup halves (._1-2) are 50% x 26vw at desktop; <=991 70% auto height; <=767 100%. Join-list text .6rem at <=479.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:81",
+          "quote": "| `.tb-w._1-2` | width 50%. ≤991: `width:70%; height:auto; margin-bottom:1rem`. ≤767: 100% |"
+        }
+      ]
+    },
+    "mv.motion.page-fade": {
+      "claim": "Page wrapper starts visibility:hidden and fades in: autoAlpha 1, duration 1s, delay .2s, default ease power1.out.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:368",
+          "quote": "`gsap.to(.pw, {autoAlpha:1, duration:1, delay:0.2})` (default ease `power1.out`)"
+        },
+        {
+          "cite": "src/motion/app.js:14",
+          "quote": "gsap.to(page, { autoAlpha: 1, duration: 1, delay: 0.2 })"
+        }
+      ]
+    },
+    "mv.motion.observer-replay": {
+      "claim": "Every reveal fires at 50% visibility of the whole element and resets instantly when the element fully leaves; animations replay on each re-entry.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:374-375",
+          "quote": "**So every animation replays each time the element re-enters**"
+        },
+        {
+          "cite": "src/motion/reveal.js:13-22",
+          "quote": "{ threshold: 0.5 },"
+        }
+      ]
+    },
+    "mv.motion.text-reveal": {
+      "claim": "Word/line reveal: split into lines (overflow hidden) then words; y 150% -> 0%, 1.2s expo.out, delay .1s (0 on mobile UA), stagger .05s from start.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:380",
+          "quote": "duration:1.2, ease:\"expo.out\", delay: isMobileUA ? 0 : 0.1, stagger:{each:0.05, from:\"start\"}"
+        },
+        {
+          "cite": "src/motion/reveal.js:60-66",
+          "quote": "stagger: { each: 0.05, from: 'start' },"
+        }
+      ]
+    },
+    "mv.motion.char-drop": {
+      "claim": "Footer wordmark uses char split with data-y=-150%, so characters drop in from above.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:379",
+          "quote": "The footer uses `data-y=\"-150%\"` so its chars drop in from above."
+        },
+        {
+          "cite": "src/components/Footer.jsx:6",
+          "quote": "data-y=\"-150%\" data-a=\"char\""
+        }
+      ]
+    },
+    "mv.motion.alpha": {
+      "claim": "Alpha reveal: autoAlpha 0 -> 1, 1.2s expo.out, delay .1s.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:386",
+          "quote": "`gsap.to(el, {autoAlpha:1, duration:1.2, ease:\"expo.out\", delay:0.1})`"
+        },
+        {
+          "cite": "src/motion/reveal.js:86",
+          "quote": "gsap.to(el, { autoAlpha: 1, duration: 1.2, ease: EASE, delay: 0.1 })"
+        }
+      ]
+    },
+    "mv.motion.scramble": {
+      "claim": "Scramble: alpha reveal plus scrambleText over 0.6-0.9s with chars \"▖▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟\", revealDelay .3s, speed 1; inner markup flattened to text.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:391",
+          "quote": "revealDelay:0.3"
+        },
+        {
+          "cite": "src/motion/reveal.js:9",
+          "quote": "const SCRAMBLE_CHARS = '▖▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟'"
+        },
+        {
+          "cite": "src/motion/reveal.js:97",
+          "quote": "duration: 0.6 + Math.random() * 0.3,"
+        }
+      ]
+    },
+    "mv.motion.scale": {
+      "claim": "Scale reveal (s / sx): from 0 to 1, duration 1.2-1.4s expo.out, delay .1s, transform-origin 'right center' unless data-origin (name-field underline uses 'left center'). 'sy' exists in code but no element uses it.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:403",
+          "quote": "`transformOrigin: el.dataset.origin || \"right center\"`"
+        },
+        {
+          "cite": "src/motion/reveal.js:115",
+          "quote": "duration: 1.2 + Math.random() * 0.2"
+        },
+        {
+          "cite": "src/components/Signup.jsx:31",
+          "quote": "data-origin=\"left center\""
+        }
+      ]
+    },
+    "mv.motion.button-hover": {
+      "claim": "CTA hover: CSS colour .2s / background .4s; on non-mobile UA it also tweens the cube hover uniform to 1 (expo.out 1.2s): lower half darkens, sticker colours hint, scale +0.02.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:407-409",
+          "quote": "This tweens the shader `hover` value with `{hover: v, ease:\"expo.out\", duration:1.2}`"
+        },
+        {
+          "cite": "src/motion/app.js:20-27",
+          "quote": "// CTA hover darkens the cube (desktop only)"
+        }
+      ]
+    },
+    "mv.motion.link-hover": {
+      "claim": "Footer nav links: opacity .5 on hover, transition opacity .2s. Other links have no hover style.",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": "transition:opacity .2s}.ft-li-lk:hover{opacity:.5}"
+        },
+        {
+          "cite": "CLONE_SPEC.md:510",
+          "quote": "have no hover style"
+        }
+      ]
+    },
+    "mv.motion.cube-drop": {
+      "claim": "Cube drops in from 3 units above with back.out over 1.2s once GLB + textures load.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:370",
+          "quote": "`a.initial: 3 → 0`, `ease:\"back.out\"`, `duration:1.2`"
+        },
+        {
+          "cite": "src/motion/cube.js:160",
+          "quote": "gsap.to(this.a, { initial: 0, ease: 'back.out', duration: 1.2 })"
+        }
+      ]
+    },
+    "mv.motion.cube-idle": {
+      "claim": "Idle: continuous tumble plus a layer twist every 1680ms (0.8 x 2100), 0.8s per twist; scroll progress lifts (0.45 units), scales (+0.05, not on mobile UA) and spins the cube.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "src/motion/cube.js:167",
+          "quote": "setInterval(() => this.twist(0.8), 0.8 * 2100)"
+        },
+        {
+          "cite": "src/motion/cube.js:261",
+          "quote": "scroll.progress * (isMobile ? 0 : 0.05)"
+        },
+        {
+          "cite": "CLONE_SPEC.md:446",
+          "quote": "Scroll therefore moves the cube up (by 0.45 units over the full page)"
+        }
+      ]
+    },
+    "mv.motion.cube-click": {
+      "claim": "Click anywhere: cube pushes back and springs (click 0 -> 5 over 1.6s, CustomEase bump returning to 0).",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:455",
+          "quote": "`gsap.to(a, {click:5, duration:1.6"
+        },
+        {
+          "cite": "src/motion/cube.js:16-19",
+          "quote": "'M0,0 C0.126,0.382 0.18,0.726 0.241,0.726 0.397,0.726 0.482,-0.234 0.619,-0.234 0.746,-0.234 0.768,0 1,0'"
+        }
+      ]
+    },
+    "mv.motion.cube-solve": {
+      "claim": "Solve (key '!' or form success): stickers turn fully coloured (1.8s elastic.out, delay .4) and --black flashes to #b71234 or #0046ad (1.2s elastic.out, delay .4) then restores.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "src/motion/cube.js:224-233",
+          "quote": ".to(root, { '--black': flash, duration: 1.2, delay: 0.4, ease: 'elastic.out' })"
+        },
+        {
+          "cite": "src/motion/cube.js:321",
+          "quote": "e.key === '!' && cube.solve()"
+        }
+      ]
+    },
+    "mv.motion.easepack-fallback": {
+      "claim": "Original asks for slow.out / slow.inOut but EasePack is not bundled, so GSAP falls back to power1.out; the clone uses power1.out explicitly.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:529",
+          "quote": "**EasePack is not in the bundle**"
+        },
+        {
+          "cite": "src/motion/cube.js:190",
+          "quote": "falls back to power1.out"
+        }
+      ]
+    },
+    "mv.motion.lenis": {
+      "claim": "Smooth scroll: Lenis duration 1.2, easing min(1, 1.001 - 2^(-10t)), smoothWheel, touchMultiplier 2, native touch.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:413",
+          "quote": "new Lenis({ duration:1.2, smoothWheel:true"
+        },
+        {
+          "cite": "src/motion/scroll.js:5-11",
+          "quote": "easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),"
+        }
+      ]
+    },
+    "mv.motion.anchor-scroll-source": {
+      "claim": "On the original, #signup anchors are NOT handled by Lenis (anchors:false); the Webflow runtime does its own smooth anchor scroll. The clone (as edited 2026-10-23 by a concurrent session) reproduces it via lenis.scrollTo with a distance-based duration max(0, 472.143*ln(dist+125) - 2000) ms and easeInOutCubic. Earlier clone revision used a fixed 1.2s Lenis expo ease (superseded).",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:419",
+          "quote": "The Webflow runtime does its own smooth anchor scroll."
+        },
+        {
+          "cite": "src/motion/scroll.js:30-35",
+          "quote": "duration: Math.max(0, 472.143 * Math.log(dist + 125) - 2000) / 1000,"
+        },
+        {
+          "cite": "src/motion/scroll.js:34",
+          "quote": "(t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1)"
+        }
+      ]
+    },
+    "mv.motion.mobile-ua": {
+      "claim": "'Mobile' is decided by user-agent regex, not viewport width: mobile UA disables CTA-hover coupling, word delay, pointer offset and scroll-based scale.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "src/motion/env.js:1-2",
+          "quote": "The original decides \"mobile\" from the user agent, not the viewport width."
+        },
+        {
+          "cite": "CLONE_SPEC.md:494",
+          "quote": "not from viewport width"
+        }
+      ]
+    },
+    "mv.motion.no-reduced-motion": {
+      "claim": "Neither the original nor the clone handles prefers-reduced-motion (0 matches in app.js, src/ and the stylesheets). Every reducedMotionFallback in this design-repo is therefore a design-repo POLICY for generated output, not observed behaviour.",
+      "evidenceLevel": "inferred",
+      "basis": "grep -r 'prefers-reduced-motion|reduced' over the saved app.js, src/ and both stylesheets returned 0 matches on 2026-10-23.",
+      "citations": []
+    },
+    "mv.form.lock": {
+      "claim": "Submit starts locked (.lock opacity .3, not-allowed) and unlocks when every non-email input is valid (i.e. name filled); email is not JS-checked.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:517",
+          "quote": "the button unlocks (removes `.lock`, `pointer-events:auto`) as soon as the Name field is non-empty"
+        },
+        {
+          "cite": "src/motion/form.js:11-15",
+          "quote": "inputs.every((i) => i.type === 'email' || i.checkValidity())"
+        }
+      ]
+    },
+    "mv.form.success": {
+      "claim": "On success the form hides, the success block shows (scrambled 'YOU ARE IN.' / 'Catch up soon!') and the cube solve animation runs. Failure shows 'Something went wrong. Try again?'.",
+      "evidenceLevel": "source-code",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:519-520",
+          "quote": "which triggers the solve animation"
+        },
+        {
+          "cite": "src/motion/form.js:19-29",
+          "quote": "done.style.display = 'block'"
+        }
+      ]
+    },
+    "mv.endpoint.mailchimp": {
+      "claim": "The original form posts to a live MailChimp list endpoint (ooo.us21.list-manage.com).",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "Join Waitlist — thecodeflow.co.html:27",
+          "quote": "action=\"https://ooo.us21.list-manage.com/subscribe/post?"
+        },
+        {
+          "cite": "CLONE_SPEC.md:283",
+          "quote": "action=\"https://ooo.us21.list-manage.com/subscribe/post?"
+        }
+      ]
+    },
+    "mv.endpoint.clone-has-no-action": {
+      "claim": "The clone's form has no action attribute (verified): it fakes success locally.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "src/components/Signup.jsx:25",
+          "quote": "<form id=\"email-form\" name=\"email-form\" data-name=\"Email Form\" method=\"post\" className=\"lead-c\" aria-label=\"Email Form\">"
+        },
+        {
+          "cite": "src/motion/form.js:2",
+          "quote": "There is no MailChimp backend here"
+        }
+      ]
+    },
+    "mv.endpoint.umami": {
+      "claim": "The original loads Umami analytics with a real website id and tracks 'Signup Success'. The clone loads no analytics.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "Join Waitlist — thecodeflow.co.html:22",
+          "quote": "data-website-id=\"13ed4638-a8ba-4623-9987-1f6112450739\""
+        },
+        {
+          "cite": "CLONE_SPEC.md:358",
+          "quote": "Umami analytics `https://cloud.umami.is/script.js`"
+        }
+      ]
+    },
+    "mv.identity.author-links": {
+      "claim": "Footer carries the real author's links: https://federic.ooo/s/twitter, https://federic.ooo/ and a privacy-policy Google Doc.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "src/components/Footer.jsx:15",
+          "quote": "href=\"https://federic.ooo/s/twitter\""
+        },
+        {
+          "cite": "src/components/Footer.jsx:48",
+          "quote": "href=\"https://docs.google.com/document/d/"
+        },
+        {
+          "cite": "src/components/Footer.jsx:56",
+          "quote": "href=\"https://federic.ooo/\""
+        }
+      ]
+    },
+    "mv.identity.author-name": {
+      "claim": "The author's full name (Federico Valla) was supplied by the requester; it does not appear in any on-disk evidence file (the page identifies the author only as federic.ooo).",
+      "evidenceLevel": "requester-reported",
+      "basis": "grep for 'Federico' over the saved page, CLONE_SPEC.md and src/ returned 0 matches on 2026-10-23.",
+      "citations": []
+    },
+    "mv.asset.logo": {
+      "claim": "Logo \"THE CODE FLOW. CO\": inline SVG, viewBox 0 0 53 50, fill hardcoded #F5D0E6, used twice (nav + footer).",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:356",
+          "quote": "logo \"THE CODE FLOW. CO\""
+        },
+        {
+          "cite": "Join Waitlist — thecodeflow.co.html:27",
+          "quote": "<div class=\"logo xs w-embed\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"currentColor\" viewBox=\"0 0 53 50\""
+        }
+      ]
+    },
+    "mv.asset.arrow": {
+      "claim": "Arrow icon: inline SVG viewBox 0 0 14 14, fill currentColor, used in every CTA (x3).",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:355",
+          "quote": "viewBox 0 0 14 14, `fill=currentColor`, ×3"
+        }
+      ]
+    },
+    "mv.asset.discord": {
+      "claim": "Discord icon: third-party trademark glyph, inline SVG viewBox 0 0 17 14, hidden on the site.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:354",
+          "quote": "viewBox 0 0 17 14, `fill=currentColor` (hidden on site)"
+        }
+      ]
+    },
+    "mv.asset.cube-model": {
+      "claim": "Rubik's cube GLB (cube8.glb, 648,832 B, 3 layer meshes) from the original's Webflow uploads.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:346",
+          "quote": "glTF 2 binary, 648,832 B"
+        }
+      ]
+    },
+    "mv.asset.cube-textures": {
+      "claim": "Matcaps mtc16.webp / mtc3.webp (1080x1080) and sticker colour map col_map.webp (540x540).",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:347-349",
+          "quote": "sticker color map (`u_col_map`)"
+        }
+      ]
+    },
+    "mv.asset.meta-images": {
+      "claim": "favicon 32x32, apple-touch webclip 256x256, og/twitter image 1200x630.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:350-352",
+          "quote": "| og/twitter image |"
+        }
+      ]
+    },
+    "mv.meta.copy": {
+      "claim": "Page title 'Join Waitlist — thecodeflow.co' and meta description.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "index.html:6-7",
+          "quote": "Level up your Webflow game by learning Javascript."
+        }
+      ]
+    },
+    "mv.copy.real-text": {
+      "claim": "Real copy for every section, used verbatim in schema/example.pagespec.json (evidence-reference provenance) and as the basis of every maxWords budget.",
+      "evidenceLevel": "source-markup",
+      "citations": [
+        {
+          "cite": "src/components/Navbar.jsx:6-10",
+          "quote": "A practical <strong>Javascript</strong> course"
+        },
+        {
+          "cite": "src/components/Hero.jsx:18",
+          "quote": "A 8+ HOURS VIDEO COURSE"
+        },
+        {
+          "cite": "src/components/Features.jsx:56",
+          "quote": "<Block label=\"FEATURES (1/2)\" l1=\"DISCORD\" l2=\"COMMUNITY\">"
+        },
+        {
+          "cite": "src/components/Pricing.jsx:39",
+          "quote": "mono=\"* THEN 250? Maybe 300? Maybe more? not sure\""
+        },
+        {
+          "cite": "src/components/Signup.jsx:18-20",
+          "quote": "Early access at 50% discount (then 250$+)"
+        },
+        {
+          "cite": "src/components/Footer.jsx:52",
+          "quote": "© 2024 —"
+        }
+      ]
+    },
+    "mv.copy.budget-policy": {
+      "claim": "maxWords budget per text field = max(real + 2, ceil(real x 1.5)) where 'real' is the longest real instance of that field. Words are whitespace-separated tokens after stripping ** and __ inline markers.",
+      "evidenceLevel": "inferred",
+      "basis": "The real word counts are measured from the source copy; the 1.5x headroom formula is a design-repo policy, not a measurement.",
+      "citations": []
+    },
+    "mv.qa.pixel": {
+      "claim": "Pixel QA 2026-10-23: clone matches the original at 1440x900 and 375x812 with zero static deltas. Doc height 7047 (1440) / 6884 (375). Section y/h at 1440: hero 0/810, content 810/2249, cta1 3059/1177, cta2 4236/1465, signup 5701/655, footer 6356/691.",
+      "evidenceLevel": "qa-measured",
+      "basis": "QA report handed to this build (2026-10-23). The section geometry independently matches the Playwright measurements recorded in CLONE_SPEC.md.",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:85",
+          "quote": "hero 0 (h810), #content 810 (h2249), #cta(1) 3059 (h1177), #cta(2) 4236 (h1465), #signup 5701 (h655), footer 6356 (h691)"
+        }
+      ]
+    },
+    "mv.qa.motion-match": {
+      "claim": "Motion QA 2026-10-23 (clone vs live original) MATCHED within tolerance: page fade, word/char reveal, alpha, scale s/sx, scramble, button hover, footer link hover, cube CTA-hover darkening, '!' solve flash, cube rest size/position, and (after the 60fps re-measure) anchor scroll and wheel scroll. No open motion deltas remain.",
+      "evidenceLevel": "qa-measured",
+      "basis": "QA report handed to this build (2026-10-23); no QA artifact file is stored in the source project.",
+      "citations": []
+    },
+    "mv.qa.anchor-scroll": {
+      "claim": "MATCHED (re-measured at 60fps, 2026-10-23): anchor-link scroll to #signup matches the original within ~35ms at 50/90/99% progress, after the clone switched to the Webflow-style distance-based duration + easeInOutCubic. Superseded earlier finding: clone snapped out and hit 99% at ~0.66s vs original ~1.7s.",
+      "evidenceLevel": "qa-measured",
+      "basis": "60fps re-measurement reported by the concurrent session that edited src/motion/scroll.js (relayed by the orchestrator, 2026-10-23). The code change itself is verified on disk (see mv.motion.anchor-scroll-source).",
+      "citations": [
+        {
+          "cite": "src/motion/scroll.js:30",
+          "quote": "match the Webflow runtime's anchor scroll"
+        }
+      ]
+    },
+    "mv.qa.wheel-scroll": {
+      "claim": "MATCHED (re-measured at 60fps, 2026-10-23): wheel scroll matches the original. The earlier '~100ms slower to 50%' finding was sampling noise; the Lenis wheel config is unchanged.",
+      "evidenceLevel": "qa-measured",
+      "basis": "60fps re-measurement reported by the concurrent session (relayed by the orchestrator, 2026-10-23). Lenis config verified unchanged on disk.",
+      "citations": [
+        {
+          "cite": "src/motion/scroll.js:5-11",
+          "quote": "smoothWheel: true,"
+        }
+      ]
+    },
+    "mv.form.underline": {
+      "claim": "Inputs and timeline rows use a 1px --white rule (.line.abs, absolutely positioned at the bottom); before its sx reveal the input underline rests at scaleX(.5).",
+      "evidenceLevel": "source-css",
+      "citations": [
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".line{width:100%;height:1px}.line.abs{background-color:var(--white);position:absolute;inset:auto 0% 0%}"
+        },
+        {
+          "cite": "src/index.css:41",
+          "quote": "input + .line { transform: scaleX(0.5); }"
+        }
+      ]
+    },
+    "mv.form.input": {
+      "claim": "Input box 504x38 at 1440 (max-width 60ch), padding 8px 12px, transparent 1px border with no bottom border; visible underline is the .line element.",
+      "evidenceLevel": "playwright-measured",
+      "citations": [
+        {
+          "cite": "CLONE_SPEC.md:297",
+          "quote": "Input: 504x38 @1440 (max-width 60ch), padding 8px 12px"
+        },
+        {
+          "cite": "src/styles/webflow.css:1",
+          "quote": ".lead-field{border-style:solid solid none"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "primitive.marker-dot",
+  "kind": "primitive",
+  "description": ".7em filled circle in the text colour (timeline marker); scales in.",
+  "props": {},
+  "tokens": [
+    "component.marker.dot",
+    "radius.circle"
+  ],
+  "assetRoles": [],
+  "evidence": [
+    "mv.radius.dot"
+  ]
+}

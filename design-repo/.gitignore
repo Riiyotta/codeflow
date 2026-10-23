@@ -1,0 +1,9 @@
+# Generated / OS junk that must never ship in design-repo.zip
+__pycache__/
+*.pyc
+.DS_Store
+__MACOSX/
+Thumbs.db
+desktop.ini
+# NOTE: design-repo.zip lives OUTSIDE this folder (project root). The source project is not a git
+# repository today; if it becomes one, add "design-repo.zip" to the PROJECT-ROOT .gitignore.

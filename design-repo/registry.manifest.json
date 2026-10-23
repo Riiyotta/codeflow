@@ -1,0 +1,109 @@
+{
+  "repositoryId": "codeflow-waitlist-design-repo",
+  "repositoryVersion": "1.0.0",
+  "pageSpecVersion": "1.0.0",
+  "allowlistVersion": "1.0.0",
+  "versionFieldNote": "Only allowlistVersion is machine-checked: extraction/verify_all.py fails if it differs from tokens/llm/component-allowlist.json allowlistVersion. pageSpecVersion is enforced only as a const inside schema/pagespec.schema.json (verify_all checks the manifest value equals that const). repositoryVersion is documentation-only and hand-maintained; nothing checks it.",
+  "status": "design-review-pending",
+  "productionApproved": false,
+  "builtOn": "2026-10-23",
+  "defaultTheme": "dark",
+  "schemaValidatedThemes": [
+    "dark"
+  ],
+  "source": {
+    "url": "https://www.thecodeflow.co/",
+    "routes": [
+      "/"
+    ],
+    "realLiveSite": true,
+    "complianceNote": "Real, live marketing/waitlist site by a real named author (identified on-page as federic.ooo). Logo, 3D model and textures, meta images, author links and live endpoints are must-not-reproduce / must-not-reuse-live-endpoint (assets/asset-roles.json, pinned in schema/semantic_validate.py). Helvetica Neue / Helvetica Neue Condensed are commercial typefaces: license-required. Real copy appears only in the evidence-reference example and must never be published as the real brand. Do not make this repository public.",
+    "evidence": [
+      "mv.endpoint.mailchimp",
+      "mv.endpoint.umami",
+      "mv.identity.author-links",
+      "mv.font.licensing"
+    ]
+  },
+  "sourceStack": {
+    "documentationOnly": true,
+    "original": "Webflow export + custom bundle (GSAP 3.13 SplitText / ScrambleTextPlugin / CustomEase, Lenis 1.3.4, OGL WebGL), jQuery-based Webflow runtime for the form, Umami analytics.",
+    "clone": "React 18 + Vite 5; original Webflow CSS ported to src/styles/webflow.css, global embed CSS in src/index.css; tailwind.config.js holds colour/font tokens but no Tailwind layers are emitted.",
+    "note": "Recorded for provenance only. No token name, section id, schema field or validator rule depends on the stack.",
+    "evidence": [
+      "mv.stack.original",
+      "mv.stack.clone"
+    ]
+  },
+  "vcs": {
+    "sourceProjectIsGitRepo": false,
+    "note": "The source project is not a git repository (checked 2026-10-23), so there is nothing to gitignore or commit yet. design-repo.zip (sibling of this folder) is a generated build artifact: regenerate it last with the CLI zip tool after verification, and if the project is ever put under git, add 'design-repo.zip' to the project-root .gitignore and confirm with 'git ls-files' that it is not tracked."
+  },
+  "counts": {
+    "tokens": 139,
+    "primitives": 10,
+    "components": 6,
+    "sections": 7,
+    "sectionVariants": 8,
+    "templates": 1,
+    "routes": 1,
+    "assetRoles": 13,
+    "pinnedAssetRoles": 11,
+    "motionPatterns": 18,
+    "compatibilityRules": 21,
+    "measuredValueEntries": 94
+  },
+  "knownSourceQuirks": [
+    "mv.structure.duplicate-cta-id",
+    "mv.structure.mt-xl-undefined",
+    "mv.structure.invalid-nth-child",
+    "mv.structure.discord-hidden",
+    "mv.structure.marquee-no-dom",
+    "mv.structure.data-delay-unused",
+    "mv.layering.z-words",
+    "mv.layering.z-tablet-reset",
+    "mv.motion.observer-replay",
+    "mv.motion.mobile-ua",
+    "mv.type.cta-tx-discrepancy"
+  ],
+  "qaStatus": {
+    "pixel": "matched at 1440x900 and 375x812 (mv.qa.pixel)",
+    "motion": "all patterns matched within tolerance, including anchor and wheel scroll after the 60fps re-measure (mv.qa.motion-match, mv.qa.anchor-scroll, mv.qa.wheel-scroll)",
+    "openDeltas": []
+  },
+  "entryPoints": [
+    "README.md",
+    "CHANGELOG.md",
+    "registry.manifest.json",
+    "requirements.txt",
+    "tokens/00-foundation/color.json",
+    "tokens/00-foundation/typography.json",
+    "tokens/00-foundation/radius.json",
+    "tokens/00-foundation/spacing.json",
+    "tokens/00-foundation/breakpoint.json",
+    "tokens/00-foundation/layering.json",
+    "tokens/00-foundation/icon-size.json",
+    "tokens/00-foundation/motion.json",
+    "tokens/10-semantic/semantic.json",
+    "tokens/20-component/component.json",
+    "tokens/30-layout/layout.json",
+    "tokens/themes/dark.json",
+    "tokens/llm/component-allowlist.json",
+    "tokens/llm/motion-patterns.json",
+    "assets/asset-roles.json",
+    "templates/templates.json",
+    "compatibility/graph.json",
+    "schema/pagespec.schema.json",
+    "schema/example.pagespec.json",
+    "schema/semantic_validate.py",
+    "schema/tests/adversarial_test.py",
+    "extraction/measured-values.json",
+    "extraction/verify_all.py",
+    "extraction/prove_drift.py"
+  ],
+  "entryPointDirectories": [
+    "primitives/",
+    "components/",
+    "sections/"
+  ]
+}

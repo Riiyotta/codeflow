@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+__pycache__/
+# generated from design-repo/ — rebuild with the CLI zip, never commit
+design-repo.zip

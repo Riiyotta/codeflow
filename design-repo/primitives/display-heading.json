@@ -1,0 +1,22 @@
+{
+  "id": "primitive.display-heading",
+  "kind": "primitive",
+  "description": "Condensed bold display text, split into lines of segments; a segment may sit behind the WebGL canvas.",
+  "props": {
+    "lines": "array of lines, each an array of {text, layer}",
+    "scale": "enum hero|list|block|wordmark"
+  },
+  "tokens": [
+    "typography.role.displayHero",
+    "typography.role.displayList",
+    "typography.role.displayBlock",
+    "typography.role.footerWordmark",
+    "layer.behindCanvas",
+    "layer.behindCanvasDeep"
+  ],
+  "assetRoles": [],
+  "evidence": [
+    "mv.type.display",
+    "mv.layering.z-words"
+  ]
+}

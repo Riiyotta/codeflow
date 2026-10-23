@@ -1,0 +1,16 @@
+{
+  "id": "component.price-note",
+  "kind": "component",
+  "description": "Two-line centred mono note under a CTA ('*LOCK PRICE AT 200$, / GUARANTEES ENTRY'); xs in the hero, default size in the pitch section.",
+  "uses": [
+    "primitive.mono-label"
+  ],
+  "tokens": [
+    "typography.role.monoXs",
+    "typography.role.monoLabel"
+  ],
+  "evidence": [
+    "mv.section.hero",
+    "mv.section.pitch"
+  ]
+}

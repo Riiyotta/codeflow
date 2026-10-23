@@ -1,0 +1,237 @@
+{
+  "$comment": "Closed list of what a generator may set. sections.*.variants.*.settableProperties must equal the schema node's properties for that (section, variant); verify_all.py enforces parity with the contract files and the schema.",
+  "allowlistVersion": "1.0.0",
+  "primitives": [
+    "primitive.body-text",
+    "primitive.button-pill",
+    "primitive.display-heading",
+    "primitive.icon-inline",
+    "primitive.input-underline",
+    "primitive.link-underline",
+    "primitive.logo-slot",
+    "primitive.marker-dot",
+    "primitive.mono-label",
+    "primitive.rule-line"
+  ],
+  "components": [
+    "component.counter-list",
+    "component.form-field",
+    "component.price-note",
+    "component.text-block",
+    "component.timeline-table",
+    "component.wordmark-stack"
+  ],
+  "sections": {
+    "content.block-pairs": {
+      "variants": {
+        "feature-pairs": {
+          "settableProperties": [
+            "anchorId",
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "rows"
+          ]
+        },
+        "pitch-timeline": {
+          "settableProperties": [
+            "anchorId",
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "cta",
+            "heading",
+            "kicker",
+            "priceNote",
+            "row",
+            "timeline"
+          ]
+        }
+      }
+    },
+    "form.waitlist": {
+      "variants": {
+        "default": {
+          "settableProperties": [
+            "anchorId",
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "action",
+            "body",
+            "error",
+            "fields",
+            "headingLines",
+            "perks",
+            "submit",
+            "success"
+          ]
+        }
+      }
+    },
+    "hero.course-intro": {
+      "variants": {
+        "default": {
+          "settableProperties": [
+            "anchorId",
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "cta",
+            "eyebrow",
+            "heading",
+            "priceNote",
+            "subheading"
+          ]
+        }
+      }
+    },
+    "layer.webgl-object": {
+      "variants": {
+        "default": {
+          "settableProperties": [
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "clearColorToken",
+            "colorMap",
+            "matcaps",
+            "model"
+          ]
+        }
+      }
+    },
+    "list.numbered-topics": {
+      "variants": {
+        "default": {
+          "settableProperties": [
+            "anchorId",
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "heading",
+            "items",
+            "summary"
+          ]
+        }
+      }
+    },
+    "shell.footer-wordmark": {
+      "variants": {
+        "default": {
+          "settableProperties": [
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "credit",
+            "logo",
+            "privacy",
+            "siteNav",
+            "social",
+            "wordmark"
+          ]
+        }
+      }
+    },
+    "shell.nav": {
+      "variants": {
+        "default": {
+          "settableProperties": [
+            "content",
+            "motion",
+            "section",
+            "variant"
+          ],
+          "contentFields": [
+            "communityLink",
+            "cta",
+            "intro",
+            "logo",
+            "versionTag"
+          ]
+        }
+      }
+    }
+  },
+  "pageProperties": [
+    "contentProvenance",
+    "fonts",
+    "meta",
+    "nodes",
+    "pageMotion",
+    "pageSpecVersion",
+    "route",
+    "template",
+    "theme"
+  ],
+  "assetRoles": [
+    "brand.logo-mark",
+    "endpoint.analytics",
+    "endpoint.form-action",
+    "font.commercial-sans",
+    "font.mono",
+    "icon.arrow",
+    "icon.discord",
+    "identity.author-link",
+    "meta.favicon",
+    "meta.og-image",
+    "webgl.cube-model",
+    "webgl.matcap",
+    "webgl.sticker-colormap"
+  ],
+  "motionPatterns": [
+    "alpha-fade",
+    "anchor-scroll",
+    "cta-hover",
+    "link-hover-opacity",
+    "page-fade-in",
+    "scale-dot",
+    "scale-line",
+    "scramble-text",
+    "smooth-scroll-wheel",
+    "text-reveal-char-drop",
+    "text-reveal-word",
+    "webgl-click-bump",
+    "webgl-cta-hover-darken",
+    "webgl-drop-in",
+    "webgl-idle-tumble",
+    "webgl-pointer-inertia",
+    "webgl-scroll-coupling",
+    "webgl-solve"
+  ],
+  "reducedMotionFallbacks": [
+    "final-state-instant",
+    "no-fade-native-scroll",
+    "static-single-frame"
+  ],
+  "templates": [
+    "template.waitlist-landing"
+  ],
+  "notOverridable": [
+    "tokens (no per-instance token/style override field exists in the PageSpec)",
+    "anchorId (const per variant)",
+    "cta.href (const '#signup')",
+    "layer z-index values"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "primitive.input-underline",
+  "kind": "primitive",
+  "description": "Transparent text input with no bottom border; the visible underline is a rule-line sibling.",
+  "props": {
+    "label": "string",
+    "placeholder": "string",
+    "type": "enum text|email",
+    "required": "boolean"
+  },
+  "tokens": [
+    "component.input.underline",
+    "typography.role.input",
+    "typography.role.formLabel",
+    "semantic.text.placeholder"
+  ],
+  "assetRoles": [],
+  "evidence": [
+    "mv.form.input",
+    "mv.form.underline"
+  ]
+}

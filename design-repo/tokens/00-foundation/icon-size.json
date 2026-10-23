@@ -1,0 +1,16 @@
+{
+  "iconSize": {
+    "logo": {
+      "value": "2.5rem",
+      "evidence": "mv.icon.sizes"
+    },
+    "arrow": {
+      "value": ".8em",
+      "evidence": "mv.icon.sizes"
+    },
+    "discord": {
+      "value": "1rem",
+      "evidence": "mv.icon.sizes"
+    }
+  }
+}

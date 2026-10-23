@@ -1,0 +1,21 @@
+{
+  "$comment": "The only theme. The site has no light mode.",
+  "theme": "dark",
+  "resolves": {
+    "surface.page": "#0c0c0c",
+    "surface.webglClear": "#0f0f0f",
+    "surface.buttonHover": "#f5d0e6",
+    "surface.solveFlash": [
+      "#b71234",
+      "#0046ad"
+    ],
+    "text.primary": "#f5d0e6",
+    "text.onButtonHover": "#0c0c0c",
+    "text.placeholder": "#999",
+    "text.submit": "#fff",
+    "border.default": "#f5d0e6",
+    "line.rule": "#f5d0e6",
+    "marker.dot": "#f5d0e6",
+    "border.inputFocus": "#707070"
+  }
+}

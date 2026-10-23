@@ -1,0 +1,90 @@
+{
+  "id": "hero.course-intro",
+  "kind": "section",
+  "category": "hero",
+  "description": "Centred hero (min-height 90vh): scrambled eyebrow, 3-line condensed display heading whose last word renders behind the WebGL object, mono sub-lines, pill CTA to #signup and an xs price note.",
+  "variants": {
+    "default": {
+      "anchorId": "intro",
+      "contentFields": [
+        "eyebrow",
+        "heading",
+        "subheading",
+        "cta",
+        "priceNote"
+      ],
+      "maxWords": {
+        "eyebrow": 8,
+        "heading.lines[][].text": 5,
+        "subheading.regular": 5,
+        "subheading.bold": 4,
+        "cta.label": 5,
+        "priceNote.line1": 6,
+        "priceNote.line2": 4
+      },
+      "realWordCounts": {
+        "eyebrow": 5,
+        "heading.lines[][].text": 3,
+        "subheading.regular": 3,
+        "subheading.bold": 2,
+        "cta.label": 3,
+        "priceNote.line1": 4,
+        "priceNote.line2": 2
+      },
+      "motion": {
+        "allowedPatterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade",
+          "cta-hover"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "onePerPage": true,
+    "mustFollowNav": true
+  },
+  "responsive": {
+    "base": {
+      "heading": "9vw, nowrap",
+      "evidence": "mv.type.display"
+    },
+    "max991": {
+      "heading": "11vw",
+      "behindCanvasWords": "static, z-index 0 (paint in front of the object)",
+      "evidence": "mv.layering.z-tablet-reset"
+    },
+    "max767": {
+      "heading": "11vw, wraps (white-space normal)",
+      "ctaGap": "2em",
+      "evidence": "mv.responsive.hero"
+    },
+    "max479": {
+      "heading": "3.9rem, break-spaces",
+      "ctaGap": "1rem",
+      "monoSub": "1em (inherits 17px)",
+      "evidence": "mv.type.display"
+    }
+  },
+  "uses": {
+    "primitives": [
+      "primitive.mono-label",
+      "primitive.display-heading",
+      "primitive.button-pill"
+    ],
+    "components": [
+      "component.price-note"
+    ]
+  },
+  "knownQuirks": [
+    "data-delay=\"1\" on the sub-lines is not read by the motion code; there is no delay field in this contract (mv.structure.data-delay-unused)."
+  ],
+  "evidence": [
+    "mv.section.hero",
+    "mv.structure.data-delay-unused"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy"
+}

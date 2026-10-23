@@ -1,0 +1,41 @@
+@import './styles/webflow.css';
+
+/* No @tailwind directives: nothing in the markup uses utilities, and `@tailwind base` injected
+   preflight (html line-height:1.5, border-style:solid, heading/p resets) whenever the config
+   was not picked up, which shifted every text box. Webflow's normalize is the only base layer. */
+
+/* Head CSS from the original */
+[data-start='hidden'] { visibility: hidden; }
+[data-viz='hidden'] { visibility: hidden; }
+[data-pointer='none'] { pointer-events: none; }
+
+/* Global embed CSS from the original (.style----global) */
+.FULLPAGEWRAPPER, body, html { overscroll-behavior: none; }
+body, h1, h2, h3, h4, html, p { user-select: none; -webkit-user-select: none; }
+[data-selectable] { user-select: text; -webkit-user-select: text; }
+[data-z='u'] { position: relative; z-index: -11; }
+[data-counter] { counter-reset: itemcounter; }
+[data-counter] li { position: relative; counter-increment: itemcounter; }
+@media (min-width: 991px) {
+  /* the original's other two offset rules are invalid selectors and never apply */
+  [data-counter] li:nth-child(2n) { transform: translateX(10%); }
+  [data-counter] li::before {
+    content: '0' counter(itemcounter, decimal-leading-zero) ' ';
+    position: absolute;
+    left: -4em;
+    font-size: 0.6em;
+    font-family: firacode;
+    font-weight: lighter;
+  }
+  [data-counter] li:nth-child(2n)::before { left: calc(100% + 4em); }
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+.scroller-item { animation-name: marquee; animation-duration: 30s; animation-iteration-count: infinite; }
+[data-a='char'] div, [data-a='line'] div, [data-a='word'] div { overflow: hidden; box-sizing: border-box; }
+[data-a='char'] div div, [data-a='line'] div div, [data-a='word'] div div { box-sizing: border-box; }
+@media (max-width: 991px) { [data-hide='tablet'] { display: none; } }
+@media (max-width: 767px) { [data-hide='mobile'] { display: none; } }
+input + .line { transform: scaleX(0.5); }

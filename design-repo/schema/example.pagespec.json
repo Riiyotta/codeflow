@@ -1,0 +1,570 @@
+{
+  "pageSpecVersion": "1.0.0",
+  "template": "template.waitlist-landing",
+  "route": "/",
+  "theme": "dark",
+  "contentProvenance": "evidence-reference",
+  "meta": {
+    "title": "Join Waitlist — thecodeflow.co",
+    "description": "Level up your Webflow game by learning Javascript. Tailored to no-code and Webflow developers specifically, with 10+ hours of content, from zero experience to having no limits on what you can build.",
+    "ogImage": {
+      "assetRole": "meta.og-image",
+      "source": "placeholder",
+      "ref": "placeholder:og-image"
+    },
+    "favicon": {
+      "assetRole": "meta.favicon",
+      "source": "placeholder",
+      "ref": "placeholder:favicon"
+    },
+    "analytics": {
+      "assetRole": "endpoint.analytics",
+      "source": "placeholder",
+      "ref": "placeholder:analytics"
+    }
+  },
+  "fonts": {
+    "sans": {
+      "assetRole": "font.commercial-sans",
+      "source": "fallback-stack"
+    },
+    "mono": {
+      "assetRole": "font.mono",
+      "source": "fallback-stack"
+    }
+  },
+  "pageMotion": {
+    "patterns": [
+      "page-fade-in",
+      "smooth-scroll-wheel",
+      "anchor-scroll"
+    ],
+    "reducedMotionFallback": "no-fade-native-scroll"
+  },
+  "nodes": [
+    {
+      "section": "shell.nav",
+      "variant": "default",
+      "content": {
+        "intro": "A practical **Javascript** course to **level up** no-code developers**.** From the basics to doing anything you can imagine, through **animations,** custom libraries, dev environment, a proper setup and all that fun stuffs.",
+        "versionTag": "(ver 0.2)",
+        "cta": {
+          "label": "Join Waitlist",
+          "href": "#signup"
+        },
+        "communityLink": {
+          "icon": {
+            "assetRole": "icon.discord",
+            "source": "placeholder",
+            "ref": "placeholder:community-icon"
+          },
+          "hidden": true
+        },
+        "logo": {
+          "assetRole": "brand.logo-mark",
+          "source": "placeholder",
+          "ref": "placeholder:logo"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "cta-hover"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "hero.course-intro",
+      "variant": "default",
+      "anchorId": "intro",
+      "content": {
+        "eyebrow": "A 8+ HOURS VIDEO COURSE",
+        "heading": {
+          "lines": [
+            [
+              {
+                "text": "WEBFLOW BUILDS",
+                "layer": "front"
+              }
+            ],
+            [
+              {
+                "text": "WITH NO WEBFLOW",
+                "layer": "front"
+              }
+            ],
+            [
+              {
+                "text": "LIMITS",
+                "layer": "behind-canvas"
+              }
+            ]
+          ]
+        },
+        "subheading": {
+          "regular": "JAVASCRIPT COURSE FOR",
+          "bold": "WEBFLOW DEVELOPERS"
+        },
+        "cta": {
+          "label": "Reserve your Spot",
+          "href": "#signup"
+        },
+        "priceNote": {
+          "line1": "*LOCK PRICE AT **200$,**",
+          "line2": "**GUARANTEES** ENTRY"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade",
+          "cta-hover"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "list.numbered-topics",
+      "variant": "default",
+      "anchorId": "content",
+      "content": {
+        "heading": "COURSE CONTENT",
+        "items": [
+          {
+            "text": "API AND DATA",
+            "layer": "front"
+          },
+          {
+            "text": "DOM",
+            "layer": "front"
+          },
+          {
+            "text": "MANIPULATIONS",
+            "layer": "behind-canvas"
+          },
+          {
+            "text": "GSAP",
+            "layer": "front"
+          },
+          {
+            "text": "ANIMATIONS",
+            "layer": "front"
+          },
+          {
+            "text": "SMOOTH SCROLL",
+            "layer": "front"
+          },
+          {
+            "text": "PAGE TRANSITIONS",
+            "layer": "front"
+          },
+          {
+            "text": "ADVANCED JS",
+            "layer": "front"
+          },
+          {
+            "text": "RIVE & LOTTIE",
+            "layer": "front"
+          },
+          {
+            "text": "LIBRARIES",
+            "layer": "front"
+          },
+          {
+            "text": "DEV SETUP",
+            "layer": "front"
+          },
+          {
+            "text": "COMPILERS",
+            "layer": "behind-canvas"
+          },
+          {
+            "text": "WORKFLOWS",
+            "layer": "front"
+          },
+          {
+            "text": "THE BOILERPLATE™",
+            "layer": "front"
+          },
+          {
+            "text": "OPTIMISATION",
+            "layer": "front"
+          },
+          {
+            "text": "BACKEND",
+            "layer": "front"
+          },
+          {
+            "text": "WEBFLOW API",
+            "layer": "front"
+          },
+          {
+            "text": "CI/CD",
+            "layer": "front"
+          },
+          {
+            "text": "VIBE CODING",
+            "layer": "front"
+          },
+          {
+            "text": "PERFORMANCE",
+            "layer": "behind-canvas"
+          }
+        ],
+        "summary": "**8+ hours** of In depth **video MATERIAL,** beginners to advanced, and advanced to masters with **custom code in webflow**"
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "content.block-pairs",
+      "variant": "feature-pairs",
+      "anchorId": "cta",
+      "content": {
+        "rows": [
+          {
+            "left": {
+              "label": "CONTENT",
+              "headingLines": [
+                "10+ HOURS",
+                "OF VIDEO"
+              ],
+              "body": "Split into **skill-based modules,** you'll learn different __workflows__ that are effective and applicable, even if you haven't completed the entire course.",
+              "monoNote": [
+                "• 4 sections",
+                "• 2 FULL LIVE BUILDS",
+                "• COMMUNITY SUPPORT",
+                "• LEARN TOGETHER",
+                "• LIVE SESSION MONTHLY"
+              ]
+            },
+            "right": {
+              "label": "SKILLS",
+              "headingLines": [
+                "BEGINNER TO",
+                "ADVANCED"
+              ],
+              "body": "**And Advanced to master.** Tailored to accommodate learners at any stage of their journey, ensuring __you can start from your current skill__ level and gain practical, actionable knowledge at every step.",
+              "monoNote": [
+                "> JOIN AT ANY POINT",
+                "< END AT ANY PoNT"
+              ]
+            }
+          },
+          {
+            "left": {
+              "label": "FEATURES (1/2)",
+              "headingLines": [
+                "DISCORD",
+                "COMMUNITY"
+              ],
+              "body": "**Learn with others** following the same path, get help and share progress. Plus challenges, and __a network of other freelancers__ with the same skillset as you."
+            },
+            "right": {
+              "label": "FEATURES (2/2)",
+              "headingLines": [
+                "REAL LIFE",
+                "LIVE BUILDS"
+              ],
+              "body": "**Featuring a full real-life website build:** dive into building and deconstructing fully functional websites with the newly acquired skills."
+            }
+          }
+        ]
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "content.block-pairs",
+      "variant": "pitch-timeline",
+      "anchorId": "cta",
+      "content": {
+        "kicker": "Solve Webflow with code",
+        "heading": {
+          "lines": [
+            [
+              {
+                "text": "FIND",
+                "layer": "front"
+              },
+              {
+                "text": "THE",
+                "layer": "behind-canvas"
+              }
+            ],
+            [
+              {
+                "text": "MISSING PIECE",
+                "layer": "front"
+              }
+            ]
+          ]
+        },
+        "cta": {
+          "label": "Reserve your Spot",
+          "href": "#signup"
+        },
+        "priceNote": {
+          "line1": "*LOCK PRICE AT **200$,**",
+          "line2": "**GUARANTEES** ENTRY"
+        },
+        "row": {
+          "left": {
+            "label": "TIMELINE",
+            "headingLines": [
+              "LIVE SEPT",
+              "2025"
+            ],
+            "body": "**Recording is starting for the first module.** The course goes live progressively, with additional sections after initial launch.",
+            "monoNote": [
+              "• SECTION 1 EST Q1 2025",
+              "• COMMUNITY LIVE",
+              "• First live session"
+            ]
+          },
+          "right": {
+            "label": "PRICE",
+            "headingLines": [
+              "LOCK PRICE",
+              "AT 200$*"
+            ],
+            "body": "**By joining the waitlist now.** You'll receive a discount before the course goes live, allowing you to signup early, __guaranteeing entry__ to the first cohort, and at a special discount.",
+            "monoNote": [
+              "* THEN 250? Maybe 300? Maybe more? not sure"
+            ]
+          }
+        },
+        "timeline": {
+          "cornerLabel": "PRICE",
+          "columns": [
+            {
+              "title": "WAITLIST AND EARLY ACCESS",
+              "date": "SEPT 2024"
+            },
+            {
+              "title": "FIRST MODULE LAUNCH",
+              "date": "SEPT 2025"
+            },
+            {
+              "title": "FULL COURSE LIVE",
+              "date": "~ +4M > ∞"
+            }
+          ],
+          "rows": [
+            {
+              "price": "200$",
+              "markerColumn": 1,
+              "bold": true
+            },
+            {
+              "price": "300+ $",
+              "markerColumn": 3,
+              "bold": false
+            }
+          ]
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade",
+          "cta-hover",
+          "scale-line",
+          "scale-dot"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "form.waitlist",
+      "variant": "default",
+      "anchorId": "signup",
+      "content": {
+        "headingLines": [
+          "JOIN THE",
+          "WAITLIST"
+        ],
+        "body": "**Lock launch price at 200$ and guarantee entry to first cohort.** I'll only send few updates on course completion, or probably just the launch one.",
+        "perks": [
+          "Early access at 50% discount (then 250$+)",
+          "Early access to Discord inner circle",
+          "Guaranteed entry to 1st cohort"
+        ],
+        "fields": {
+          "name": {
+            "label": "First Name *",
+            "placeholder": "Your Name"
+          },
+          "email": {
+            "label": "Email Address *",
+            "placeholder": "example@email.com"
+          }
+        },
+        "submit": {
+          "label": "Get In",
+          "waitLabel": "Almost there!"
+        },
+        "success": {
+          "heading": "YOU ARE IN.",
+          "subline": "Catch up soon!"
+        },
+        "error": "Something went wrong. Try again?",
+        "action": {
+          "assetRole": "endpoint.form-action",
+          "source": "placeholder",
+          "ref": "placeholder:waitlist-endpoint"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "text-reveal-word",
+          "alpha-fade",
+          "scale-line",
+          "scramble-text"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "shell.footer-wordmark",
+      "variant": "default",
+      "content": {
+        "social": {
+          "label": "TWEET @ ME",
+          "link": {
+            "assetRole": "identity.author-link",
+            "source": "placeholder",
+            "ref": "placeholder:social-profile"
+          }
+        },
+        "wordmark": [
+          {
+            "text": "THE",
+            "layer": "front"
+          },
+          {
+            "text": "CODE",
+            "layer": "behind-canvas-deep"
+          },
+          {
+            "text": "FLOW",
+            "layer": "behind-canvas"
+          },
+          {
+            "text": "CO",
+            "layer": "front"
+          }
+        ],
+        "siteNav": {
+          "label": "WEBSITE",
+          "links": [
+            {
+              "label": "INTRO",
+              "href": "#intro"
+            },
+            {
+              "label": "CONTENT",
+              "href": "#content"
+            },
+            {
+              "label": "CTA",
+              "href": "#cta"
+            },
+            {
+              "label": "SIGN UP",
+              "href": "#signup"
+            }
+          ]
+        },
+        "privacy": {
+          "label": "PRIVACY POLICY",
+          "link": {
+            "assetRole": "identity.author-link",
+            "source": "placeholder",
+            "ref": "placeholder:privacy-policy"
+          }
+        },
+        "credit": {
+          "years": "© 2024 — 2025",
+          "madeBy": "MADE BY",
+          "linkLabel": "HTTPS://FEDERIC.OOO",
+          "link": {
+            "assetRole": "identity.author-link",
+            "source": "placeholder",
+            "ref": "placeholder:author-site"
+          }
+        },
+        "logo": {
+          "assetRole": "brand.logo-mark",
+          "source": "placeholder",
+          "ref": "placeholder:logo"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-char-drop",
+          "alpha-fade",
+          "link-hover-opacity"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "layer.webgl-object",
+      "variant": "default",
+      "content": {
+        "model": {
+          "assetRole": "webgl.cube-model",
+          "source": "placeholder",
+          "ref": "placeholder:3d-object"
+        },
+        "matcaps": [
+          {
+            "assetRole": "webgl.matcap",
+            "source": "placeholder",
+            "ref": "placeholder:matcap-body"
+          },
+          {
+            "assetRole": "webgl.matcap",
+            "source": "placeholder",
+            "ref": "placeholder:matcap-stickers"
+          }
+        ],
+        "colorMap": {
+          "assetRole": "webgl.sticker-colormap",
+          "source": "placeholder",
+          "ref": "placeholder:color-map"
+        },
+        "clearColorToken": "color.webgl.clear"
+      },
+      "motion": {
+        "patterns": [
+          "webgl-drop-in",
+          "webgl-idle-tumble",
+          "webgl-scroll-coupling",
+          "webgl-pointer-inertia",
+          "webgl-click-bump",
+          "webgl-solve",
+          "webgl-cta-hover-darken"
+        ],
+        "reducedMotionFallback": "static-single-frame"
+      }
+    }
+  ]
+}

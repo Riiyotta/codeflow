@@ -1,0 +1,27 @@
+{
+  "$comment": "Elevation for this site is a z-index contract around the fixed WebGL canvas.",
+  "layer": {
+    "nav": {
+      "value": 20,
+      "evidence": "mv.layering.stack"
+    },
+    "canvas": {
+      "value": -10,
+      "evidence": "mv.layering.stack"
+    },
+    "behindCanvas": {
+      "value": -11,
+      "evidence": "mv.layering.z-words",
+      "responsive": {
+        "max991": "position static, z-index 0 (paints in front of the canvas)"
+      }
+    },
+    "behindCanvasDeep": {
+      "value": -21,
+      "evidence": "mv.layering.z-words",
+      "responsive": {
+        "max991": "position static, z-index 0"
+      }
+    }
+  }
+}

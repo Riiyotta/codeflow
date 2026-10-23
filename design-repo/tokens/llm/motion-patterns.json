@@ -1,0 +1,109 @@
+{
+  "$comment": "Closed motion vocabulary referenced by the schema enum and section contracts.",
+  "patterns": {
+    "page-fade-in": {
+      "description": "Page wrapper autoAlpha 0->1, 1s, delay .2s, power1.out.",
+      "evidence": "mv.motion.page-fade",
+      "scope": "page"
+    },
+    "smooth-scroll-wheel": {
+      "description": "Lenis wheel smoothing: duration 1.2, ease min(1,1.001-2^-10t), native touch. QA: matched (60fps re-measure).",
+      "evidence": "mv.qa.wheel-scroll",
+      "scope": "page"
+    },
+    "anchor-scroll": {
+      "description": "In-page anchor scroll with distance-based duration max(0,472.143*ln(d+125)-2000)ms and easeInOutCubic (Webflow-runtime behaviour). QA: matched within ~35ms (60fps re-measure).",
+      "evidence": "mv.qa.anchor-scroll",
+      "scope": "page"
+    },
+    "text-reveal-word": {
+      "description": "Lines masked, words rise from y 150% -> 0, 1.2s expo.out, delay .1s, stagger .05s; 50% visible trigger; instant reset on full exit; replays.",
+      "evidence": "mv.motion.text-reveal",
+      "scope": "section"
+    },
+    "text-reveal-char-drop": {
+      "description": "As text-reveal-word but per character from y -150% (drop from above).",
+      "evidence": "mv.motion.char-drop",
+      "scope": "section"
+    },
+    "alpha-fade": {
+      "description": "autoAlpha 0 -> 1, 1.2s expo.out, delay .1s; replays.",
+      "evidence": "mv.motion.alpha",
+      "scope": "section"
+    },
+    "scramble-text": {
+      "description": "alpha-fade plus scrambleText 0.6-0.9s with quadrant-block chars, revealDelay .3s; flattens inner markup.",
+      "evidence": "mv.motion.scramble",
+      "scope": "section"
+    },
+    "scale-line": {
+      "description": "Rule-line scaleX 0 -> 1, 1.2-1.4s expo.out, delay .1s, origin right center unless overridden (name underline: left center).",
+      "evidence": "mv.motion.scale",
+      "scope": "section"
+    },
+    "scale-dot": {
+      "description": "Dot scale 0 -> 1, 1.2-1.4s expo.out, delay .1s.",
+      "evidence": "mv.motion.scale",
+      "scope": "section"
+    },
+    "cta-hover": {
+      "description": "Pill CTA hover: fill text colour, text to page colour (color .2s, background .4s); also triggers webgl-cta-hover-darken on non-mobile UA.",
+      "evidence": "mv.motion.button-hover",
+      "scope": "section"
+    },
+    "link-hover-opacity": {
+      "description": "Footer nav links fade to opacity .5 over .2s on hover.",
+      "evidence": "mv.motion.link-hover",
+      "scope": "section"
+    },
+    "webgl-drop-in": {
+      "description": "Object drops from +3 units with back.out over 1.2s after assets load.",
+      "evidence": "mv.motion.cube-drop",
+      "scope": "webgl"
+    },
+    "webgl-idle-tumble": {
+      "description": "Continuous tumble plus a layer twist every 1680ms (0.8s each).",
+      "evidence": "mv.motion.cube-idle",
+      "scope": "webgl"
+    },
+    "webgl-scroll-coupling": {
+      "description": "Scroll progress lifts (0.45 units), grows (+0.05, not on mobile UA) and spins the object.",
+      "evidence": "mv.motion.cube-idle",
+      "scope": "webgl"
+    },
+    "webgl-pointer-inertia": {
+      "description": "Pointer movement adds decaying spin velocity (x0.97 per frame) and x offset (not on mobile UA).",
+      "evidence": "mv.section.canvas",
+      "scope": "webgl"
+    },
+    "webgl-click-bump": {
+      "description": "Click anywhere: push back and spring (1.6s custom bump ease).",
+      "evidence": "mv.motion.cube-click",
+      "scope": "webgl"
+    },
+    "webgl-solve": {
+      "description": "'!' key or form success: full sticker colours (1.8s elastic.out) and page-colour flash to #b71234|#0046ad then restore.",
+      "evidence": "mv.motion.cube-solve",
+      "scope": "webgl"
+    },
+    "webgl-cta-hover-darken": {
+      "description": "While a CTA is hovered (non-mobile UA): sticker half darkens to 10%, colour map +10%, scale +0.02 (expo.out 1.2s).",
+      "evidence": "mv.motion.button-hover",
+      "scope": "webgl"
+    }
+  },
+  "reducedMotionFallbacks": {
+    "final-state-instant": {
+      "description": "Render the final revealed state immediately: no transforms, no scramble, opacity 1. Hover colour swaps may remain (no motion).",
+      "evidence": "mv.motion.no-reduced-motion"
+    },
+    "static-single-frame": {
+      "description": "Render one static frame of the object at rest; no drop-in, tumble, twist, scroll/pointer coupling or flashes.",
+      "evidence": "mv.motion.no-reduced-motion"
+    },
+    "no-fade-native-scroll": {
+      "description": "Page visible immediately; native (unsmoothed) scrolling and instant anchor jumps.",
+      "evidence": "mv.motion.no-reduced-motion"
+    }
+  }
+}

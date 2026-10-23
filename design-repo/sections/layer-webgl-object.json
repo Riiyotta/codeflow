@@ -1,0 +1,67 @@
+{
+  "id": "layer.webgl-object",
+  "kind": "section",
+  "category": "layer",
+  "description": "Fixed, full-viewport, transparent WebGL canvas (z-index -10) placed AFTER the page wrapper. Content paints above it except behind-canvas words (z -11/-21), which paint below it at >991px. Renders one 3D object with matcap shading.",
+  "variants": {
+    "default": {
+      "anchorId": null,
+      "contentFields": [
+        "model",
+        "matcaps",
+        "colorMap",
+        "clearColorToken"
+      ],
+      "maxWords": {},
+      "realWordCounts": {},
+      "motion": {
+        "allowedPatterns": [
+          "webgl-drop-in",
+          "webgl-idle-tumble",
+          "webgl-scroll-coupling",
+          "webgl-pointer-inertia",
+          "webgl-click-bump",
+          "webgl-solve",
+          "webgl-cta-hover-darken"
+        ],
+        "reducedMotionFallback": "static-single-frame",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "onePerPage": true,
+    "mustBeLast": true
+  },
+  "responsive": {
+    "base": {
+      "canvas": "100vw x 100vh, DPR 2",
+      "evidence": "mv.layering.stack"
+    },
+    "max991": {
+      "behindCanvasWords": "no longer behind (static, z 0)",
+      "evidence": "mv.layering.z-tablet-reset"
+    },
+    "max767": {
+      "note": "no width-based change; mobile behaviour is user-agent based",
+      "evidence": "mv.motion.mobile-ua"
+    },
+    "max479": {
+      "note": "no width-based change",
+      "evidence": "mv.motion.mobile-ua"
+    }
+  },
+  "uses": {
+    "primitives": [],
+    "components": []
+  },
+  "knownQuirks": [
+    "Mobile detection is by user agent, not width: mobile UA disables CTA-hover coupling, pointer offset and scroll scale (mv.motion.mobile-ua).",
+    "Layering contract: .pw/.w must not create a stacking context or behind-canvas words would stop rendering behind the object."
+  ],
+  "evidence": [
+    "mv.section.canvas",
+    "mv.layering.stack"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy"
+}

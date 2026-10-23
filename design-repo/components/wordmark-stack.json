@@ -1,0 +1,18 @@
+{
+  "id": "component.wordmark-stack",
+  "kind": "component",
+  "description": "Giant condensed words laid out in footer rows, chars dropping in from above; some words sit behind the canvas.",
+  "uses": [
+    "primitive.display-heading"
+  ],
+  "tokens": [
+    "typography.role.footerWordmark",
+    "layer.behindCanvas",
+    "layer.behindCanvasDeep",
+    "motion.offset.charFrom"
+  ],
+  "evidence": [
+    "mv.section.footer",
+    "mv.motion.char-drop"
+  ]
+}

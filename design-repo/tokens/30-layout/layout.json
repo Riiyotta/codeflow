@@ -1,0 +1,63 @@
+{
+  "layout": {
+    "container.width": {
+      "value": {
+        "base": "80%",
+        "max991": "90%"
+      },
+      "evidence": "mv.spacing.container"
+    },
+    "textBlock.width": {
+      "value": {
+        "base": "45%",
+        "max991": "70%",
+        "max767": "90%"
+      },
+      "evidence": "mv.layout.primitives"
+    },
+    "half.width": {
+      "value": {
+        "base": "50%",
+        "max991": "70%",
+        "max767": "100%"
+      },
+      "evidence": "mv.responsive.signup"
+    },
+    "half.height": {
+      "value": {
+        "base": "26vw",
+        "max991": "auto"
+      },
+      "evidence": "mv.responsive.signup"
+    },
+    "timeline.firstColumn": {
+      "value": "10%",
+      "evidence": "mv.layout.primitives"
+    },
+    "timeline.column": {
+      "value": "30%",
+      "evidence": "mv.layout.primitives"
+    },
+    "nav.columns": {
+      "value": {
+        "base": "40% / 20% / 40%",
+        "max991": "50% / hidden / flex:1"
+      },
+      "evidence": "mv.responsive.nav"
+    },
+    "list.evenOffset": {
+      "value": {
+        "min991": "translateX(10%) on even items only",
+        "below991": "none"
+      },
+      "evidence": "mv.structure.invalid-nth-child"
+    },
+    "summary.width": {
+      "value": {
+        "base": "60ch",
+        "max479": "max-width 90%"
+      },
+      "evidence": "mv.section.content"
+    }
+  }
+}

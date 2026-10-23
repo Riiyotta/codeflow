@@ -1,0 +1,18 @@
+{
+  "id": "primitive.logo-slot",
+  "kind": "primitive",
+  "description": "2.5rem-wide logo slot. The original logo must never be reused or imitated.",
+  "props": {
+    "logo": "assetRef(brand.logo-mark), source must be placeholder"
+  },
+  "tokens": [
+    "iconSize.logo"
+  ],
+  "assetRoles": [
+    "brand.logo-mark"
+  ],
+  "evidence": [
+    "mv.asset.logo",
+    "mv.icon.sizes"
+  ]
+}

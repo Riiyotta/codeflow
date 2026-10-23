@@ -1,0 +1,78 @@
+{
+  "$comment": "One template per distinct page shape. The real site has exactly one route and one shape. Every node is required and non-repeatable because that is the only composition observed; optionality is NOT evidenced and must not be invented.",
+  "templatesVersion": "1.0.0",
+  "templates": {
+    "template.waitlist-landing": {
+      "description": "Single-page waitlist landing: nav, hero, numbered topic list, feature block pairs, pitch + timeline block pairs, waitlist form, wordmark footer, fixed WebGL object layer.",
+      "nodes": [
+        {
+          "section": "shell.nav",
+          "variant": "default",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "hero.course-intro",
+          "variant": "default",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "list.numbered-topics",
+          "variant": "default",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "content.block-pairs",
+          "variant": "feature-pairs",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "content.block-pairs",
+          "variant": "pitch-timeline",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "form.waitlist",
+          "variant": "default",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "shell.footer-wordmark",
+          "variant": "default",
+          "required": true,
+          "repeatable": false
+        },
+        {
+          "section": "layer.webgl-object",
+          "variant": "default",
+          "required": true,
+          "repeatable": false
+        }
+      ],
+      "pageMaxWords": {
+        "meta.title": 6,
+        "meta.description": 48
+      },
+      "pageRealWordCounts": {
+        "meta.title": 4,
+        "meta.description": 32
+      },
+      "evidence": [
+        "mv.structure.section-order",
+        "mv.qa.pixel"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "path": "/",
+      "template": "template.waitlist-landing",
+      "evidence": "mv.structure.routes-single"
+    }
+  ]
+}

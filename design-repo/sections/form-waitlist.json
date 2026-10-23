@@ -1,0 +1,109 @@
+{
+  "id": "form.waitlist",
+  "kind": "section",
+  "category": "form",
+  "description": "Waitlist signup: left half heading/body/perk list, right half name + email form with scaling underlines, a locked submit that unlocks when the name is valid, success (triggers webgl-solve) and failure states.",
+  "variants": {
+    "default": {
+      "anchorId": "signup",
+      "contentFields": [
+        "headingLines",
+        "body",
+        "perks",
+        "fields",
+        "submit",
+        "success",
+        "error",
+        "action"
+      ],
+      "maxWords": {
+        "headingLines[]": 4,
+        "body": 38,
+        "perks[]": 11,
+        "fields.name.label": 5,
+        "fields.name.placeholder": 4,
+        "fields.email.label": 5,
+        "fields.email.placeholder": 3,
+        "submit.label": 4,
+        "submit.waitLabel": 4,
+        "success.heading": 5,
+        "success.subline": 5,
+        "error": 8
+      },
+      "realWordCounts": {
+        "headingLines[]": 2,
+        "body": 25,
+        "perks[]": 7,
+        "fields.name.label": 3,
+        "fields.name.placeholder": 2,
+        "fields.email.label": 3,
+        "fields.email.placeholder": 1,
+        "submit.label": 2,
+        "submit.waitLabel": 2,
+        "success.heading": 3,
+        "success.subline": 3,
+        "error": 5
+      },
+      "motion": {
+        "allowedPatterns": [
+          "text-reveal-word",
+          "alpha-fade",
+          "scale-line",
+          "scramble-text"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "onePerPage": true,
+    "mustPrecedeFooter": true
+  },
+  "responsive": {
+    "base": {
+      "halves": "50% x 26vw each",
+      "evidence": "mv.responsive.signup"
+    },
+    "max991": {
+      "halves": "stack; 70% wide, auto height, margin-bottom 1rem",
+      "evidence": "mv.responsive.signup"
+    },
+    "max767": {
+      "halves": "100% wide",
+      "evidence": "mv.responsive.signup"
+    },
+    "max479": {
+      "perks": ".6rem",
+      "evidence": "mv.type.roles"
+    }
+  },
+  "uses": {
+    "primitives": [
+      "primitive.display-heading",
+      "primitive.body-text",
+      "primitive.mono-label",
+      "primitive.button-pill"
+    ],
+    "components": [
+      "component.form-field"
+    ]
+  },
+  "knownQuirks": [
+    "Original posts to a live MailChimp list; the clone has no action and fakes success. Never emit the real endpoint (mv.endpoint.mailchimp)."
+  ],
+  "evidence": [
+    "mv.section.signup",
+    "mv.form.lock",
+    "mv.form.success",
+    "mv.endpoint.clone-has-no-action"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy",
+  "behaviour": {
+    "submitLock": "locked (opacity .3, not-allowed) until every non-email input is valid; email validity is not JS-checked (native required/type=email still applies)",
+    "wait": "submit label swaps to submit.waitLabel while pending",
+    "success": "hide form, show success block (scrambles in), run webgl-solve",
+    "failure": "show error line",
+    "endpoint": "action is an assetRef with role endpoint.form-action; only source 'placeholder' is valid"
+  }
+}

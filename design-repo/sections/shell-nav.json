@@ -1,0 +1,84 @@
+{
+  "id": "shell.nav",
+  "kind": "section",
+  "category": "shell",
+  "description": "Fixed top bar (z-index 20): intro paragraph, centred version tag, right cluster with an always-hidden community icon link, a small pill CTA to #signup and the logo slot.",
+  "variants": {
+    "default": {
+      "anchorId": null,
+      "contentFields": [
+        "intro",
+        "versionTag",
+        "cta",
+        "communityLink",
+        "logo"
+      ],
+      "maxWords": {
+        "intro": 48,
+        "versionTag": 4,
+        "cta.label": 4
+      },
+      "realWordCounts": {
+        "intro": 32,
+        "versionTag": 2,
+        "cta.label": 2
+      },
+      "motion": {
+        "allowedPatterns": [
+          "scramble-text",
+          "cta-hover"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "onePerPage": true,
+    "mustBeFirst": true
+  },
+  "responsive": {
+    "base": {
+      "layout": "row, space-around; columns 40% / 20% / 40%; transparent background",
+      "evidence": "mv.section.nav"
+    },
+    "max991": {
+      "intro": "width 50%",
+      "versionTag": "hidden",
+      "cluster": "flex:1",
+      "evidence": "mv.responsive.nav"
+    },
+    "max767": {
+      "intro": "hidden",
+      "background": "surface.page (solid)",
+      "cluster": "row-reverse, space-between (logo left, CTA right)",
+      "marginTop": "0",
+      "evidence": "mv.responsive.nav"
+    },
+    "max479": {
+      "nav": "full width, space-between, no horizontal padding",
+      "cluster": "flex none, width 100%, padding 0 1.4rem",
+      "cta": "no horizontal margin",
+      "evidence": "mv.responsive.nav"
+    }
+  },
+  "uses": {
+    "primitives": [
+      "primitive.body-text",
+      "primitive.mono-label",
+      "primitive.button-pill",
+      "primitive.icon-inline",
+      "primitive.logo-slot"
+    ],
+    "components": []
+  },
+  "knownQuirks": [
+    "Community (Discord) link is present in the DOM but display:none at every width; contract keeps it with hidden:true (mv.structure.discord-hidden).",
+    "Source attribute is misspelled 'arial-label' on that link (documented, not reproduced as a field)."
+  ],
+  "evidence": [
+    "mv.section.nav",
+    "mv.structure.discord-hidden"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy"
+}

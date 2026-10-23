@@ -1,0 +1,18 @@
+{
+  "id": "primitive.rule-line",
+  "kind": "primitive",
+  "description": "1px full-width rule pinned to the bottom of its row/field; scales in on X.",
+  "props": {
+    "origin": "enum right-center (default) | left-center"
+  },
+  "tokens": [
+    "component.rule.line",
+    "semantic.line.rule",
+    "motion.transformOrigin"
+  ],
+  "assetRoles": [],
+  "evidence": [
+    "mv.form.underline",
+    "mv.motion.scale"
+  ]
+}

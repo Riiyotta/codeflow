@@ -1,0 +1,138 @@
+{
+  "$comment": "Closed asset-role vocabulary. Every media / link / endpoint / font reference in a PageSpec is an assetRef {assetRole, source, ref?} whose assetRole must be a key here, whose source must be allowed by the role's generationPolicy, and whose ref must not contain any denylisted real-asset string. The source site is a real, live site by a real named author: its logo, 3D model, textures, meta images, author identity links and live endpoints must never be reused or imitated in generated output. Roles marked pinned:true are additionally checked against a hard-coded expected policy in schema/semantic_validate.py (PINNED_POLICIES), so a mutation to a different-but-valid policy is caught.",
+  "rolesVersion": "1.0.0",
+  "generationPolicies": {
+    "may-generate-new": {
+      "meaning": "A generator may create a new, original asset for this role.",
+      "allowedSources": ["generated", "placeholder"]
+    },
+    "must-not-reproduce": {
+      "meaning": "Real brand / real person / proprietary asset. Never reuse the original file or URL and never fabricate a look-alike. Use a clearly labelled neutral placeholder; the deployer supplies their own asset.",
+      "allowedSources": ["placeholder"]
+    },
+    "must-not-reuse-live-endpoint": {
+      "meaning": "A live third-party endpoint or tracking id. Never emit the real URL or id; emit a placeholder the deployer wires to their own backend.",
+      "allowedSources": ["placeholder"]
+    },
+    "license-required": {
+      "meaning": "Commercial or unverified-licence typeface. Do not ship or embed the font files; reference the fallback stack, or a font the deployer has licensed.",
+      "allowedSources": ["fallback-stack", "licensed-by-deployer"]
+    }
+  },
+  "sources": {
+    "placeholder": "Neutral stand-in; ref, if given, must start with 'placeholder:'.",
+    "generated": "New original asset produced for the page; ref, if given, must start with 'generated:'.",
+    "fallback-stack": "Use the token fallback stack (Arial, sans-serif); no ref.",
+    "licensed-by-deployer": "A font the deployer licenses themselves; ref must start with 'licensed:'."
+  },
+  "roles": {
+    "brand.logo-mark": {
+      "description": "The 'THE CODE FLOW. CO' logo SVG (nav right cluster, footer legal block).",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["shell.nav", "shell.footer-wordmark"],
+      "evidence": "mv.asset.logo"
+    },
+    "icon.arrow": {
+      "description": "Small arrow glyph inside every pill CTA (14x14 viewBox, currentColor).",
+      "generationPolicy": "may-generate-new",
+      "pinned": false,
+      "usedBy": ["primitive.button-pill"],
+      "evidence": "mv.asset.arrow"
+    },
+    "icon.discord": {
+      "description": "Discord glyph in the always-hidden community link. Third-party trademark.",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["shell.nav"],
+      "evidence": "mv.asset.discord"
+    },
+    "webgl.cube-model": {
+      "description": "The Rubik's-cube GLB (3 layer meshes) rendered by the fixed WebGL layer.",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["layer.webgl-object"],
+      "evidence": "mv.asset.cube-model"
+    },
+    "webgl.matcap": {
+      "description": "The two matcap textures (body plastic / stickers) of the cube shader.",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["layer.webgl-object"],
+      "evidence": "mv.asset.cube-textures"
+    },
+    "webgl.sticker-colormap": {
+      "description": "The sticker colour map revealed on CTA hover (+10%) and on solve.",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["layer.webgl-object"],
+      "evidence": "mv.asset.cube-textures"
+    },
+    "meta.og-image": {
+      "description": "Open Graph / Twitter card image (1200x630).",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["page.meta"],
+      "evidence": "mv.asset.meta-images"
+    },
+    "meta.favicon": {
+      "description": "Favicon (32x32) and apple-touch webclip (256x256).",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["page.meta"],
+      "evidence": "mv.asset.meta-images"
+    },
+    "identity.author-link": {
+      "description": "Links that identify the real author: personal site, Twitter redirect, privacy-policy Google Doc.",
+      "generationPolicy": "must-not-reproduce",
+      "pinned": true,
+      "usedBy": ["shell.footer-wordmark"],
+      "evidence": "mv.identity.author-links"
+    },
+    "endpoint.form-action": {
+      "description": "Waitlist form submit target. The original posts to a live MailChimp list.",
+      "generationPolicy": "must-not-reuse-live-endpoint",
+      "pinned": true,
+      "usedBy": ["form.waitlist"],
+      "evidence": "mv.endpoint.mailchimp"
+    },
+    "endpoint.analytics": {
+      "description": "Page analytics script / website id. The original loads Umami with a real website id.",
+      "generationPolicy": "must-not-reuse-live-endpoint",
+      "pinned": true,
+      "usedBy": ["page.meta"],
+      "evidence": "mv.endpoint.umami"
+    },
+    "font.commercial-sans": {
+      "description": "Helvetica Neue (400/700) and Helvetica Neue Condensed (700). Commercial typefaces.",
+      "generationPolicy": "license-required",
+      "pinned": true,
+      "usedBy": ["page.fonts"],
+      "evidence": "mv.font.licensing"
+    },
+    "font.mono": {
+      "description": "Firacode (400/700). No licence file present in the source project.",
+      "generationPolicy": "license-required",
+      "pinned": false,
+      "usedBy": ["page.fonts"],
+      "evidence": "mv.font.licensing"
+    }
+  },
+  "refDenylist": {
+    "$comment": "Case-insensitive substrings that must never appear in any assetRef.ref (any provenance). Real file names, hosts and ids from the original.",
+    "terms": [
+      "list-manage.com", "ooo.us21", "194504e1038ca7c499546ef86", "f8575c61aa",
+      "cloud.umami.is", "13ed4638-a8ba-4623-9987-1f6112450739",
+      "federic.ooo", "docs.google.com/document/d/1tzCCJaDVQFgwG0ai2A-VjvCNXtm4i-UmXPj6v0ZfiYQ",
+      "uploads-ssl.webflow.com", "cdn.prod.website-files.com", "thecodeflow",
+      "cube8.glb", "mtc16.webp", "mtc3.webp", "col_map.webp",
+      "og_img.jpg", "favicon.png", "webclip.png", "logo.svg", "discord.svg",
+      "HelveticaNeue", "FiraCode-"
+    ]
+  },
+  "brandTextDenylist": {
+    "$comment": "Applied to ALL text of a PageSpec whose contentProvenance is 'generated' (case-insensitive; spaces and punctuation collapsed before matching). Real copy may appear only in an 'evidence-reference' PageSpec (the bundled example), which must never be published as the real brand.",
+    "terms": ["thecodeflow", "the code flow", "codeflow", "federic.ooo", "federic ooo", "Federico Valla"],
+    "evidence": ["mv.asset.logo", "mv.identity.author-links", "mv.identity.author-name"]
+  }
+}

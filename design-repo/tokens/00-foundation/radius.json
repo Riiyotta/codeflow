@@ -1,0 +1,12 @@
+{
+  "radius": {
+    "pill": {
+      "value": "3em",
+      "evidence": "mv.radius.pill"
+    },
+    "circle": {
+      "value": "50%",
+      "evidence": "mv.radius.dot"
+    }
+  }
+}

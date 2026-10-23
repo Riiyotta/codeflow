@@ -1,0 +1,120 @@
+{
+  "$comment": "Real spacing values only. vh/vw units are intentional (the site scales with viewport).",
+  "spacing": {
+    "section": {
+      "padding": {
+        "value": "10vh 3vw 5vh",
+        "evidence": "mv.spacing.section",
+        "responsive": {
+          "max767": {
+            "paddingTop": "5vh"
+          }
+        }
+      },
+      "minHeight": {
+        "value": "50vh",
+        "evidence": "mv.spacing.section"
+      }
+    },
+    "hero": {
+      "paddingTop": {
+        "value": "5vh",
+        "evidence": "mv.spacing.section"
+      },
+      "paddingBottom": {
+        "value": "1vh",
+        "evidence": "mv.spacing.section"
+      },
+      "minHeight": {
+        "value": "90vh",
+        "evidence": "mv.spacing.section"
+      }
+    },
+    "signup": {
+      "paddingTop": {
+        "value": "20vh",
+        "evidence": "mv.spacing.section"
+      }
+    },
+    "footer": {
+      "paddingTop": {
+        "value": "15vh",
+        "evidence": "mv.spacing.section",
+        "responsive": {
+          "max479": "5vh"
+        }
+      },
+      "paddingBottom": {
+        "value": "1vh",
+        "evidence": "mv.spacing.section"
+      }
+    },
+    "container": {
+      "margin": {
+        "value": "2em auto",
+        "evidence": "mv.spacing.container"
+      },
+      "rowGap": {
+        "value": "2em",
+        "evidence": "mv.spacing.container"
+      },
+      "pyLg": {
+        "value": "10em",
+        "evidence": "mv.spacing.container"
+      },
+      "mtMd": {
+        "value": "3rem",
+        "evidence": "mv.spacing.container"
+      },
+      "headingMargin": {
+        "value": "1rem 0",
+        "evidence": "mv.spacing.container"
+      }
+    },
+    "button": {
+      "padding": {
+        "value": ".6em 1.2em",
+        "evidence": "mv.spacing.button"
+      },
+      "margin": {
+        "value": "1.2em 1rem",
+        "evidence": "mv.spacing.button"
+      },
+      "gap": {
+        "value": "3em",
+        "evidence": "mv.spacing.button",
+        "responsive": {
+          "max767": "2em",
+          "max479": "1rem"
+        }
+      }
+    },
+    "nav": {
+      "margin": {
+        "value": "1em auto",
+        "evidence": "mv.section.nav"
+      },
+      "paddingX": {
+        "value": "2vw",
+        "evidence": "mv.section.nav",
+        "responsive": {
+          "max479": "0 (cluster padded 1.4rem)"
+        }
+      }
+    },
+    "unusedVars": {
+      "py": {
+        "value": "5vh",
+        "evidence": "mv.spacing.unused-vars",
+        "sourceName": "--space--py",
+        "status": "unused"
+      },
+      "px": {
+        "value": "3vw",
+        "evidence": "mv.spacing.unused-vars",
+        "sourceName": "--space--px",
+        "status": "unused"
+      }
+    }
+  }
+}

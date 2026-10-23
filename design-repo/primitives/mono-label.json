@@ -1,0 +1,19 @@
+{
+  "id": "primitive.mono-label",
+  "kind": "primitive",
+  "description": "Uppercase Firacode label (regular, xs 10px or bold). Usually scrambles in.",
+  "props": {
+    "text": "string",
+    "size": "enum default|xs",
+    "weight": "enum regular|bold"
+  },
+  "tokens": [
+    "typography.role.monoLabel",
+    "typography.role.monoXs",
+    "typography.role.monoBold"
+  ],
+  "assetRoles": [],
+  "evidence": [
+    "mv.type.mono"
+  ]
+}

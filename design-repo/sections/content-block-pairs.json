@@ -1,0 +1,151 @@
+{
+  "id": "content.block-pairs",
+  "kind": "section",
+  "category": "content",
+  "description": "Section built from pairs of text blocks. Two variants appear once each on the real page, back to back, BOTH with anchor id 'cta' (duplicate id on the source).",
+  "variants": {
+    "feature-pairs": {
+      "anchorId": "cta",
+      "contentFields": [
+        "rows"
+      ],
+      "maxWords": {
+        "rows[].left.label": 4,
+        "rows[].right.label": 4,
+        "rows[].left.headingLines[]": 4,
+        "rows[].right.headingLines[]": 4,
+        "rows[].left.body": 47,
+        "rows[].right.body": 47,
+        "rows[].left.monoNote[]": 8,
+        "rows[].right.monoNote[]": 8
+      },
+      "realWordCounts": {
+        "rows[].left.label": 2,
+        "rows[].right.label": 2,
+        "rows[].left.headingLines[]": 2,
+        "rows[].right.headingLines[]": 2,
+        "rows[].left.body": 31,
+        "rows[].right.body": 31,
+        "rows[].left.monoNote[]": 5,
+        "rows[].right.monoNote[]": 5
+      },
+      "motion": {
+        "allowedPatterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    },
+    "pitch-timeline": {
+      "anchorId": "cta",
+      "contentFields": [
+        "kicker",
+        "heading",
+        "cta",
+        "priceNote",
+        "row",
+        "timeline"
+      ],
+      "maxWords": {
+        "kicker": 6,
+        "heading.lines[][].text": 4,
+        "cta.label": 5,
+        "priceNote.line1": 6,
+        "priceNote.line2": 4,
+        "row.left.label": 3,
+        "row.right.label": 3,
+        "row.left.headingLines[]": 4,
+        "row.right.headingLines[]": 4,
+        "row.left.body": 45,
+        "row.right.body": 45,
+        "row.left.monoNote[]": 14,
+        "row.right.monoNote[]": 14,
+        "timeline.cornerLabel": 3,
+        "timeline.columns[].title": 6,
+        "timeline.columns[].date": 6,
+        "timeline.rows[].price": 4
+      },
+      "realWordCounts": {
+        "kicker": 4,
+        "heading.lines[][].text": 2,
+        "cta.label": 3,
+        "priceNote.line1": 4,
+        "priceNote.line2": 2,
+        "row.left.label": 1,
+        "row.right.label": 1,
+        "row.left.headingLines[]": 2,
+        "row.right.headingLines[]": 2,
+        "row.left.body": 30,
+        "row.right.body": 30,
+        "row.left.monoNote[]": 9,
+        "row.right.monoNote[]": 9,
+        "timeline.cornerLabel": 1,
+        "timeline.columns[].title": 4,
+        "timeline.columns[].date": 4,
+        "timeline.rows[].price": 2
+      },
+      "motion": {
+        "allowedPatterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade",
+          "cta-hover",
+          "scale-line",
+          "scale-dot"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "maxPerPageBySectionVariant": 1,
+    "maxPerPageBySection": 2
+  },
+  "responsive": {
+    "base": {
+      "rows": "two columns (45% each), space-between, 10em vertical margins",
+      "evidence": "mv.spacing.container"
+    },
+    "max991": {
+      "rows": "stack into one column, aligned start; blocks 70% wide",
+      "behindCanvasWords": "static, z-index 0",
+      "evidence": "mv.responsive.flex-hb"
+    },
+    "max767": {
+      "blocks": "90% wide, margin-bottom 3em",
+      "timelineTable": "hidden (pitch-timeline variant)",
+      "evidence": "mv.responsive.data-hide"
+    },
+    "max479": {
+      "blockHeading": "14vw",
+      "evidence": "mv.type.display"
+    }
+  },
+  "uses": {
+    "primitives": [
+      "primitive.mono-label",
+      "primitive.display-heading",
+      "primitive.button-pill"
+    ],
+    "components": [
+      "component.text-block",
+      "component.price-note",
+      "component.timeline-table"
+    ]
+  },
+  "knownQuirks": [
+    "Duplicate id 'cta' on both variants; the footer 'CTA' link resolves to the first (feature-pairs). anchorId is const 'cta' for both variants; graph rule DUPLICATE_ANCHOR_ONLY_DOCUMENTED warns on it and errors on any other duplicate.",
+    "Right-hand blocks carry the undefined class mt-xl (no-op); do not invent a margin (mv.structure.mt-xl-undefined).",
+    "In the pitch-timeline table, row 2's DOM order puts the rule-line before the last column; visual result is a dot in column 3."
+  ],
+  "evidence": [
+    "mv.section.features",
+    "mv.section.pitch",
+    "mv.structure.duplicate-cta-id"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy"
+}

@@ -1,0 +1,325 @@
+{
+  "$comment": "Families, weights and type roles. Sizes keyed by breakpoint (base = above 991px; max991/max767/max479 = Webflow max-width breakpoints). Omitted breakpoint = inherits the next wider value.",
+  "fontFamily": {
+    "sans": {
+      "value": [
+        "\"Helvetica Neue\"",
+        "Arial",
+        "sans-serif"
+      ],
+      "evidence": "mv.font.faces",
+      "weights": [
+        400,
+        700
+      ],
+      "assetRole": "font.commercial-sans"
+    },
+    "sansCondensed": {
+      "value": [
+        "\"Helvetica Neue Condensed\"",
+        "Arial",
+        "sans-serif"
+      ],
+      "evidence": "mv.font.faces",
+      "weights": [
+        700
+      ],
+      "assetRole": "font.commercial-sans"
+    },
+    "mono": {
+      "value": [
+        "Firacode",
+        "Arial",
+        "sans-serif"
+      ],
+      "evidence": "mv.font.faces",
+      "weights": [
+        400,
+        700
+      ],
+      "assetRole": "font.mono"
+    }
+  },
+  "fontWeight": {
+    "regular": {
+      "value": 400,
+      "evidence": "mv.font.faces"
+    },
+    "bold": {
+      "value": 700,
+      "evidence": "mv.font.faces"
+    },
+    "counterLighter": {
+      "value": "lighter",
+      "evidence": "mv.structure.invalid-nth-child",
+      "note": "computes to 100 but only 400 is loaded, renders as Regular"
+    }
+  },
+  "role": {
+    "body": {
+      "value": {
+        "family": "sans",
+        "weight": 400,
+        "size": {
+          "base": "14px"
+        },
+        "lineHeight": "1.1em"
+      },
+      "evidence": "mv.type.body"
+    },
+    "navParagraph": {
+      "value": {
+        "family": "sans",
+        "weight": 400,
+        "size": {
+          "base": ".9em"
+        },
+        "lineHeight": "1.1em",
+        "textIndent": "2em"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "monoLabel": {
+      "value": {
+        "family": "mono",
+        "weight": 400,
+        "size": {
+          "base": ".8rem",
+          "max479": "1em"
+        },
+        "lineHeight": "1em",
+        "letterSpacing": ".1em",
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.mono"
+    },
+    "monoXs": {
+      "value": {
+        "family": "mono",
+        "weight": 400,
+        "size": {
+          "base": "10px"
+        },
+        "lineHeight": "1em",
+        "letterSpacing": ".1em",
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.mono"
+    },
+    "monoBold": {
+      "value": {
+        "family": "mono",
+        "weight": 700,
+        "size": {
+          "base": ".8rem"
+        },
+        "letterSpacing": ".1em",
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "heroSub": {
+      "value": {
+        "family": "mono",
+        "size": {
+          "base": "17px"
+        },
+        "align": "center"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "displayHero": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "9vw",
+          "max991": "11vw",
+          "max767": "11vw",
+          "max479": "3.9rem"
+        },
+        "lineHeight": ".8em",
+        "whiteSpace": {
+          "base": "nowrap",
+          "max767": "normal",
+          "max479": "break-spaces"
+        }
+      },
+      "evidence": "mv.type.display"
+    },
+    "displayList": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "7vw",
+          "max767": "9vw",
+          "max479": "12vw"
+        },
+        "lineHeight": ".9em"
+      },
+      "evidence": "mv.type.display"
+    },
+    "displayBlock": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "5vw",
+          "max991": "9vw",
+          "max767": "12vw",
+          "max479": "14vw"
+        },
+        "lineHeight": ".8em",
+        "note": "values for .tb-he.py-xs (the variant used everywhere); bare .tb-he is 5vw/11vw/13vw"
+      },
+      "evidence": "mv.type.display"
+    },
+    "textBlock": {
+      "value": {
+        "family": "sans",
+        "weight": 400,
+        "size": {
+          "base": "1rem"
+        },
+        "lineHeight": "1.2em",
+        "maxWidth": "50ch",
+        "width": "80%"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "button": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "1.2rem",
+          "max479": "1rem"
+        }
+      },
+      "evidence": "mv.type.cta-tx-discrepancy"
+    },
+    "buttonSmall": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "1rem"
+        }
+      },
+      "evidence": "mv.type.roles"
+    },
+    "timelineHeader": {
+      "value": {
+        "family": "sans",
+        "weight": 700,
+        "size": {
+          "base": ".8rem"
+        },
+        "padding": ".4rem 0"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "formLabel": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "1rem"
+        },
+        "lineHeight": "1.4em"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "input": {
+      "value": {
+        "family": "mono",
+        "weight": 400,
+        "size": {
+          "base": "14px"
+        },
+        "lineHeight": "20px"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "hint": {
+      "value": {
+        "family": "mono",
+        "weight": 400,
+        "size": {
+          "base": ".7rem"
+        },
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "joinList": {
+      "value": {
+        "family": "mono",
+        "weight": 400,
+        "size": {
+          "base": ".8rem",
+          "max479": ".6rem"
+        },
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "successHeading": {
+      "value": {
+        "family": "sansCondensed",
+        "size": {
+          "base": "3rem"
+        },
+        "lineHeight": ".9em"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "error": {
+      "value": {
+        "family": "mono",
+        "size": {
+          "base": ".8rem"
+        },
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "footerWordmark": {
+      "value": {
+        "family": "sansCondensed",
+        "weight": 700,
+        "size": {
+          "base": "18vw",
+          "max767": "15vw",
+          "max479": "20vw"
+        },
+        "lineHeight": ".8em"
+      },
+      "evidence": "mv.type.display"
+    },
+    "footerNav": {
+      "value": {
+        "family": "sans",
+        "weight": 700,
+        "size": {
+          "base": ".7rem"
+        },
+        "transform": "uppercase"
+      },
+      "evidence": "mv.type.roles"
+    },
+    "counter": {
+      "value": {
+        "family": "mono",
+        "weight": "lighter",
+        "size": {
+          "base": ".6em"
+        },
+        "minWidth": "991px",
+        "format": "\"0\" + decimal-leading-zero + space (renders 001 ...)"
+      },
+      "evidence": "mv.responsive.counters"
+    }
+  }
+}

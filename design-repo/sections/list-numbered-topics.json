@@ -1,0 +1,76 @@
+{
+  "id": "list.numbered-topics",
+  "kind": "section",
+  "category": "list",
+  "description": "Course-content list: mono heading, a centred column of large condensed words with mono counters (desktop) and alternate-item offset, then a mono summary.",
+  "variants": {
+    "default": {
+      "anchorId": "content",
+      "contentFields": [
+        "heading",
+        "items",
+        "summary"
+      ],
+      "maxWords": {
+        "heading": 4,
+        "items[].text": 5,
+        "summary": 29
+      },
+      "realWordCounts": {
+        "heading": 2,
+        "items[].text": 3,
+        "summary": 19
+      },
+      "motion": {
+        "allowedPatterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade"
+        ],
+        "reducedMotionFallback": "final-state-instant",
+        "fallbackEvidence": "mv.motion.no-reduced-motion"
+      }
+    }
+  },
+  "constraints": {
+    "onePerPage": true
+  },
+  "responsive": {
+    "base": {
+      "counters": "shown, '0'+decimal-leading-zero beside each item; only even items translateX(10%)",
+      "evidence": "mv.responsive.counters"
+    },
+    "max991": {
+      "counters": "hidden",
+      "offset": "none",
+      "behindCanvasItems": "static, z-index 0",
+      "evidence": "mv.responsive.counters"
+    },
+    "max767": {
+      "items": "9vw",
+      "evidence": "mv.type.display"
+    },
+    "max479": {
+      "items": "12vw",
+      "summary": "max-width 90%",
+      "evidence": "mv.type.display"
+    }
+  },
+  "uses": {
+    "primitives": [
+      "primitive.mono-label"
+    ],
+    "components": [
+      "component.counter-list"
+    ]
+  },
+  "knownQuirks": [
+    "Two of the three source offset selectors are invalid CSS and never apply; only even items shift (mv.structure.invalid-nth-child). Do not 'restore' the intended zig-zag.",
+    "items[].layer = behind-canvas on 3 of 20 real items."
+  ],
+  "evidence": [
+    "mv.section.content",
+    "mv.structure.invalid-nth-child"
+  ],
+  "budgetPolicy": "mv.copy.budget-policy"
+}

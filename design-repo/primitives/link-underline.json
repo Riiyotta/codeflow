@@ -1,0 +1,20 @@
+{
+  "id": "primitive.link-underline",
+  "kind": "primitive",
+  "description": "Underlined mono link (.ul); no hover style except footer nav links (opacity .5 over .2s).",
+  "props": {
+    "label": "string",
+    "target": "assetRef or in-page anchor"
+  },
+  "tokens": [
+    "typography.role.monoXs",
+    "typography.role.footerNav",
+    "motion.hoverOpacity.footerLink"
+  ],
+  "assetRoles": [
+    "identity.author-link"
+  ],
+  "evidence": [
+    "mv.motion.link-hover"
+  ]
+}

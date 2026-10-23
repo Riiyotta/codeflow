@@ -1,0 +1,19 @@
+{
+  "id": "primitive.icon-inline",
+  "kind": "primitive",
+  "description": "Inline SVG icon slot using currentColor (arrow, Discord).",
+  "props": {
+    "icon": "assetRef"
+  },
+  "tokens": [
+    "iconSize.arrow",
+    "iconSize.discord"
+  ],
+  "assetRoles": [
+    "icon.arrow",
+    "icon.discord"
+  ],
+  "evidence": [
+    "mv.icon.sizes"
+  ]
+}

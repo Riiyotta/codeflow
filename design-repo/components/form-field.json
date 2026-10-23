@@ -1,0 +1,17 @@
+{
+  "id": "component.form-field",
+  "kind": "component",
+  "description": "Label + underline input + rule-line (name underline grows from the left, email from the right).",
+  "uses": [
+    "primitive.input-underline",
+    "primitive.rule-line"
+  ],
+  "tokens": [
+    "typography.role.formLabel",
+    "component.input.underline"
+  ],
+  "evidence": [
+    "mv.section.signup",
+    "mv.motion.scale"
+  ]
+}

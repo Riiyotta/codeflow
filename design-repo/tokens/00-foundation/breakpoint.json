@@ -1,0 +1,30 @@
+{
+  "breakpoint": {
+    "tablet": {
+      "value": "991px",
+      "evidence": "mv.breakpoints",
+      "query": "max-width"
+    },
+    "mobileLandscape": {
+      "value": "767px",
+      "evidence": "mv.breakpoints",
+      "query": "max-width"
+    },
+    "mobilePortrait": {
+      "value": "479px",
+      "evidence": "mv.breakpoints",
+      "query": "max-width"
+    },
+    "countersFrom": {
+      "value": "991px",
+      "evidence": "mv.breakpoints",
+      "query": "min-width",
+      "note": "overlaps the 991 max-width edge: at exactly 991px both apply"
+    }
+  },
+  "deviceDetection": {
+    "value": "user-agent",
+    "evidence": "mv.motion.mobile-ua",
+    "note": "motion 'mobile' mode is UA-based, not width-based; never infer it from a breakpoint"
+  }
+}

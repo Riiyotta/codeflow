@@ -1,0 +1,63 @@
+{
+  "$comment": "Foundation colours. Only values present in real evidence. Source variable names are recorded in 'sourceName' because the original calls the pink '--white'.",
+  "color": {
+    "base": {
+      "black": {
+        "value": "#0c0c0c",
+        "evidence": "mv.color.black",
+        "sourceName": "--black",
+        "usage": "page background; animated by the solve flash"
+      },
+      "blush": {
+        "value": "#f5d0e6",
+        "evidence": "mv.color.blush",
+        "sourceName": "--white",
+        "usage": "all text, borders, lines, dots, button hover fill"
+      },
+      "grey": {
+        "value": "#707070",
+        "evidence": "mv.color.grey",
+        "sourceName": "--grey",
+        "status": "effectively-invisible",
+        "usage": "focused input bottom border; border-bottom-style is none so it never shows"
+      },
+      "dark": {
+        "value": "#181818",
+        "evidence": "mv.color.dark-unused",
+        "sourceName": "--dark",
+        "status": "unused"
+      }
+    },
+    "webgl": {
+      "clear": {
+        "value": "#0f0f0f",
+        "evidence": "mv.color.webgl-clear",
+        "usage": "shader COL_BG (canvas itself clears transparent)"
+      }
+    },
+    "flash": {
+      "red": {
+        "value": "#b71234",
+        "evidence": "mv.color.solve-flash",
+        "usage": "solve easter-egg --black flash (random pick)"
+      },
+      "blue": {
+        "value": "#0046ad",
+        "evidence": "mv.color.solve-flash",
+        "usage": "solve easter-egg --black flash (random pick)"
+      }
+    },
+    "form": {
+      "placeholder": {
+        "value": "#999",
+        "evidence": "mv.color.placeholder",
+        "usage": "Webflow default placeholder"
+      },
+      "submitText": {
+        "value": "#fff",
+        "evidence": "mv.color.submit-text",
+        "usage": "submit input text from .w-button"
+      }
+    }
+  }
+}

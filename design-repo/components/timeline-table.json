@@ -1,0 +1,19 @@
+{
+  "id": "component.timeline-table",
+  "kind": "component",
+  "description": "Full-width table: first column (10%) price labels, three 30% columns with header title + date, rows separated by scaling rule-lines, a dot marks the column per row. Hidden <=767.",
+  "uses": [
+    "primitive.mono-label",
+    "primitive.rule-line",
+    "primitive.marker-dot"
+  ],
+  "tokens": [
+    "layout.timeline.firstColumn",
+    "layout.timeline.column",
+    "typography.role.timelineHeader"
+  ],
+  "evidence": [
+    "mv.section.pitch",
+    "mv.responsive.data-hide"
+  ]
+}

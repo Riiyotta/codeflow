@@ -1,0 +1,57 @@
+{
+  "$comment": "Semantic roles reference foundation tokens by path; themes resolve them.",
+  "semantic": {
+    "surface.page": {
+      "value": "{color.base.black}",
+      "evidence": "mv.color.black"
+    },
+    "surface.webglClear": {
+      "value": "{color.webgl.clear}",
+      "evidence": "mv.color.webgl-clear"
+    },
+    "surface.buttonHover": {
+      "value": "{color.base.blush}",
+      "evidence": "mv.color.button-hover"
+    },
+    "surface.solveFlash": {
+      "value": [
+        "{color.flash.red}",
+        "{color.flash.blue}"
+      ],
+      "evidence": "mv.color.solve-flash"
+    },
+    "text.primary": {
+      "value": "{color.base.blush}",
+      "evidence": "mv.color.blush"
+    },
+    "text.onButtonHover": {
+      "value": "{color.base.black}",
+      "evidence": "mv.color.button-hover"
+    },
+    "text.placeholder": {
+      "value": "{color.form.placeholder}",
+      "evidence": "mv.color.placeholder"
+    },
+    "text.submit": {
+      "value": "{color.form.submitText}",
+      "evidence": "mv.color.submit-text"
+    },
+    "border.default": {
+      "value": "{color.base.blush}",
+      "evidence": "mv.color.blush"
+    },
+    "line.rule": {
+      "value": "{color.base.blush}",
+      "evidence": "mv.color.blush"
+    },
+    "marker.dot": {
+      "value": "{color.base.blush}",
+      "evidence": "mv.radius.dot"
+    },
+    "border.inputFocus": {
+      "value": "{color.base.grey}",
+      "evidence": "mv.color.grey",
+      "status": "effectively-invisible"
+    }
+  }
+}

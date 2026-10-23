@@ -1,0 +1,11 @@
+# Changelog
+
+## 1.0.0 (2026-10-23): initial build (Situation A, from scratch)
+
+- Built bottom-up from real evidence: CLONE_SPEC.md (Playwright-measured), the original Webflow stylesheet port `src/styles/webflow.css`, the global embed CSS `src/index.css`, the clone components and motion modules, and the saved original page. Every value cites an entry in `extraction/measured-values.json` (94 entries; every citation carries a quote that is checked against the cited lines).
+- Contents: 139 tokens, 10 primitives, 6 components, 7 sections (8 variants), 1 template, 1 route, 13 asset roles (11 pinned), 18 motion patterns, 21 compatibility rules.
+- Compliance layer for a real, live site: a closed `assetRole` enum wired through the schema, allowlist and example; `must-not-reproduce` / `must-not-reuse-live-endpoint` / `license-required` policies; a pinned-value table in the validator; ref and brand denylists; `BRAND_PASSOFF` for generated pages.
+- Documented source quirks (not normalized): duplicate `id="cta"`, undefined `.mt-xl`, invalid nth-child counter selectors, always-hidden Discord link, marquee CSS with no DOM (no marquee section), unused `data-delay`, behind-canvas `.z` words, replaying reveals, UA-based mobile detection.
+- Correction to CLONE_SPEC §1: `.cta-tx{font-size:1rem}` exists only inside the max-width:479px block (`mv.type.cta-tx-discrepancy`).
+- Mid-build concurrent change (MASTER-GUIDE 3.11): another session edited `src/motion/scroll.js` during this build. Anchor scroll changed from a fixed 1.2s Lenis ease to a distance-based duration `max(0, 472.143*ln(d+125) - 2000)` ms with easeInOutCubic. Re-checked against the current file. The citations were re-resolved, and anchor scroll and wheel scroll were recorded as **matched (qa-measured, 60fps re-measure)**. Neither was ever written as an open delta in any contract, graph rule or validator. Only the ledger had a draft entry, and it was superseded before any file depended on it.
+- Verification: verify_all (schema 0 errors, semantics, parity, versions, counts, citations, graph agreement, pins, tokens, hygiene); an adversarial suite (49 mutations, 3 controls); prove_drift (15 injected drifts plus 2 controls); a self-containment run from an isolated OS temp dir; and a fresh CLI zip.

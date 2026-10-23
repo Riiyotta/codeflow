@@ -1,0 +1,18 @@
+{
+  "id": "component.counter-list",
+  "kind": "component",
+  "description": "Centered column of display words. At >=991px a mono counter (001...) sits beside each item and only even items shift right 10% (the other two source rules are invalid CSS). Below 991 no counter, no offset.",
+  "uses": [
+    "primitive.display-heading"
+  ],
+  "tokens": [
+    "typography.role.displayList",
+    "typography.role.counter",
+    "layout.list.evenOffset"
+  ],
+  "evidence": [
+    "mv.section.content",
+    "mv.structure.invalid-nth-child",
+    "mv.responsive.counters"
+  ]
+}

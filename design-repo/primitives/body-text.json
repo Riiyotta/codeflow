@@ -1,0 +1,15 @@
+{
+  "id": "primitive.body-text",
+  "kind": "primitive",
+  "description": "Helvetica Neue paragraph (1rem / 1.2em, 80% width, max 50ch) with inline bold (**) and underline (__) emphasis.",
+  "props": {
+    "text": "rich text string"
+  },
+  "tokens": [
+    "typography.role.textBlock"
+  ],
+  "assetRoles": [],
+  "evidence": [
+    "mv.type.roles"
+  ]
+}

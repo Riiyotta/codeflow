@@ -1,0 +1,162 @@
+{
+  "$comment": "Rhythm / position / compliance rules JSON Schema cannot express. Each rule id here must exist in schema/semantic_validate.py RULES with the same severity (extraction/verify_all.py checks this).",
+  "graphVersion": "1.0.0",
+  "nodes": [
+    "content.block-pairs",
+    "form.waitlist",
+    "hero.course-intro",
+    "layer.webgl-object",
+    "list.numbered-topics",
+    "shell.footer-wordmark",
+    "shell.nav"
+  ],
+  "edges": [
+    {
+      "from": "shell.nav/default",
+      "to": "hero.course-intro/default",
+      "kind": "immediately-precedes"
+    },
+    {
+      "from": "hero.course-intro/default",
+      "to": "list.numbered-topics/default",
+      "kind": "immediately-precedes"
+    },
+    {
+      "from": "list.numbered-topics/default",
+      "to": "content.block-pairs/feature-pairs",
+      "kind": "immediately-precedes"
+    },
+    {
+      "from": "content.block-pairs/feature-pairs",
+      "to": "content.block-pairs/pitch-timeline",
+      "kind": "immediately-precedes"
+    },
+    {
+      "from": "content.block-pairs/pitch-timeline",
+      "to": "form.waitlist/default",
+      "kind": "immediately-precedes"
+    },
+    {
+      "from": "form.waitlist/default",
+      "to": "shell.footer-wordmark/default",
+      "kind": "immediately-precedes"
+    },
+    {
+      "from": "shell.footer-wordmark/default",
+      "to": "layer.webgl-object/default",
+      "kind": "immediately-precedes"
+    }
+  ],
+  "rules": [
+    {
+      "id": "TEMPLATE_SEQUENCE_MATCH",
+      "severity": "error",
+      "description": "A PageSpec's nodes must match its declared template's node list in order, honouring required/repeatable, keyed on (section, variant).",
+      "exception": "Single template; every node required, non-repeatable."
+    },
+    {
+      "id": "ONE_PER_PAGE_BY_SECTION_VARIANT",
+      "severity": "error",
+      "description": "No (section, variant) pair may appear twice.",
+      "exception": "content.block-pairs legitimately appears twice because its two variants differ; that is not a violation."
+    },
+    {
+      "id": "NAV_FIRST",
+      "severity": "error",
+      "description": "shell.nav must be the first node."
+    },
+    {
+      "id": "HERO_FOLLOWS_NAV",
+      "severity": "error",
+      "description": "hero.course-intro must immediately follow shell.nav."
+    },
+    {
+      "id": "FORM_PRECEDES_FOOTER",
+      "severity": "error",
+      "description": "form.waitlist must immediately precede shell.footer-wordmark."
+    },
+    {
+      "id": "FOOTER_PRECEDES_LAYER",
+      "severity": "error",
+      "description": "shell.footer-wordmark must immediately precede layer.webgl-object."
+    },
+    {
+      "id": "WEBGL_LAYER_LAST",
+      "severity": "error",
+      "description": "layer.webgl-object must be the last node (the canvas sits after the page wrapper)."
+    },
+    {
+      "id": "CTA_TARGETS_FORM",
+      "severity": "error",
+      "description": "Every CTA href is '#signup' and a form.waitlist node with anchorId 'signup' must exist."
+    },
+    {
+      "id": "FOOTER_NAV_ANCHORS_RESOLVE",
+      "severity": "error",
+      "description": "Every footer siteNav href must resolve to an anchorId present in the page."
+    },
+    {
+      "id": "DUPLICATE_ANCHOR_ONLY_DOCUMENTED",
+      "severity": "warn",
+      "description": "Anchor ids should be unique; the documented source duplicate 'cta' (both content.block-pairs variants) is a warning, any other duplicate is an error.",
+      "exception": "anchor 'cta' on content.block-pairs/feature-pairs and content.block-pairs/pitch-timeline."
+    },
+    {
+      "id": "BEHIND_CANVAS_REQUIRES_LAYER",
+      "severity": "error",
+      "description": "Any segment with layer behind-canvas / behind-canvas-deep requires a layer.webgl-object node."
+    },
+    {
+      "id": "BEHIND_CANVAS_BUDGET",
+      "severity": "warn",
+      "description": "At most one behind-canvas segment per display heading, at most 3 behind-canvas list items, at most 2 behind-canvas wordmark words (observed maxima)."
+    },
+    {
+      "id": "MOTION_PATTERNS_ALLOWED",
+      "severity": "error",
+      "description": "A node's motion.patterns must be a subset of its (section, variant) contract's allowedPatterns; page motion limited to page-level patterns."
+    },
+    {
+      "id": "REDUCED_MOTION_REQUIRED",
+      "severity": "error",
+      "description": "Every node and the page carry the reducedMotionFallback fixed by their contract.",
+      "exception": "Fallbacks are design-repo policy: the source has no reduced-motion handling (mv.motion.no-reduced-motion)."
+    },
+    {
+      "id": "MAX_WORDS",
+      "severity": "error",
+      "description": "Every budgeted text field respects its section contract's maxWords (words = whitespace tokens after stripping ** and __)."
+    },
+    {
+      "id": "ASSET_ROLE_KNOWN",
+      "severity": "error",
+      "description": "Every assetRef.assetRole is a role in assets/asset-roles.json."
+    },
+    {
+      "id": "ASSET_SOURCE_POLICY",
+      "severity": "error",
+      "description": "assetRef.source must be allowed by its role's generationPolicy; ref prefix must match the source."
+    },
+    {
+      "id": "ASSET_REF_DENYLIST",
+      "severity": "error",
+      "description": "No assetRef.ref may contain a real asset filename, host, endpoint or tracking id from the original (refDenylist)."
+    },
+    {
+      "id": "PINNED_POLICY",
+      "severity": "error",
+      "description": "Compliance-critical roles must carry their pinned generationPolicy (checked against a hard-coded table in the validator, not just enum membership)."
+    },
+    {
+      "id": "BRAND_PASSOFF",
+      "severity": "error",
+      "description": "A PageSpec with contentProvenance 'generated' may not contain the real brand or author identity in any text (brandTextDenylist).",
+      "exception": "contentProvenance 'evidence-reference' (the bundled example) may carry real copy for reference only and must never be published as the real brand."
+    },
+    {
+      "id": "NO_MARQUEE_SECTION",
+      "severity": "error",
+      "description": "There is no marquee section: marquee CSS exists on the source with no DOM. Section ids are a closed set without one."
+    }
+  ]
+}

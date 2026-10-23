@@ -1,0 +1,19 @@
+{
+  "id": "component.text-block",
+  "kind": "component",
+  "description": "Label + two-line display heading + body text + optional mono note (the .tb-w block). Right-hand blocks carry the no-op class mt-xl on the source; do not invent a margin for it.",
+  "uses": [
+    "primitive.mono-label",
+    "primitive.display-heading",
+    "primitive.body-text"
+  ],
+  "tokens": [
+    "layout.textBlock.width",
+    "spacing.container.headingMargin",
+    "spacing.container.mtMd"
+  ],
+  "evidence": [
+    "mv.section.features",
+    "mv.structure.mt-xl-undefined"
+  ]
+}

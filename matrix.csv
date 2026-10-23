@@ -1,0 +1,12 @@
+section,category,templates,routes,Waitlist landing page
+shell.nav,SHELL,1,1,x
+hero.course-intro,HERO,1,1,x
+content.curriculum-list,CONTENT,1,1,x
+features.course-blocks,FEATURES,1,1,x
+conversion.pitch-cta,CONVERSION,1,1,x
+conversion.timeline-price-blocks,CONVERSION,1,1,x
+conversion.price-timeline-table,CONVERSION,1,1,x
+conversion.waitlist-signup,CONVERSION,1,1,x
+shell.footer,SHELL,1,1,x
+shell.webgl-cube,SHELL,1,1,x
+ROUTE COUNT,,,1,1

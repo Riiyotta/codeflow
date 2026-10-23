@@ -1,0 +1,161 @@
+{
+  "$comment": "Motion primitives. Every value is from source code / CLONE_SPEC and was confirmed by the 2026-10-23 motion QA (mv.qa.motion-match).",
+  "ease": {
+    "expoOut": {
+      "value": "expo.out",
+      "evidence": "mv.motion.text-reveal"
+    },
+    "power1Out": {
+      "value": "power1.out",
+      "evidence": "mv.motion.page-fade"
+    },
+    "backOut": {
+      "value": "back.out",
+      "evidence": "mv.motion.cube-drop"
+    },
+    "elasticOut": {
+      "value": "elastic.out",
+      "evidence": "mv.motion.cube-solve"
+    },
+    "lenis": {
+      "value": "t => min(1, 1.001 - 2^(-10t))",
+      "evidence": "mv.motion.lenis"
+    },
+    "cubeClick": {
+      "value": "M0,0 C0.126,0.382 0.18,0.726 0.241,0.726 0.397,0.726 0.482,-0.234 0.619,-0.234 0.746,-0.234 0.768,0 1,0",
+      "evidence": "mv.motion.cube-click"
+    },
+    "anchorInOutCubic": {
+      "value": "t<.5 ? 4t^3 : (t-1)(2t-2)^2+1",
+      "evidence": "mv.motion.anchor-scroll-source"
+    }
+  },
+  "duration": {
+    "pageFade": {
+      "value": "1s",
+      "evidence": "mv.motion.page-fade"
+    },
+    "reveal": {
+      "value": "1.2s",
+      "evidence": "mv.motion.text-reveal"
+    },
+    "scramble": {
+      "value": "0.6s-0.9s (random)",
+      "evidence": "mv.motion.scramble"
+    },
+    "scale": {
+      "value": "1.2s-1.4s (random)",
+      "evidence": "mv.motion.scale"
+    },
+    "buttonColor": {
+      "value": ".2s",
+      "evidence": "mv.color.button-hover"
+    },
+    "buttonBackground": {
+      "value": ".4s",
+      "evidence": "mv.color.button-hover"
+    },
+    "linkOpacity": {
+      "value": ".2s",
+      "evidence": "mv.motion.link-hover"
+    },
+    "cubeDrop": {
+      "value": "1.2s",
+      "evidence": "mv.motion.cube-drop"
+    },
+    "cubeTwist": {
+      "value": "0.8s",
+      "evidence": "mv.motion.cube-idle"
+    },
+    "cubeClick": {
+      "value": "1.6s",
+      "evidence": "mv.motion.cube-click"
+    },
+    "solveFlash": {
+      "value": "1.2s",
+      "evidence": "mv.motion.cube-solve"
+    },
+    "lenis": {
+      "value": "1.2s",
+      "evidence": "mv.motion.lenis"
+    },
+    "anchorScroll": {
+      "value": "max(0, 472.143*ln(distancePx+125) - 2000) ms",
+      "evidence": "mv.motion.anchor-scroll-source"
+    }
+  },
+  "delay": {
+    "pageFade": {
+      "value": "0.2s",
+      "evidence": "mv.motion.page-fade"
+    },
+    "reveal": {
+      "value": "0.1s (0 on mobile UA for word/char)",
+      "evidence": "mv.motion.text-reveal"
+    },
+    "scrambleReveal": {
+      "value": "0.3s",
+      "evidence": "mv.motion.scramble"
+    },
+    "solve": {
+      "value": "0.4s",
+      "evidence": "mv.motion.cube-solve"
+    }
+  },
+  "stagger": {
+    "reveal": {
+      "value": "0.05s from start",
+      "evidence": "mv.motion.text-reveal"
+    }
+  },
+  "interval": {
+    "cubeTwist": {
+      "value": "1680ms",
+      "evidence": "mv.motion.cube-idle"
+    }
+  },
+  "trigger": {
+    "inThreshold": {
+      "value": 0.5,
+      "evidence": "mv.motion.observer-replay"
+    },
+    "outThreshold": {
+      "value": 0,
+      "evidence": "mv.motion.observer-replay"
+    },
+    "replayOnReentry": {
+      "value": true,
+      "evidence": "mv.motion.observer-replay"
+    }
+  },
+  "offset": {
+    "wordFrom": {
+      "value": "150%",
+      "evidence": "mv.motion.text-reveal"
+    },
+    "charFrom": {
+      "value": "-150%",
+      "evidence": "mv.motion.char-drop"
+    }
+  },
+  "scrambleChars": {
+    "value": "▖▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟",
+    "evidence": "mv.motion.scramble"
+  },
+  "hoverOpacity": {
+    "footerLink": {
+      "value": 0.5,
+      "evidence": "mv.motion.link-hover"
+    }
+  },
+  "transformOrigin": {
+    "scaleDefault": {
+      "value": "right center",
+      "evidence": "mv.motion.scale"
+    },
+    "nameUnderline": {
+      "value": "left center",
+      "evidence": "mv.motion.scale"
+    }
+  }
+}
