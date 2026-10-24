@@ -26,6 +26,9 @@ wg = _mod("wrapper_gate", os.path.join("extraction", "wrapper_gate.py"))
 
 with open(os.path.join(REPO, "schema", "example.pagespec.json"), encoding="utf-8") as f:
     EXAMPLE = json.load(f)
+GEN_PATH = os.path.join(REPO, "schema", "examples", "generated.template.waitlist-landing.pagespec.json")
+with open(GEN_PATH, encoding="utf-8") as f:
+    GENERATED = json.load(f)
 BASE_REPO = sv.load_repo(REPO)
 
 
@@ -40,20 +43,14 @@ def idx(s, section, variant=None):
     return s["nodes"].index(node(s, section, variant))
 
 
-def generated_control(s):
-    """Neutral copy, provenance 'generated': must pass (proves BRAND_PASSOFF does not over-reject)."""
-    s["contentProvenance"] = "generated"
-    s["meta"]["title"] = "Join Waitlist"
-    f = node(s, "shell.footer-wordmark")["content"]
-    f["wordmark"] = [{"text": "THE", "layer": "front"}, {"text": "NEW", "layer": "behind-canvas-deep"},
-                     {"text": "WAVE", "layer": "behind-canvas"}, {"text": "CO", "layer": "front"}]
-    f["credit"]["linkLabel"] = "YOUR SITE"
-    return s
+# (name, category, expected rule, mutate(spec) -> spec, mutate_repo(repo) or None, base)
+# base is "reference" (schema/example.pagespec.json) or "generated" (schema/examples/generated.*.pagespec.json)
+def M(name, cat, rule, fn, repo_fn=None, base="reference"):
+    return (name, cat, rule, fn, repo_fn, base)
 
 
-# (name, category, expected rule, mutate(spec) -> spec, mutate_repo(repo) or None)
-def M(name, cat, rule, fn, repo_fn=None):
-    return (name, cat, rule, fn, repo_fn)
+def GM(name, cat, rule, fn, repo_fn=None):
+    return M(name, cat, rule, fn, repo_fn, "generated")
 
 
 def _set(path_fn):
@@ -148,9 +145,6 @@ MUTATIONS = [
     M("real umami website id", "compliance", "ASSET_REF_DENYLIST", _set(lambda s: s["meta"]["analytics"].__setitem__("ref", "placeholder:13ed4638-a8ba-4623-9987-1f6112450739"))),
     M("commercial font shipped as placeholder", "compliance", "ASSET_SOURCE_POLICY", _set(lambda s: s["fonts"]["sans"].__setitem__("source", "placeholder"))),
     M("ref prefix does not match source", "compliance", "ASSET_SOURCE_POLICY", _set(lambda s: node(s, "shell.nav")["content"]["logo"].__setitem__("ref", "https://example.test/logo.png"))),
-    M("generated page keeps real wordmark", "compliance", "BRAND_PASSOFF", lambda s: (lambda g: (node(g, "shell.footer-wordmark")["content"].__setitem__("wordmark", [{"text": "THE", "layer": "front"}, {"text": "CODE", "layer": "behind-canvas-deep"}, {"text": "FLOW", "layer": "behind-canvas"}, {"text": "CO", "layer": "front"}]), g)[1])(generated_control(s))),
-    M("generated page keeps author domain", "compliance", "BRAND_PASSOFF", lambda s: (lambda g: (node(g, "shell.footer-wordmark")["content"]["credit"].__setitem__("linkLabel", "HTTPS://FEDERIC.OOO"), g)[1])(generated_control(s))),
-    M("generated page keeps real title", "compliance", "BRAND_PASSOFF", lambda s: (lambda g: (g["meta"].__setitem__("title", "Join Waitlist — thecodeflow.co"), g)[1])(generated_control(s))),
     # pinned-value mutations: a DIFFERENT BUT VALID policy (enum membership alone cannot catch these)
     M("pinned: form endpoint policy -> may-generate-new", "pinned", "PINNED_POLICY", lambda s: s,
       lambda r: r["roles"]["roles"]["endpoint.form-action"].__setitem__("generationPolicy", "may-generate-new")),
@@ -203,6 +197,325 @@ MUTATIONS = [
     _contract_mut("source: malformed line range", "source", "SECTION_CONTRACT_SCHEMA", _setsec("hero.course-intro", ["source", "lines"], "15")),
     _contract_mut("source: id disagrees with the variant anchorId", "source", "SECTION_SOURCE_STRUCTURE", _setsec("hero.course-intro", ["source", "id"], "hero")),
     _contract_mut("source: two sections claim the same range", "source", "SECTION_SOURCE_STRUCTURE", _dup_source),
+]
+
+
+# ======================================================================================================
+# Token policy (tokens/llm/token-catalog.json + token-policy.json) and reference/generated mode
+# ======================================================================================================
+def tok(slot, value):
+    return lambda s: s["tokens"].__setitem__(slot, value)
+
+
+def tokd(slot):
+    return lambda s: s["tokens"].pop(slot)
+
+
+def toks(**kw):
+    return lambda s: s["tokens"].update(kw)
+
+
+def repo_cat(fn):
+    return lambda r: fn(r["catalog"])
+
+
+def repo_pol(fn):
+    return lambda r: fn(r["policy"])
+
+
+def _nav(s):
+    return node(s, "shell.nav")["content"]
+
+
+def _foot(s):
+    return node(s, "shell.footer-wordmark")["content"]
+
+
+def _hero(s):
+    return node(s, "hero.course-intro")["content"]
+
+
+def _role(path_fn, role):
+    return lambda s: path_fn(s).__setitem__("assetRole", role)
+
+
+def _set_label(fn, key, value):
+    return lambda s: fn(s).__setitem__(key, value)
+
+
+def _flip_to_generated(s):
+    s["mode"] = "generated"
+    s["contentProvenance"] = "generated"
+
+
+def _community(s):
+    _nav(s)["communityLink"] = {"icon": {"assetRole": "icon.discord", "source": "placeholder", "ref": "placeholder:community-icon"}, "hidden": True}
+
+
+def _drop_role(role):
+    return lambda r: r["roles"]["roles"].pop(role)
+
+
+def _avail(role, value):
+    return lambda r: r["roles"]["roles"][role].__setitem__("availability", value)
+
+
+def _new_role(r):
+    r["roles"]["roles"]["brand.logo-extra"] = dict(r["roles"]["roles"]["brand.logo-placeholder"])
+
+
+def _theme_rename(c):
+    c["themes"]["light"] = c["themes"].pop("dark")
+
+
+def _theme_drop(token):
+    return lambda c: c["themes"]["dark"]["semanticTokens"].remove(token)
+
+
+def _theme_resolve(token, value):
+    return lambda c: c["themes"]["dark"]["resolves"].__setitem__(token, value)
+
+
+TOKEN_MUTATIONS = [
+    # ---- unknown tokens
+    M("unknown semantic surface token", "tokens", "TOKEN_UNKNOWN", _set(tok("surface", "semantic.surface.nope"))),
+    M("unknown text token", "tokens", "TOKEN_UNKNOWN", _set(tok("text", "semantic.text.shiny"))),
+    M("unknown border token", "tokens", "TOKEN_UNKNOWN", _set(tok("border", "semantic.border.glow"))),
+    M("unknown spacing token", "tokens", "TOKEN_UNKNOWN", _set(tok("sectionPadding", "spacing.section.huge"))),
+    M("unknown font token (serif)", "tokens", "TOKEN_UNKNOWN", _set(tok("fontSans", "typography.fontFamily.serif"))),
+    M("unknown radius token", "tokens", "TOKEN_UNKNOWN", _set(tok("buttonRadius", "radius.square"))),
+    M("token slot holds prose, not a path", "tokens", "TOKEN_UNKNOWN", _set(tok("surface", "the page background"))),
+    M("token slot holds a bare word", "tokens", "TOKEN_UNKNOWN", _set(tok("surface", "page"))),
+    M("token slot holds a group, not a leaf token", "tokens", "TOKEN_UNKNOWN", _set(tok("surface", "semantic.surface"))),
+    M("token path with the wrong case", "tokens", "TOKEN_UNKNOWN", _set(tok("surface", "semantic.surface.Page"))),
+    M("token path with a trailing dot", "tokens", "TOKEN_UNKNOWN", _set(tok("text", "semantic.text.primary."))),
+    GM("generated page: unknown token", "tokens", "TOKEN_UNKNOWN", _set(tok("surface", "semantic.surface.nope"))),
+    M("catalog loses the token the example uses", "tokens", "TOKEN_UNKNOWN", lambda s: s, repo_cat(lambda c: c["tokens"].pop("semantic.text.primary"))),
+    M("catalog loses the WebGL clear colour", "tokens", "TOKEN_UNKNOWN", lambda s: s, repo_cat(lambda c: c["tokens"].pop("color.webgl.clear"))),
+    # ---- raw colours
+    M("raw hex colour (6 digits) in surface", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "#0c0c0c"))),
+    M("raw hex colour (3 digits) in text", "tokens", "TOKEN_RAW_COLOR", _set(tok("text", "#fff"))),
+    M("raw hex colour (upper-case) in border", "tokens", "TOKEN_RAW_COLOR", _set(tok("border", "#F5D0E6"))),
+    M("raw hex colour with alpha (8 digits)", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "#0c0c0c80"))),
+    M("raw rgb() colour", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "rgb(12, 12, 12)"))),
+    M("raw rgba() colour", "tokens", "TOKEN_RAW_COLOR", _set(tok("text", "rgba(245,208,230,0.9)"))),
+    M("raw hsl() colour", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "hsl(0 0% 5%)"))),
+    M("raw oklch() colour", "tokens", "TOKEN_RAW_COLOR", _set(tok("text", "oklch(0.9 0.05 340)"))),
+    M("raw color-mix() colour", "tokens", "TOKEN_RAW_COLOR", _set(tok("border", "color-mix(in srgb, red, blue)"))),
+    M("CSS colour name (black)", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "black"))),
+    M("CSS colour name (HotPink, mixed case)", "tokens", "TOKEN_RAW_COLOR", _set(tok("text", "HotPink"))),
+    M("CSS keyword transparent", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "transparent"))),
+    M("CSS keyword currentColor", "tokens", "TOKEN_RAW_COLOR", _set(tok("border", "currentColor"))),
+    M("raw hex colour in a spacing slot", "tokens", "TOKEN_RAW_COLOR", _set(tok("sectionPadding", "#123456"))),
+    M("raw hex colour in a font slot", "tokens", "TOKEN_RAW_COLOR", _set(tok("fontMono", "#123456"))),
+    M("raw hex colour with surrounding space", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "  #0c0c0c  "))),
+    GM("generated page: raw hex colour", "tokens", "TOKEN_RAW_COLOR", _set(tok("surface", "#0c0c0c"))),
+    # ---- arbitrary spacing
+    M("arbitrary spacing in px", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "24px"))),
+    M("arbitrary spacing in rem", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "2rem"))),
+    M("the raw value of spacing.section.padding copied out of the token file", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "10vh 3vw 5vh"))),
+    M("arbitrary spacing calc()", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "calc(1rem + 2vw)"))),
+    M("arbitrary spacing clamp()", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "clamp(1rem, 2vw, 3rem)"))),
+    M("arbitrary spacing zero", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "0"))),
+    M("arbitrary spacing bare number", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "8"))),
+    M("arbitrary spacing percentage", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "5%"))),
+    M("arbitrary spacing with em", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", ".6em 1.2em"))),
+    GM("generated page: arbitrary spacing", "tokens", "TOKEN_ARBITRARY_SPACING", _set(tok("sectionPadding", "16px"))),
+    # ---- unsupported fonts
+    M("unsupported font name (Comic Sans MS)", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontSans", "Comic Sans MS"))),
+    M("commercial source font named directly (Helvetica Neue)", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontSans", "Helvetica Neue"))),
+    M("commercial display font named directly", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontDisplay", "Helvetica Neue Condensed"))),
+    M("font stack in the font slot", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontSans", "Inter, sans-serif"))),
+    M("quoted font stack in the mono slot", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontMono", "\"Firacode\", monospace"))),
+    M("system font name", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontSans", "Arial"))),
+    M("generic family keyword", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontDisplay", "sans-serif"))),
+    M("a length in a font slot", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontSans", "14px"))),
+    M("mono slot with a different mono font", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontMono", "Courier New"))),
+    GM("generated page: unsupported font", "tokens", "TOKEN_UNSUPPORTED_FONT", _set(tok("fontSans", "Comic Sans MS"))),
+    # ---- slot / category mismatches
+    M("font token in the surface slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("surface", "typography.fontFamily.sans"))),
+    M("text token in the surface slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("surface", "semantic.text.primary"))),
+    M("surface token in the text slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("text", "semantic.surface.page"))),
+    M("list-valued flash colour as page surface", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("surface", "semantic.surface.solveFlash"))),
+    M("foundation colour in a semantic slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("surface", "color.base.black"))),
+    M("real semantic token the border slot does not accept", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("border", "semantic.line.rule"))),
+    M("type role in the text slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("text", "typography.role.body"))),
+    M("mono family in the sans slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("fontSans", "typography.fontFamily.mono"))),
+    M("sans family in the mono slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("fontMono", "typography.fontFamily.sans"))),
+    M("sans family in the display slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("fontDisplay", "typography.fontFamily.sans"))),
+    M("spacing token in the radius slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("buttonRadius", "spacing.button.padding"))),
+    M("real radius token the slot does not accept", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("buttonRadius", "radius.circle"))),
+    M("radius token in the spacing slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("sectionPadding", "radius.pill"))),
+    M("min-height spacing token in the padding slot", "tokens", "TOKEN_SLOT_MISMATCH", _set(tok("sectionPadding", "spacing.section.minHeight"))),
+    M("font token whose assetRole disagrees with the fonts field", "tokens", "TOKEN_SLOT_MISMATCH", lambda s: s,
+      repo_cat(lambda c: c["tokens"]["typography.fontFamily.sans"].__setitem__("assetRole", "font.mono"))),
+    M("policy widened: surface slot loses its allow list", "tokens", "TOKEN_SLOT_MISMATCH", lambda s: s,
+      repo_pol(lambda p: p["pageSpecTokenSlots"]["surface"].__setitem__("allow", ["semantic.surface.webglClear"]))),
+    # ---- theme / combination
+    M("text identical to surface (onButtonHover on page)", "tokens", "TOKEN_THEME_COMBINATION", _set(tok("text", "semantic.text.onButtonHover"))),
+    M("text identical to surface (primary on buttonHover)", "tokens", "TOKEN_THEME_COMBINATION", _set(tok("surface", "semantic.surface.buttonHover"))),
+    M("placeholder text on the pink surface (contrast about 2)", "tokens", "TOKEN_THEME_COMBINATION", _set(toks(surface="semantic.surface.buttonHover", text="semantic.text.placeholder"))),
+    M("white submit text on the pink surface", "tokens", "TOKEN_THEME_COMBINATION", _set(toks(surface="semantic.surface.buttonHover", text="semantic.text.submit"))),
+    M("near-identical surface and text (webglClear + onButtonHover)", "tokens", "TOKEN_THEME_COMBINATION", _set(toks(surface="semantic.surface.webglClear", text="semantic.text.onButtonHover"))),
+    GM("generated page: text identical to surface", "tokens", "TOKEN_THEME_COMBINATION", _set(tok("text", "semantic.text.onButtonHover"))),
+    M("theme missing from the catalog", "tokens", "TOKEN_THEME_COMBINATION", lambda s: s, repo_cat(_theme_rename)),
+    M("theme no longer resolves the text token", "tokens", "TOKEN_THEME_COMBINATION", lambda s: s, repo_cat(_theme_drop("semantic.text.primary"))),
+    M("theme no longer resolves the surface token", "tokens", "TOKEN_THEME_COMBINATION", lambda s: s, repo_cat(_theme_drop("semantic.surface.page"))),
+    M("theme resolves text.primary to the surface colour", "tokens", "TOKEN_THEME_COMBINATION", lambda s: s, repo_cat(_theme_resolve("semantic.text.primary", "#0c0c0c"))),
+    M("policy raises the contrast bar above the real pair", "tokens", "TOKEN_THEME_COMBINATION", lambda s: s, repo_pol(lambda p: p["themeRules"].__setitem__("minTextContrast", 20))),
+    # ---- not approved
+    M("effectively-invisible border token", "tokens", "TOKEN_NOT_APPROVED", _set(tok("border", "semantic.border.inputFocus"))),
+    M("unused foundation colour as surface", "tokens", "TOKEN_NOT_APPROVED", _set(tok("surface", "color.base.dark"))),
+    M("effectively-invisible grey as text", "tokens", "TOKEN_NOT_APPROVED", _set(tok("text", "color.base.grey"))),
+    M("unused spacing variable", "tokens", "TOKEN_NOT_APPROVED", _set(tok("sectionPadding", "spacing.unusedVars.py"))),
+    M("policy marks the token the example uses as not approved", "tokens", "TOKEN_NOT_APPROVED", lambda s: s,
+      repo_pol(lambda p: p["notGenerationApproved"].append("semantic.text.primary"))),
+    M("policy marks the WebGL clear colour as not approved", "tokens", "TOKEN_NOT_APPROVED", lambda s: s,
+      repo_pol(lambda p: p["notGenerationApproved"].append("color.webgl.clear"))),
+    GM("generated page: not-approved token", "tokens", "TOKEN_NOT_APPROVED", _set(tok("border", "semantic.border.inputFocus"))),
+    # ---- schema layer (closed tokens object)
+    M("tokens object missing", "tokens", "SCHEMA", lambda s: s.pop("tokens")),
+    M("required token slot missing", "tokens", "SCHEMA", _set(tokd("sectionPadding"))),
+    M("invented token slot", "tokens", "SCHEMA", _set(tok("accent", "semantic.text.primary"))),
+    M("token slot is a number", "tokens", "SCHEMA", _set(tok("sectionPadding", 24))),
+    M("token slot is null", "tokens", "SCHEMA", _set(tok("surface", None))),
+    M("token slot is empty", "tokens", "SCHEMA", _set(tok("surface", ""))),
+    M("token slot is an object", "tokens", "SCHEMA", _set(tok("surface", {"value": "#0c0c0c"}))),
+    M("token slot is a very long string", "tokens", "SCHEMA", _set(tok("surface", "semantic." + "x" * 90))),
+    M("per-node style override smuggled in", "tokens", "SCHEMA", _set(lambda s: node(s, "hero.course-intro").__setitem__("style", {"color": "#fff"}))),
+    M("WebGL clear colour as a raw value", "tokens", "SCHEMA", _set(lambda s: node(s, "layer.webgl-object")["content"].__setitem__("clearColorToken", "#0f0f0f"))),
+    M("WebGL clear colour as another token", "tokens", "SCHEMA", _set(lambda s: node(s, "layer.webgl-object")["content"].__setitem__("clearColorToken", "color.base.black"))),
+]
+
+# ---- mode: reference | generated
+MODE_MUTATIONS = [
+    M("mode missing", "mode", "SCHEMA", lambda s: s.pop("mode")),
+    M("mode outside the closed enum", "mode", "SCHEMA", _set(lambda s: s.__setitem__("mode", "production"))),
+    M("mode wrong case", "mode", "SCHEMA", _set(lambda s: s.__setitem__("mode", "Generated"))),
+    M("mode null", "mode", "SCHEMA", _set(lambda s: s.__setitem__("mode", None))),
+    M("mode a list", "mode", "SCHEMA", _set(lambda s: s.__setitem__("mode", ["generated"]))),
+    GM("generated example: mode removed", "mode", "SCHEMA", lambda s: s.pop("mode")),
+    M("generated mode with evidence-reference provenance", "mode", "MODE_PROVENANCE_MISMATCH", _set(lambda s: s.__setitem__("mode", "generated"))),
+    M("reference mode with generated provenance", "mode", "MODE_PROVENANCE_MISMATCH", _set(lambda s: s.__setitem__("contentProvenance", "generated"))),
+    GM("generated example flipped to reference mode", "mode", "MODE_PROVENANCE_MISMATCH", _set(lambda s: s.__setitem__("mode", "reference"))),
+    GM("generated example given evidence-reference provenance", "mode", "MODE_PROVENANCE_MISMATCH", _set(lambda s: s.__setitem__("contentProvenance", "evidence-reference"))),
+    M("the reference example flipped to generated is rejected (real mark, model, links, copy, hosts)", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_flip_to_generated)),
+    M("the reference example flipped to generated: source copy", "mode", "GENERATED_MODE_SOURCE_COPY", _set(_flip_to_generated)),
+    M("the reference example flipped to generated: source host", "mode", "GENERATED_MODE_SOURCE_URL", _set(_flip_to_generated)),
+    M("the reference example flipped to generated: brand", "mode", "BRAND_PASSOFF", _set(_flip_to_generated)),
+    M("the reference example flipped to generated: real url in a label", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(_flip_to_generated)),
+    # reference-only roles smuggled into a generated page (each must be rejected)
+    GM("source logo role in the navbar", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: _nav(s)["logo"], "brand.logo-mark"))),
+    GM("source logo role in the footer", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: _foot(s)["logo"], "brand.logo-mark"))),
+    GM("author link role in the footer social link", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: _foot(s)["social"]["link"], "identity.author-link"))),
+    GM("author link role in the privacy link", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: _foot(s)["privacy"]["link"], "identity.author-link"))),
+    GM("author link role in the credit link", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: _foot(s)["credit"]["link"], "identity.author-link"))),
+    GM("source og image role", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: s["meta"]["ogImage"], "meta.og-image"))),
+    GM("source favicon role", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: s["meta"]["favicon"], "meta.favicon"))),
+    GM("source cube model role", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: node(s, "layer.webgl-object")["content"]["model"], "webgl.cube-model"))),
+    GM("source matcap role", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: node(s, "layer.webgl-object")["content"]["matcaps"][0], "webgl.matcap"))),
+    GM("source sticker colour map role", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_role(lambda s: node(s, "layer.webgl-object")["content"]["colorMap"], "webgl.sticker-colormap"))),
+    GM("blocked Discord community icon in a generated page", "mode", "GENERATED_MODE_REFERENCE_ASSET", _set(_community)),
+    # source brand in generated text
+    GM("source wordmark in the footer", "mode", "BRAND_PASSOFF", _set(lambda s: _foot(s).__setitem__("wordmark", [{"text": "THE", "layer": "front"}, {"text": "CODE", "layer": "behind-canvas-deep"}, {"text": "FLOW", "layer": "behind-canvas"}, {"text": "CO", "layer": "front"}]))),
+    GM("source author domain as the credit label", "mode", "BRAND_PASSOFF", _set(_set_label(lambda s: _foot(s)["credit"], "linkLabel", "HTTPS://FEDERIC.OOO"))),
+    GM("source title", "mode", "BRAND_PASSOFF", _set(lambda s: s["meta"].__setitem__("title", "Join Waitlist — thecodeflow.co"))),
+    GM("source brand in a heading line", "mode", "BRAND_PASSOFF", _set(lambda s: _hero(s)["heading"]["lines"][0][0].__setitem__("text", "CODEFLOW"))),
+    GM("source brand in the route", "mode", "BRAND_PASSOFF", _set(lambda s: s.__setitem__("route", "/thecodeflow"))),
+    GM("source brand split by punctuation", "mode", "BRAND_PASSOFF", _set(_set_label(_hero, "eyebrow", "THE-CODE-FLOW"))),
+    GM("source author name in body copy", "mode", "BRAND_PASSOFF", _set(lambda s: node(s, "cta.waitlist-form")["content"].__setitem__("body", "Built by Federico Valla."))),
+    # source copy in generated text
+    GM("source CTA label reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(_set_label(lambda s: _hero(s)["cta"], "label", "Reserve your Spot"))),
+    GM("source CTA label reused, upper-case", "mode", "GENERATED_MODE_SOURCE_COPY", _set(_set_label(lambda s: _hero(s)["cta"], "label", "RESERVE YOUR SPOT"))),
+    GM("source CTA label reused, punctuation and markdown changed", "mode", "GENERATED_MODE_SOURCE_COPY", _set(_set_label(lambda s: _hero(s)["cta"], "label", "**Reserve** your __Spot__!"))),
+    GM("source nav CTA reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(_set_label(lambda s: _nav(s)["cta"], "label", "Join Waitlist"))),
+    GM("source list heading reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: node(s, "list.numbered-topics")["content"].__setitem__("heading", "COURSE CONTENT"))),
+    GM("source subheading reused (signature phrase)", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: _hero(s)["subheading"].__setitem__("regular", "JAVASCRIPT COURSE FOR"))),
+    GM("source price pitch inside new words (signature phrase)", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: _hero(s)["priceNote"].__setitem__("line1", "*LOCK PRICE AT **$48,**"))),
+    GM("source guarantee line reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: _hero(s)["priceNote"].__setitem__("line2", "**GUARANTEES** ENTRY"))),
+    GM("source meta description reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: s["meta"].__setitem__("description", "Level up your Webflow game by learning Javascript."))),
+    GM("source perk reused inside a longer sentence (4-word run)", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: node(s, "cta.waitlist-form")["content"]["perks"].__setitem__(0, "Includes early access to Discord inner circle for all"))),
+    GM("source footer label reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: _foot(s)["privacy"].__setitem__("label", "PRIVACY POLICY"))),
+    GM("source form error reused", "mode", "GENERATED_MODE_SOURCE_COPY", _set(lambda s: node(s, "cta.waitlist-form")["content"].__setitem__("error", "Something went wrong. Try again?"))),
+    # source hosts / non-reserved URLs
+    GM("source host as a label", "mode", "GENERATED_MODE_SOURCE_URL", _set(_set_label(lambda s: _foot(s)["credit"], "linkLabel", "thecodeflow.co"))),
+    GM("source URL with scheme in the description", "mode", "GENERATED_MODE_SOURCE_URL", _set(lambda s: s["meta"].__setitem__("description", "Read more at https://www.thecodeflow.co/join today."))),
+    GM("source author site in a label", "mode", "GENERATED_MODE_SOURCE_URL", _set(_set_label(lambda s: _foot(s)["social"], "label", "FEDERIC.OOO"))),
+    GM("source mail host in the form error", "mode", "GENERATED_MODE_SOURCE_URL", _set(lambda s: node(s, "cta.waitlist-form")["content"].__setitem__("error", "Try ooo.us21.list-manage.com"))),
+    GM("source analytics host in a ref", "mode", "GENERATED_MODE_SOURCE_URL", _set(lambda s: node(s, "cta.waitlist-form")["content"]["action"].__setitem__("ref", "placeholder:cloud.umami.is/x"))),
+    GM("source privacy-policy document host in a label", "mode", "GENERATED_MODE_SOURCE_URL", _set(_set_label(lambda s: _foot(s)["privacy"], "label", "docs.google.com/doc"))),
+    GM("source CMS host in a label", "mode", "GENERATED_MODE_SOURCE_URL", _set(_set_label(lambda s: _foot(s)["social"], "label", "webflow.com"))),
+    GM("real domain in a label (.com)", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(_set_label(lambda s: _foot(s)["credit"], "linkLabel", "studio.com"))),
+    GM("real domain with scheme in the description", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(lambda s: s["meta"].__setitem__("description", "Book at https://shop.io/join now."))),
+    GM("www host on a real TLD", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(_set_label(lambda s: _foot(s)["social"], "label", "www.mystudio.net"))),
+    GM("email on a real domain", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(lambda s: node(s, "cta.waitlist-form")["content"]["fields"]["email"].__setitem__("placeholder", "you@mail.org"))),
+    GM("real .ai domain", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(_set_label(lambda s: _foot(s)["credit"], "linkLabel", "studio.ai"))),
+    GM("localhost URL", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(lambda s: s["meta"].__setitem__("description", "Try http://localhost:3000 first."))),
+    GM("example.org is reserved by RFC but not an allowed placeholder here", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(lambda s: s["meta"].__setitem__("description", "See ftp://files.example.org/list for details."))),
+    GM("example.com bare host", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(_set_label(lambda s: _foot(s)["credit"], "linkLabel", "example.com"))),
+    GM("real URL in a ref (placeholder: prefix kept)", "mode", "GENERATED_MODE_URL_NOT_RESERVED", _set(lambda s: node(s, "cta.waitlist-form")["content"]["action"].__setitem__("ref", "placeholder:https://hooks.shop.io/x"))),
+    # availability pinned (registry mutated: a DIFFERENT BUT VALID availability, or an invalid one)
+    M("pinned availability: source logo -> generation-safe", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("brand.logo-mark", "generation-safe")),
+    M("pinned availability: author link -> generation-safe", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("identity.author-link", "generation-safe")),
+    M("pinned availability: cube model -> blocked", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("webgl.cube-model", "blocked")),
+    M("pinned availability: Discord glyph -> generation-safe", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.discord", "generation-safe")),
+    M("pinned availability: Discord glyph -> reference-only", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.discord", "reference-only")),
+    M("pinned availability: placeholder logo -> reference-only", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("brand.logo-placeholder", "reference-only")),
+    M("pinned availability: arrow icon -> blocked", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.arrow", "blocked")),
+    M("pinned availability: value outside the closed vocabulary", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.arrow", "sometimes")),
+    M("pinned availability: availability removed", "mode", "PINNED_AVAILABILITY", lambda s: s, lambda r: r["roles"]["roles"]["icon.arrow"].pop("availability")),
+    M("pinned availability: a new role nobody pinned", "mode", "PINNED_AVAILABILITY", lambda s: s, _new_role),
+    M("pinned availability: a pinned role deleted from the registry", "mode", "PINNED_AVAILABILITY", lambda s: s, _drop_role("meta.og-placeholder")),
+    GM("registry lets the source logo through (validator still pinned)", "mode", "PINNED_AVAILABILITY", _set(_role(lambda s: _nav(s)["logo"], "brand.logo-mark")), _avail("brand.logo-mark", "generation-safe")),
+]
+
+MUTATIONS += TOKEN_MUTATIONS + MODE_MUTATIONS
+
+
+def _tok_control(name, **kw):
+    s = copy.deepcopy(EXAMPLE)
+    s["tokens"].update(kw)
+    return (name, s, None)
+
+
+def _gen_ctl(name, fn):
+    s = copy.deepcopy(GENERATED)
+    fn(s)
+    return (name, s, None)
+
+
+def _foot_label(s, key, value):
+    _foot(s)["credit"][key] = value
+
+
+def _meta_desc(s, value):
+    s["meta"]["description"] = value
+
+
+EXTRA_CONTROLS = [
+    # every allowed value of every non-contrast slot
+    *[(("slot %s accepts %s" % (slot, t)), (lambda sl, tt: (lambda s: (s["tokens"].__setitem__(sl, tt), s)[1])(copy.deepcopy(EXAMPLE)))(slot, t), None)
+      for slot, x in sorted(json.load(open(os.path.join(REPO, "tokens", "llm", "token-policy.json")))["pageSpecTokenSlots"].items())
+      if not slot.startswith("$") and x["location"].startswith("tokens.") and slot not in ("surface", "text")
+      for t in x["allow"]],
+    _tok_control("valid pair: placeholder text on the page surface (contrast above 4.5)", text="semantic.text.placeholder"),
+    _tok_control("valid pair: white submit text on the page surface", text="semantic.text.submit"),
+    _tok_control("valid pair: hover text on the hover surface (the real hover state)", surface="semantic.surface.buttonHover", text="semantic.text.onButtonHover"),
+    _tok_control("valid pair: primary text on the WebGL clear surface", surface="semantic.surface.webglClear"),
+    ("border slot omitted (optional)", (lambda s: (s["tokens"].pop("border"), s)[1])(copy.deepcopy(EXAMPLE)), None),
+    _gen_ctl("generated example: valid token combination", lambda s: s["tokens"].update(surface="semantic.surface.buttonHover", text="semantic.text.onButtonHover")),
+    # generated mode: reserved placeholder domains are accepted
+    _gen_ctl("generated: .example host as a label", lambda s: _foot_label(s, "linkLabel", "studio.example")),
+    _gen_ctl("generated: .invalid host as a label", lambda s: _foot_label(s, "linkLabel", "studio.invalid")),
+    _gen_ctl("generated: upper-case .EXAMPLE host", lambda s: _foot_label(s, "linkLabel", "STUDIO.EXAMPLE")),
+    _gen_ctl("generated: https URL on a reserved domain", lambda s: _meta_desc(s, "Book your seat at https://shop.studio.example/join today.")),
+    _gen_ctl("generated: www host on a reserved domain", lambda s: _meta_desc(s, "Visit www.studio.invalid for the latest dates.")),
+    _gen_ctl("generated: email on a reserved domain", lambda s: node(s, "cta.waitlist-form")["content"]["fields"]["email"].__setitem__("placeholder", "jo@mail.example")),
+    _gen_ctl("generated: analytics placeholder (generation-safe role)", lambda s: s["meta"].__setitem__("analytics", {"assetRole": "endpoint.analytics", "source": "placeholder", "ref": "placeholder:analytics"})),
+    _gen_ctl("generated: generated-source logo placeholder", lambda s: _nav(s).__setitem__("logo", {"assetRole": "brand.logo-placeholder", "source": "generated", "ref": "generated:logo"})),
+    _gen_ctl("generated: font licensed by the deployer", lambda s: s["fonts"].__setitem__("sans", {"assetRole": "font.commercial-sans", "source": "licensed-by-deployer", "ref": "licensed:studio-sans"})),
+    _gen_ctl("generated: generic CTA words that are single words are not source copy", lambda s: _nav(s)["cta"].__setitem__("label", "Reserve")),
+    ("reference example unchanged: reference-only and blocked roles are allowed in reference mode", copy.deepcopy(EXAMPLE), None),
 ]
 
 
@@ -304,7 +617,8 @@ def run():
         pool = {(n["section"], n["variant"]): n for n in s["nodes"]}
         s["nodes"] = [copy.deepcopy(pool[(tn["section"], tn["variant"])]) for tn in t["nodes"]]
         controls.append(("template control: %s" % tid, s))
-    controls.append(("generated-provenance neutral copy", generated_control(copy.deepcopy(EXAMPLE))))
+    controls.append(("generated example (mode generated, fictional copy, placeholder assets)", copy.deepcopy(GENERATED)))
+    controls += [(n, sp) for n, sp, _ in EXTRA_CONTROLS]
     for name, s in controls:
         errs, warns = sv.validate(s, BASE_REPO)
         ok = not errs
@@ -313,8 +627,8 @@ def run():
         for e in errs:
             print("      ", e)
     # ---- mutations
-    for name, cat, rule, fn, repo_fn in MUTATIONS:
-        s = fn(copy.deepcopy(EXAMPLE))
+    for name, cat, rule, fn, repo_fn, base in MUTATIONS:
+        s = fn(copy.deepcopy(GENERATED if base == "generated" else EXAMPLE))
         repo = copy.deepcopy(BASE_REPO)
         saved = copy.deepcopy(sv.DOCUMENTED_DUPLICATE_ANCHORS)
         if repo_fn:

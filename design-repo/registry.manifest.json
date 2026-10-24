@@ -1,9 +1,12 @@
 {
   "repositoryId": "codeflow-waitlist-design-repo",
-  "repositoryVersion": "1.1.0",
-  "pageSpecVersion": "1.1.0",
-  "allowlistVersion": "1.1.0",
-  "versionFieldNote": "allowlistVersion is machine-checked: extraction/verify_all.py fails if it differs from tokens/llm/component-allowlist.json allowlistVersion. pageSpecVersion is enforced as a const inside schema/pagespec.schema.json (verify_all checks the manifest value equals that const). repositoryVersion is documentation-only and hand-maintained; nothing checks it. 1.1.0 renames two section ids (form.waitlist -> cta.waitlist-form, content.block-pairs/pitch-timeline -> cta.pitch-timeline/default), so a 1.0.0 PageSpec no longer validates; this was released as a minor bump because no PageSpec exists outside the bundled example.",
+  "repositoryVersion": "1.2.0",
+  "pageSpecVersion": "1.2.0",
+  "allowlistVersion": "1.2.0",
+  "tokenCatalogVersion": "1.0.0",
+  "tokenPolicyVersion": "1.0.0",
+  "assetRolesVersion": "1.1.0",
+  "versionFieldNote": "allowlistVersion is machine-checked: extraction/verify_all.py fails if it differs from tokens/llm/component-allowlist.json allowlistVersion. pageSpecVersion is enforced as a const inside schema/pagespec.schema.json (verify_all checks the manifest value equals that const). tokenCatalogVersion, tokenPolicyVersion and assetRolesVersion are machine-checked against tokens/llm/token-catalog.json, tokens/llm/token-policy.json and assets/asset-roles.json. repositoryVersion is documentation-only and hand-maintained; nothing checks it. 1.2.0 adds the required PageSpec fields `mode` and `tokens`, so a 1.1.0 PageSpec no longer validates; this was released as a minor bump because no PageSpec exists outside the bundled examples (the same call as 1.1.0).",
   "status": "design-review-pending",
   "productionApproved": false,
   "builtOn": "2026-10-23",
@@ -47,12 +50,20 @@
     "sectionVariants": 8,
     "templates": 1,
     "routes": 1,
-    "assetRoles": 13,
+    "assetRoles": 20,
     "pinnedAssetRoles": 11,
     "retrievalIneligibleSections": 1,
     "motionPatterns": 18,
-    "compatibilityRules": 26,
-    "measuredValueEntries": 95
+    "compatibilityRules": 39,
+    "measuredValueEntries": 95,
+    "tokenCategories": 13,
+    "themes": 1,
+    "typographyRoles": 22,
+    "tokenPolicySlots": 9,
+    "pageSpecExamples": 2,
+    "referenceOnlyAssetRoles": 7,
+    "generationSafeAssetRoles": 12,
+    "blockedAssetRoles": 1
   },
   "knownSourceQuirks": [
     "mv.structure.duplicate-cta-id",
@@ -91,12 +102,17 @@
     "tokens/themes/dark.json",
     "tokens/llm/component-allowlist.json",
     "tokens/llm/motion-patterns.json",
+    "tokens/llm/token-catalog.json",
+    "tokens/llm/token-policy.json",
+    "tokens/tokens_lib.py",
+    "tokens/build_catalog.py",
     "assets/asset-roles.json",
     "templates/templates.json",
     "compatibility/graph.json",
     "schema/pagespec.schema.json",
     "schema/section-contract.schema.json",
     "schema/example.pagespec.json",
+    "schema/examples/generated.template.waitlist-landing.pagespec.json",
     "schema/semantic_validate.py",
     "schema/tests/adversarial_test.py",
     "extraction/measured-values.json",
@@ -110,5 +126,12 @@
     "primitives/",
     "components/",
     "sections/"
-  ]
+  ],
+  "pageSpecModes": {
+    "values": [
+      "reference",
+      "generated"
+    ],
+    "note": "PageSpec.mode (required, closed enum). reference = a page for the source brand; generated = a page for any other brand (generation-safe roles only, no source brand, copy or hosts, placeholder URLs on .example/.invalid). See assets/asset-roles.json modes and availability."
+  }
 }

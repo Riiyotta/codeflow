@@ -10,8 +10,8 @@ check is downgraded to a WARN instead of failing.
 
 Every drift-sensitive check here (allowlist parity, citation range + quote, section source ranges,
 taxonomy and retrieval-eligibility pins, wrapper gate, allowlistVersion parity, manifest counts,
-pinned asset policies, graph/validator agreement) is proven to fail
-on injected drift by extraction/prove_drift.py.
+pinned asset policies, graph/validator agreement, token catalog + policy, asset availability + modes,
+validator canaries) is proven to fail on injected drift by extraction/prove_drift.py.
 """
 import sys
 sys.dont_write_bytecode = True
@@ -38,6 +38,37 @@ EXPECT_TAXONOMY = {
     "layer.webgl-object": "layer",
 }
 EXPECT_RETRIEVAL = {sid: sid != "layer.webgl-object" for sid in EXPECT_TAXONOMY}   # utility/runtime UI is the only false
+
+# Pinned ASSET AVAILABILITY by mode (assets/asset-roles.json `availability`). A second copy, independent of
+# schema/semantic_validate.py PINNED_AVAILABILITY: flipping a role to a different-but-valid availability
+# (the source's mark -> generation-safe, the blocked Discord glyph -> generation-safe) must be caught.
+AVAIL_VALUES = ["reference-only", "generation-safe", "blocked"]
+PINNED_AVAILABILITY = {
+    "brand.logo-mark": "reference-only", "identity.author-link": "reference-only", "meta.og-image": "reference-only",
+    "meta.favicon": "reference-only", "webgl.cube-model": "reference-only", "webgl.matcap": "reference-only",
+    "webgl.sticker-colormap": "reference-only", "icon.discord": "blocked",
+    "icon.arrow": "generation-safe", "endpoint.form-action": "generation-safe", "endpoint.analytics": "generation-safe",
+    "font.commercial-sans": "generation-safe", "font.mono": "generation-safe",
+    "brand.logo-placeholder": "generation-safe", "identity.link-placeholder": "generation-safe",
+    "meta.og-placeholder": "generation-safe", "meta.favicon-placeholder": "generation-safe",
+    "webgl.model-placeholder": "generation-safe", "webgl.matcap-placeholder": "generation-safe",
+    "webgl.colormap-placeholder": "generation-safe",
+}
+# Pinned PageSpec token slots (token-policy.json pageSpecTokenSlots): name -> (kind, required, allowed catalog paths).
+# Independent of the policy file: widening a slot's allow list (letting `surface` take a flash colour, letting
+# `sectionPadding` take a min-height) is a different-but-valid value that only this table catches.
+PINNED_TOKEN_SLOTS = {
+    "surface": ("semanticColor", True, ["semantic.surface.page", "semantic.surface.buttonHover", "semantic.surface.webglClear"]),
+    "text": ("semanticColor", True, ["semantic.text.primary", "semantic.text.onButtonHover", "semantic.text.placeholder", "semantic.text.submit"]),
+    "border": ("semanticColor", False, ["semantic.border.default"]),
+    "fontSans": ("fontFamily", True, ["typography.fontFamily.sans"]),
+    "fontDisplay": ("fontFamily", True, ["typography.fontFamily.sansCondensed"]),
+    "fontMono": ("fontFamily", True, ["typography.fontFamily.mono"]),
+    "sectionPadding": ("spacing", True, ["spacing.section.padding", "spacing.hero.paddingTop", "spacing.hero.paddingBottom", "spacing.signup.paddingTop", "spacing.footer.paddingTop", "spacing.footer.paddingBottom"]),
+    "buttonRadius": ("radius", True, ["radius.pill"]),
+    "webglClear": ("color", True, ["color.webgl.clear"]),
+}
+PINNED_MIN_TEXT_CONTRAST = 4.5
 UTILITY_WORDS = ("cookie", "consent", "modal", "dialog", "overlay", "toast", "popup", "lightbox", "drawer", "snackbar")
 
 
@@ -81,6 +112,14 @@ def main(argv):
     if "--source-root" in argv:
         source_root = os.path.abspath(argv[argv.index("--source-root") + 1])
 
+    # 0. the token + mode layer files this verifier depends on exist (a missing one fails here, not with a traceback)
+    required = ["tokens/llm/token-catalog.json", "tokens/llm/token-policy.json", "tokens/tokens_lib.py", "tokens/build_catalog.py",
+                "schema/examples/generated.template.waitlist-landing.pagespec.json"]
+    probs = ["missing: %s" % r_ for r_ in required if not os.path.isfile(os.path.join(REPO, r_))]
+    check("required token/mode files exist (%d)" % len(required), probs)
+    if probs:
+        return finish()
+
     # 1. every JSON file parses
     probs, data = [], {}
     for p in sorted(glob.glob(os.path.join(REPO, "**", "*.json"), recursive=True)):
@@ -117,13 +156,27 @@ def main(argv):
         Draft7Validator.check_schema(schema)
     except Exception as e:  # noqa
         probs.append("schema invalid: %s" % e)
+    gen_examples = sorted(glob.glob(os.path.join(REPO, "schema", "examples", "generated.*.pagespec.json")))
     errs = list(Draft7Validator(schema).iter_errors(example))
     probs += ["example: %s" % e.message[:200] for e in errs]
-    check("schema Draft-07 (example: %d errors)" % len(errs), probs)
+    for gp in gen_examples:
+        gerrs = list(Draft7Validator(schema).iter_errors(J(os.path.relpath(gp, REPO))))
+        probs += ["%s: %s" % (os.path.basename(gp), e.message[:200]) for e in gerrs]
+        errs += gerrs
+    check("schema Draft-07 (%d examples: %d errors)" % (1 + len(gen_examples), len(errs)), probs)
 
-    # 3. semantic layer on the example
-    e, w = sv.validate(example, sv.load_repo(REPO))
-    check("semantic validator on example (%d errors, %d warnings)" % (len(e), len(w)), ["%s: %s" % x for x in e])
+    # 3. semantic layer on the examples (the reference example and every generated-mode example)
+    srepo = sv.load_repo(REPO)
+    e, w = sv.validate(example, srepo)
+    probs = ["reference example: %s: %s" % x for x in e]
+    n_err, n_warn = len(e), len(w)
+    for gp in gen_examples:
+        gs = J(os.path.relpath(gp, REPO))
+        ge, gw = sv.validate(gs, srepo)
+        probs += ["%s: %s: %s" % ((os.path.basename(gp),) + x) for x in ge]
+        n_err += len(ge)
+        n_warn += len(gw)
+    check("semantic validator on examples (reference + %d generated: %d errors, %d warnings)" % (len(gen_examples), n_err, n_warn), probs)
 
     # 4. allowlist parity
     probs = []
@@ -199,9 +252,17 @@ def main(argv):
         probs.append("manifest allowlistVersion %r != allowlist %r" % (manifest["allowlistVersion"], allow["allowlistVersion"]))
     if manifest["pageSpecVersion"] != schema["properties"]["pageSpecVersion"]["const"]:
         probs.append("manifest pageSpecVersion %r != schema const %r" % (manifest["pageSpecVersion"], schema["properties"]["pageSpecVersion"]["const"]))
+    cat_v = J("tokens/llm/token-catalog.json")["version"]
+    pol_v = J("tokens/llm/token-policy.json")["version"]
+    if manifest.get("tokenCatalogVersion") != cat_v:
+        probs.append("manifest tokenCatalogVersion %r != token-catalog.json version %r" % (manifest.get("tokenCatalogVersion"), cat_v))
+    if manifest.get("tokenPolicyVersion") != pol_v:
+        probs.append("manifest tokenPolicyVersion %r != token-policy.json version %r" % (manifest.get("tokenPolicyVersion"), pol_v))
+    if manifest.get("assetRolesVersion") != roles.get("rolesVersion"):
+        probs.append("manifest assetRolesVersion %r != asset-roles.json rolesVersion %r" % (manifest.get("assetRolesVersion"), roles.get("rolesVersion")))
     if manifest.get("status") != "design-review-pending" or manifest.get("productionApproved") is not False:
         probs.append("manifest must be status design-review-pending and productionApproved false")
-    check("version parity (allowlistVersion, pageSpecVersion) + status flags", probs)
+    check("version parity (allowlistVersion, pageSpecVersion, token catalog/policy, asset roles) + status flags", probs)
 
     # 6. manifest counts recomputed from disk
     real = {
@@ -214,6 +275,14 @@ def main(argv):
         "retrievalIneligibleSections": sum(1 for c in sections.values() if c.get("retrievalEligible", True) is False),
         "motionPatterns": len(motion["patterns"]), "compatibilityRules": len(graph["rules"]),
         "measuredValueEntries": len(ledger["entries"]),
+        "tokenCategories": len(J("tokens/llm/token-catalog.json")["counts"]["byCategory"]),
+        "themes": len(glob.glob(os.path.join(REPO, "tokens", "themes", "*.json"))),
+        "typographyRoles": len(J("tokens/00-foundation/typography.json")["role"]),
+        "tokenPolicySlots": len([k for k in J("tokens/llm/token-policy.json")["pageSpecTokenSlots"] if not k.startswith("$")]),
+        "pageSpecExamples": 1 + len(gen_examples),
+        "referenceOnlyAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "reference-only"),
+        "generationSafeAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "generation-safe"),
+        "blockedAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "blocked"),
     }
     probs = ["%s: manifest %r != disk %r" % (k, manifest["counts"].get(k), v) for k, v in real.items() if manifest["counts"].get(k) != v]
     probs += ["manifest count %r has no recompute rule" % k for k in manifest["counts"] if k not in real]
@@ -509,7 +578,253 @@ def main(argv):
     for msg in ginfo:
         print("note: " + msg)
 
-    # 20. hygiene: no absolute machine paths, no junk files
+    # 20. token catalog + policy: rebuilt from the real token files, policy resolves against it, slots pinned
+    probs = []
+    sys.path.insert(0, os.path.join(REPO, "tokens"))
+    bc = load_module("build_catalog", os.path.join("tokens", "build_catalog.py"))
+    built = bc.build(os.path.join(REPO, "tokens"))
+    with open(os.path.join(REPO, "tokens", "llm", "token-catalog.json"), encoding="utf-8") as f:
+        disk_text = f.read()
+    if disk_text != bc.render(built):
+        probs.append("tokens/llm/token-catalog.json differs from what tokens/build_catalog.py builds from the token files (a token file or the catalog was edited alone; run tokens/build_catalog.py)")
+    cat = built
+    if cat["counts"]["tokens"] != real["tokens"]:
+        probs.append("catalog token count %d != token leaves on disk %d" % (cat["counts"]["tokens"], real["tokens"]))
+    theme_files = sorted(os.path.splitext(os.path.basename(p_))[0] for p_ in glob.glob(os.path.join(REPO, "tokens", "themes", "*.json")))
+    if sorted(cat["themes"]) != theme_files:
+        probs.append("catalog themes %s != theme files %s" % (sorted(cat["themes"]), theme_files))
+    check("token catalog rebuilt from the token files and identical on disk (%d tokens, %d categories, %d theme(s))" % (cat["counts"]["tokens"], len(cat["counts"]["byCategory"]), len(cat["themes"])), probs)
+
+    # 20b. token policy: resolves against the catalog, slots pinned, schema + examples agree
+    probs = []
+    policy = J("tokens/llm/token-policy.json")
+    byc = cat["counts"]["byCategory"]
+    rv = policy["rules"]["rawValueRestrictions"]
+    if set(rv) != set(byc):
+        probs.append("rawValueRestrictions categories %s != catalog categories %s" % (sorted(rv), sorted(byc)))
+    derived = sorted(p_ for p_, t in cat["tokens"].items() if t.get("status") in ("unused", "effectively-invisible"))
+    if sorted(policy["notGenerationApproved"]) != derived:
+        probs.append("notGenerationApproved %s != catalog tokens with status unused/effectively-invisible %s" % (sorted(policy["notGenerationApproved"]), derived))
+    slots = {k: v for k, v in policy["pageSpecTokenSlots"].items() if not k.startswith("$")}
+    if sorted(slots) != sorted(PINNED_TOKEN_SLOTS):
+        probs.append("policy slots %s != verify_all PINNED_TOKEN_SLOTS %s" % (sorted(slots), sorted(PINNED_TOKEN_SLOTS)))
+    kind_cat = {"semanticColor": "semanticColor", "color": "color", "fontFamily": "fontFamily", "spacing": "spacing", "radius": "radius"}
+    for n, (kind, req, allow) in PINNED_TOKEN_SLOTS.items():
+        sl = slots.get(n)
+        if sl is None:
+            continue
+        if sl.get("kind") != kind or sl.get("required") is not req or sl.get("allow") != allow:
+            probs.append("slot %s: policy (kind %r, required %r, allow %s) != pinned (%r, %r, %s)" % (n, sl.get("kind"), sl.get("required"), sl.get("allow"), kind, req, allow))
+        for t_ in sl.get("allow", []):
+            if t_ not in cat["tokens"]:
+                probs.append("slot %s allows %s, which is not in the catalog" % (n, t_))
+            elif cat["tokens"][t_]["category"] != kind_cat[sl["kind"]]:
+                probs.append("slot %s (kind %s) allows %s of category %s" % (n, sl["kind"], t_, cat["tokens"][t_]["category"]))
+            if t_ in policy["notGenerationApproved"]:
+                probs.append("slot %s allows the not-approved token %s" % (n, t_))
+            if sl.get("themeResolved"):
+                for th_, tv in cat["themes"].items():
+                    if t_ not in tv["semanticTokens"]:
+                        probs.append("slot %s is theme-resolved but theme %s does not resolve %s" % (n, th_, t_))
+    tprops = schema["properties"]["tokens"]
+    page_slots = sorted(k for k, v in slots.items() if v["location"].startswith("tokens."))
+    if sorted(tprops["properties"]) != page_slots:
+        probs.append("schema tokens properties %s != policy tokens.* slots %s" % (sorted(tprops["properties"]), page_slots))
+    if sorted(tprops["required"]) != sorted(k for k in page_slots if slots[k]["required"]):
+        probs.append("schema tokens.required != policy required slots")
+    if tprops.get("additionalProperties") is not False or "tokens" not in schema["required"]:
+        probs.append("schema tokens object must be closed and required")
+    if schema["definitions"]["node__layer_webgl_object__default"]["properties"]["content"]["properties"]["clearColorToken"].get("const") != slots["webglClear"]["allow"][0]:
+        probs.append("schema clearColorToken const != policy webglClear token")
+    tr = policy["themeRules"]
+    if tr.get("minTextContrast") != PINNED_MIN_TEXT_CONTRAST:
+        probs.append("themeRules.minTextContrast %r != pinned %r" % (tr.get("minTextContrast"), PINNED_MIN_TEXT_CONTRAST))
+    if sorted(schema["properties"]["theme"]["enum"]) != theme_files:
+        probs.append("schema theme enum %s != theme files %s" % (schema["properties"]["theme"]["enum"], theme_files))
+    if manifest["defaultTheme"] not in cat["themes"] or any(t_ not in cat["themes"] for t_ in manifest["schemaValidatedThemes"]):
+        probs.append("manifest defaultTheme/schemaValidatedThemes are not catalog themes")
+    for folder in ("primitives", "components"):
+        for p_ in glob.glob(os.path.join(REPO, folder, "*.json")):
+            c_ = J(os.path.relpath(p_, REPO))
+            for t_ in c_["tokens"]:
+                if t_ not in cat["tokens"] and not any(k.startswith(t_ + ".") for k in cat["tokens"]):
+                    probs.append("%s references %s, which is neither a catalog token nor a catalog token group" % (c_["id"], t_))
+    raw_hits = []
+    for rel_ in ["schema/example.pagespec.json"] + [os.path.relpath(g_, REPO) for g_ in gen_examples]:
+        for path_, val in sv.iter_strings(J(rel_)):
+            if sv.HEX_RE.search(val) or sv.COLOR_FN_RE.search(val):
+                raw_hits.append("%s %s: %r" % (rel_, path_, val[:40]))
+    probs += ["raw colour in a PageSpec example: " + h for h in raw_hits]
+    check("token policy resolves against the catalog, %d slots pinned, schema + examples agree (%d categories, %d not-approved tokens)" % (len(slots), len(byc), len(policy["notGenerationApproved"])), probs)
+
+    # 21. asset availability + reference/generated modes
+    probs = []
+    if roles.get("availabilityValues") != AVAIL_VALUES:
+        probs.append("asset-roles availabilityValues must be %s, found %s" % (AVAIL_VALUES, roles.get("availabilityValues")))
+    for r_, v_ in roles["roles"].items():
+        if v_.get("availability") not in AVAIL_VALUES:
+            probs.append("asset role %s: availability %r is not one of %s" % (r_, v_.get("availability"), AVAIL_VALUES))
+        if not v_.get("generatedModeGuidance"):
+            probs.append("asset role %s: missing generatedModeGuidance" % r_)
+    for r_, want in PINNED_AVAILABILITY.items():
+        if r_ not in roles["roles"]:
+            probs.append("pinned availability: role %s is missing from the registry" % r_)
+        elif roles["roles"][r_].get("availability") != want:
+            probs.append("pinned availability: role %s must be %s, found %r" % (r_, want, roles["roles"][r_].get("availability")))
+    for r_ in roles["roles"]:
+        if r_ not in PINNED_AVAILABILITY:
+            probs.append("asset role %s has no entry in verify_all PINNED_AVAILABILITY (review it, then pin it)" % r_)
+    for r_, v_ in roles["roles"].items():
+        subs = v_.get("generationSafeSubstitutes", [])
+        if v_.get("availability") == "reference-only":
+            if not subs:
+                probs.append("asset role %s is reference-only but names no generation-safe substitute" % r_)
+            for s_ in subs:
+                if s_ not in roles["roles"] or roles["roles"][s_].get("availability") != "generation-safe":
+                    probs.append("asset role %s: substitute %s is not a generation-safe role" % (r_, s_))
+                elif roles["roles"][s_].get("substituteFor") != r_:
+                    probs.append("asset role %s: substitute %s does not declare substituteFor %s" % (r_, s_, r_))
+        elif subs:
+            probs.append("asset role %s is %s but lists substitutes" % (r_, v_.get("availability")))
+        if v_.get("substituteFor") and roles["roles"].get(v_["substituteFor"], {}).get("availability") != "reference-only":
+            probs.append("asset role %s substitutes for %s, which is not reference-only" % (r_, v_["substituteFor"]))
+    enums = []
+    def collect_enums(o):
+        if isinstance(o, dict):
+            if isinstance(o.get("allOf"), list) and len(o["allOf"]) == 2 and o["allOf"][0] == {"$ref": "#/definitions/assetRole"}:
+                enums.append(o["allOf"][1])
+            for v in o.values():
+                collect_enums(v)
+        elif isinstance(o, list):
+            for v in o:
+                collect_enums(v)
+    collect_enums(schema)
+    for r_, v_ in roles["roles"].items():
+        if v_.get("availability") == "reference-only":
+            occ = [e_ for e_ in enums if r_ in (e_.get("enum") or [e_.get("const")])]
+            if not occ:
+                probs.append("reference-only role %s does not occur in any schema field" % r_)
+            for e_ in occ:
+                missing = [s_ for s_ in v_.get("generationSafeSubstitutes", []) if s_ not in e_.get("enum", [])]
+                if "const" in e_ or missing:
+                    probs.append("schema field for %s does not accept its substitute(s) %s" % (r_, missing or v_.get("generationSafeSubstitutes")))
+    for r_, v_ in roles["roles"].items():
+        if v_.get("availability") == "blocked":
+            for nid, nd in schema["definitions"].items():
+                if not nid.startswith("node__"):
+                    continue
+                ct = nd["properties"]["content"]
+                for k, sub in ct["properties"].items():
+                    if r_ in json.dumps(sub) and k in ct["required"]:
+                        probs.append("blocked role %s sits in required field %s of %s: a generated page could not omit it" % (r_, k, nid))
+    if sorted(schema["properties"]["mode"]["enum"]) != ["generated", "reference"]:
+        probs.append("schema mode enum must be exactly ['reference', 'generated'], found %s" % schema["properties"]["mode"]["enum"])
+    if "mode" not in schema["required"]:
+        probs.append("schema must require 'mode'")
+    if sorted(k for k in roles["modes"] if k != "field") != sorted(schema["properties"]["mode"]["enum"]):
+        probs.append("asset-roles modes keys differ from the schema mode enum")
+    if example.get("mode") != "reference" or example.get("contentProvenance") != "evidence-reference":
+        probs.append("schema/example.pagespec.json must declare mode 'reference' with contentProvenance 'evidence-reference'")
+    for tid in templates["templates"]:
+        gp = os.path.join(REPO, "schema", "examples", "generated.%s.pagespec.json" % tid)
+        if not os.path.isfile(gp):
+            probs.append("schema/examples/generated.%s.pagespec.json is missing: every template needs a generation-safe example" % tid)
+            continue
+        gs = J(os.path.relpath(gp, REPO))
+        if gs.get("mode") != "generated" or gs.get("contentProvenance") != "generated":
+            probs.append("generated example for %s must declare mode 'generated' and contentProvenance 'generated'" % tid)
+        if gs.get("template") != tid:
+            probs.append("generated example %s declares template %s" % (os.path.basename(gp), gs.get("template")))
+        for path_, d_ in sv.iter_dicts(gs):
+            if "assetRole" in d_ and roles["roles"].get(d_["assetRole"], {}).get("availability") != "generation-safe":
+                probs.append("generated example %s uses non-generation-safe role %s at %s" % (os.path.basename(gp), d_["assetRole"], path_))
+    sb = roles.get("sourceBrand", {})
+    norm_ = lambda t_: " ".join(sv._words(t_))
+    if sorted(norm_(t_) for t_ in sb.get("names", [])) != sorted(norm_(t_) for t_ in roles["brandTextDenylist"]["terms"]):
+        probs.append("sourceBrand.names differ from brandTextDenylist.terms")
+    ref_texts = [norm_(t_) for t_ in sv.iter_text(example)]
+    for ph in sb.get("signatureCopy", []):
+        if not any(norm_(ph) in rt for rt in ref_texts):
+            probs.append("sourceBrand.signatureCopy %r does not occur in the reference example (not real source copy)" % ph)
+    if len(sb.get("signatureCopy", [])) < 6:
+        probs.append("sourceBrand.signatureCopy must keep at least 6 phrases")
+    deny_blob = " ".join(roles["refDenylist"]["terms"]).lower() + " " + manifest["source"]["url"].lower()
+    tlds = set(sb.get("urlLikeTlds", []))
+    for h_ in sb.get("hosts", []):
+        if h_.lower() not in deny_blob:
+            probs.append("sourceBrand host %r is not evidenced by refDenylist or manifest.source.url" % h_)
+        if h_.rsplit(".", 1)[-1] not in tlds:
+            probs.append("sourceBrand host %r has a TLD missing from urlLikeTlds" % h_)
+    if manifest["source"]["url"].split("//")[1].split("/")[0].replace("www.", "") not in sb.get("hosts", []):
+        probs.append("manifest source host is not in sourceBrand.hosts")
+    if sb.get("reservedPlaceholderDomains") != [".example", ".invalid"]:
+        probs.append("sourceBrand.reservedPlaceholderDomains must be ['.example', '.invalid']")
+    if not {"com", "co", "org", "net", "io", "example", "invalid"} <= tlds:
+        probs.append("sourceBrand.urlLikeTlds lost a common TLD")
+    co = sb.get("copyOverlap", {})
+    if co.get("shingleWords") != 4 or co.get("minWholeStringWords") != 2 or co.get("referenceExample") != "schema/example.pagespec.json":
+        probs.append("sourceBrand.copyOverlap must stay {referenceExample schema/example.pagespec.json, shingleWords 4, minWholeStringWords 2}")
+    try:
+        sv_repo = sv.load_repo(REPO)
+        if len(sv_repo["reference"]["shingles"]) < 100 or len(sv_repo["reference"]["whole"]) < 40:
+            probs.append("reference copy corpus is implausibly small (%d shingles, %d strings)" % (len(sv_repo["reference"]["shingles"]), len(sv_repo["reference"]["whole"])))
+    except Exception as ex_:  # noqa
+        probs.append("reference corpus failed to build: %s" % ex_)
+    check("asset availability pinned + reference/generated modes (%d roles: %d reference-only, %d generation-safe, %d blocked; %d generated example(s))" % (
+        len(roles["roles"]), real["referenceOnlyAssetRoles"], real["generationSafeAssetRoles"], real["blockedAssetRoles"], len(gen_examples)), probs)
+
+    # 22. validator canaries: the validator must still REJECT each token / mode failure (a no-op validator cannot pass this)
+    import copy as _copy
+    probs = []
+    crepo = sv.load_repo(REPO)
+    gen0 = J(os.path.relpath(gen_examples[0], REPO)) if gen_examples else None
+
+    def rules_of(spec_):
+        return {r_ for r_, _ in sv.validate(spec_, crepo)[0]}
+
+    def mut(base, fn):
+        b = _copy.deepcopy(base)
+        fn(b)
+        return b
+    canaries = [
+        ("TOKEN_RAW_COLOR", mut(example, lambda s_: s_["tokens"].__setitem__("surface", "#0c0c0c"))),
+        ("TOKEN_UNKNOWN", mut(example, lambda s_: s_["tokens"].__setitem__("surface", "semantic.surface.nope"))),
+        ("TOKEN_ARBITRARY_SPACING", mut(example, lambda s_: s_["tokens"].__setitem__("sectionPadding", "24px"))),
+        ("TOKEN_UNSUPPORTED_FONT", mut(example, lambda s_: s_["tokens"].__setitem__("fontSans", "Comic Sans MS"))),
+        ("TOKEN_SLOT_MISMATCH", mut(example, lambda s_: s_["tokens"].__setitem__("surface", "typography.fontFamily.sans"))),
+        ("TOKEN_THEME_COMBINATION", mut(example, lambda s_: s_["tokens"].__setitem__("text", "semantic.text.onButtonHover"))),
+        ("TOKEN_NOT_APPROVED", mut(example, lambda s_: s_["tokens"].__setitem__("border", "semantic.border.inputFocus"))),
+        ("MODE_PROVENANCE_MISMATCH", mut(example, lambda s_: s_.__setitem__("mode", "generated"))),
+    ]
+    if gen0 is not None:
+        def set_logo(s_):
+            for n_ in s_["nodes"]:
+                if n_["section"] == "shell.nav":
+                    n_["content"]["logo"]["assetRole"] = "brand.logo-mark"
+        def set_label(txt):
+            def f(s_):
+                for n_ in s_["nodes"]:
+                    if n_["section"] == "hero.course-intro":
+                        n_["content"]["cta"]["label"] = txt
+            return f
+        canaries += [
+            ("GENERATED_MODE_REFERENCE_ASSET", mut(gen0, set_logo)),
+            ("GENERATED_MODE_SOURCE_COPY", mut(gen0, set_label("Join Waitlist"))),  # whole-string rule only (2 words, not a signature phrase)
+            ("GENERATED_MODE_SOURCE_COPY", mut(gen0, set_label("Includes early access to discord for all"))),  # 4-word-run rule only
+            ("GENERATED_MODE_SOURCE_COPY", mut(gen0, set_label("Lock price at $48"))),  # signature-phrase rule only
+            ("GENERATED_MODE_SOURCE_URL", mut(gen0, set_label("thecodeflow.co"))),
+            ("GENERATED_MODE_URL_NOT_RESERVED", mut(gen0, set_label("shop.io"))),
+            ("BRAND_PASSOFF", mut(gen0, lambda s_: s_.__setitem__("route", "/codeflow"))),
+        ]
+    for rule_, spec_ in canaries:
+        if rule_ not in rules_of(spec_):
+            probs.append("validator no longer raises %s on a spec built to violate it" % rule_)
+    for name_, spec_ in [("reference example", example)] + [(os.path.basename(g_), J(os.path.relpath(g_, REPO))) for g_ in gen_examples]:
+        if rules_of(spec_):
+            probs.append("%s no longer validates cleanly: %s" % (name_, sorted(rules_of(spec_))))
+    check("validator canaries: %d token/mode failures still rejected, examples still clean" % len(canaries), probs)
+
+    # 23. hygiene: no absolute machine paths, no junk files
     probs = []
     pats = ["/" + "Users/", "/" + "home/", "C:" + "\\" + "Users"]
     for p in glob.glob(os.path.join(REPO, "**", "*"), recursive=True) + glob.glob(os.path.join(REPO, "**", ".*"), recursive=True):

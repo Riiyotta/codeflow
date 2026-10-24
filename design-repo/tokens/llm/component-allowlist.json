@@ -1,6 +1,6 @@
 {
   "$comment": "Closed list of what a generator may set. sections.*.variants.*.settableProperties must equal the schema node's properties for that (section, variant); verify_all.py enforces parity with the contract files and the schema. sections.*.retrievalEligible must equal the section contract's retrievalEligible (default true); verify_all.py enforces it and independently pins it.",
-  "allowlistVersion": "1.1.0",
+  "allowlistVersion": "1.2.0",
   "primitives": [
     "primitive.body-text",
     "primitive.button-pill",
@@ -190,15 +190,18 @@
     "contentProvenance",
     "fonts",
     "meta",
+    "mode",
     "nodes",
     "pageMotion",
     "pageSpecVersion",
     "route",
     "template",
-    "theme"
+    "theme",
+    "tokens"
   ],
   "assetRoles": [
     "brand.logo-mark",
+    "brand.logo-placeholder",
     "endpoint.analytics",
     "endpoint.form-action",
     "font.commercial-sans",
@@ -206,10 +209,16 @@
     "icon.arrow",
     "icon.discord",
     "identity.author-link",
+    "identity.link-placeholder",
     "meta.favicon",
+    "meta.favicon-placeholder",
     "meta.og-image",
+    "meta.og-placeholder",
+    "webgl.colormap-placeholder",
     "webgl.cube-model",
     "webgl.matcap",
+    "webgl.matcap-placeholder",
+    "webgl.model-placeholder",
     "webgl.sticker-colormap"
   ],
   "motionPatterns": [
@@ -241,7 +250,7 @@
     "template.waitlist-landing"
   ],
   "notOverridable": [
-    "tokens (no per-instance token/style override field exists in the PageSpec)",
+    "tokens (only the closed slots of PageSpec.tokens, each a catalog path from tokens/llm/token-policy.json pageSpecTokenSlots; no raw value, no per-section or per-component style override)",
     "anchorId (const per variant)",
     "cta.href (const '#signup')",
     "layer z-index values"

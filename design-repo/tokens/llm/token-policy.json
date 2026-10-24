@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "description": "Rules for using tokens. Category names are real keys of token-catalog.json counts.byCategory and slot names are real keys of the PageSpec `tokens` object, so extraction/verify_all.py resolves both. A PageSpec names a token by its catalog path; schema/semantic_validate.py rejects anything else (TOKEN_* rules in compatibility/graph.json).",
+  "rules": {
+    "rawValueRestrictions": {
+      "color": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: foundation colours are referenced by token path, never written as hex / rgb() / hsl() / a colour name",
+      "semanticColor": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: semantic colours (surface.*, text.*, border.*, line.*, marker.*) are referenced by token path; a theme resolves them",
+      "fontFamily": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: font families are referenced by token path; no raw family name or stack (the source fonts are licence-required, see assets/asset-roles.json)",
+      "fontWeight": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: weights are referenced by token path",
+      "typography": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: type scale and roles (size, line-height, tracking) exist only as typography.role.* tokens; no loose font-size values",
+      "spacing": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: spacing is referenced by token path; no px / rem / em / vh / vw / % / calc() written into a PageSpec or contract",
+      "radius": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: radii are referenced by token path",
+      "breakpoint": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: breakpoints are referenced by token path",
+      "layer": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: z-index layering is referenced by token path",
+      "iconSize": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: icon sizes are referenced by token path",
+      "motion": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: durations, easings, delays and offsets are referenced by token path; patterns come from tokens/llm/motion-patterns.json",
+      "layout": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: widths and columns are referenced by token path",
+      "component": "forbidden in primitives/, components/, sections/, templates/ and every PageSpec token slot: component tokens are referenced by token path"
+    },
+    "referenceSyntax": "{path.to.token} resolving against tokens/ (tokens/tokens_lib.py); in a PageSpec a bare catalog path, e.g. semantic.surface.page",
+    "rawLintCoverage": "Hex colours, rgb()/hsl() and named colours in every string of every PageSpec example (copy included; schema/semantic_validate.py checks the token slots themselves on every spec, whatever the example)"
+  },
+  "pageSpecTokenSlots": {
+    "$comment": "Every token a PageSpec can name. `tokens.*` slots are keys of the PageSpec `tokens` object (closed in schema/pagespec.schema.json); webglClear is the one pre-existing token field (layer.webgl-object content.clearColorToken). `allow` is the closed list of catalog paths a slot accepts. `kind` is the catalog category the slot expects.",
+    "surface": {
+      "location": "tokens.surface",
+      "kind": "semanticColor",
+      "required": true,
+      "themeResolved": true,
+      "allow": [
+        "semantic.surface.page",
+        "semantic.surface.buttonHover",
+        "semantic.surface.webglClear"
+      ],
+      "purpose": "Page background colour."
+    },
+    "text": {
+      "location": "tokens.text",
+      "kind": "semanticColor",
+      "required": true,
+      "themeResolved": true,
+      "contrastAgainst": "surface",
+      "allow": [
+        "semantic.text.primary",
+        "semantic.text.onButtonHover",
+        "semantic.text.placeholder",
+        "semantic.text.submit"
+      ],
+      "purpose": "Body text colour; must contrast with the surface slot."
+    },
+    "border": {
+      "location": "tokens.border",
+      "kind": "semanticColor",
+      "required": false,
+      "themeResolved": true,
+      "allow": [
+        "semantic.border.default"
+      ],
+      "purpose": "Border and rule colour."
+    },
+    "fontSans": {
+      "location": "tokens.fontSans",
+      "kind": "fontFamily",
+      "required": true,
+      "allow": [
+        "typography.fontFamily.sans"
+      ],
+      "assetField": "fonts.sans",
+      "purpose": "Body sans family."
+    },
+    "fontDisplay": {
+      "location": "tokens.fontDisplay",
+      "kind": "fontFamily",
+      "required": true,
+      "allow": [
+        "typography.fontFamily.sansCondensed"
+      ],
+      "assetField": "fonts.sans",
+      "purpose": "Display (condensed) family; shares the sans licence role."
+    },
+    "fontMono": {
+      "location": "tokens.fontMono",
+      "kind": "fontFamily",
+      "required": true,
+      "allow": [
+        "typography.fontFamily.mono"
+      ],
+      "assetField": "fonts.mono",
+      "purpose": "Mono family."
+    },
+    "sectionPadding": {
+      "location": "tokens.sectionPadding",
+      "kind": "spacing",
+      "required": true,
+      "allow": [
+        "spacing.section.padding",
+        "spacing.hero.paddingTop",
+        "spacing.hero.paddingBottom",
+        "spacing.signup.paddingTop",
+        "spacing.footer.paddingTop",
+        "spacing.footer.paddingBottom"
+      ],
+      "purpose": "Vertical rhythm of a section; a token, never a measured length."
+    },
+    "buttonRadius": {
+      "location": "tokens.buttonRadius",
+      "kind": "radius",
+      "required": true,
+      "allow": [
+        "radius.pill"
+      ],
+      "purpose": "Corner radius of pill controls."
+    },
+    "webglClear": {
+      "location": "nodes[layer.webgl-object].content.clearColorToken",
+      "kind": "color",
+      "required": true,
+      "themeResolved": false,
+      "allow": [
+        "color.webgl.clear"
+      ],
+      "purpose": "Clear colour of the fixed WebGL canvas (foundation colour, not theme-resolved)."
+    }
+  },
+  "themeRules": {
+    "$comment": "Pinned in extraction/verify_all.py (PINNED_TOKEN_RULES) as well as here.",
+    "themeMustExist": "spec.theme must be a key of token-catalog.json themes (tokens/themes/*.json).",
+    "themeResolved": "A slot marked themeResolved may only name a semantic token the declared theme resolves (catalog themes.<theme>.semanticTokens).",
+    "minTextContrast": 4.5,
+    "contrast": "The text slot, resolved through the theme, must reach minTextContrast (WCAG 2.x relative-luminance ratio) against the surface slot. This rejects text.primary on surface.buttonHover (identical colour, ratio 1) and text.onButtonHover on surface.page (identical colour).",
+    "fontAssetRole": "A font slot's token assetRole (typography.json) must equal the assetRole of its assetField in the PageSpec (fonts.sans, fonts.mono)."
+  },
+  "notGenerationApproved": [
+    "color.base.dark",
+    "color.base.grey",
+    "semantic.border.inputFocus",
+    "spacing.unusedVars.px",
+    "spacing.unusedVars.py"
+  ],
+  "notGenerationApprovedReason": "Exactly the catalog tokens whose token file marks them status 'unused' or 'effectively-invisible' (derived and compared by extraction/verify_all.py): they exist in the source CSS but never render, so a generator must not build on them.",
+  "overrides": "A PageSpec carries no per-instance style or token override. It names a closed set of page-level tokens in `tokens` (and clearColorToken); styling inside a section stays owned by the section/component contracts. Nothing else in a PageSpec can carry a colour, length or font."
+}

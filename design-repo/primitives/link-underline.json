@@ -12,7 +12,8 @@
     "motion.hoverOpacity.footerLink"
   ],
   "assetRoles": [
-    "identity.author-link"
+    "identity.author-link",
+    "identity.link-placeholder"
   ],
   "evidence": [
     "mv.motion.link-hover"

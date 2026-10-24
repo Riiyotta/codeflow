@@ -5,5 +5,5 @@ __pycache__/
 __MACOSX/
 Thumbs.db
 desktop.ini
-# NOTE: design-repo.zip lives OUTSIDE this folder (project root). The source project is not a git
-# repository today; if it becomes one, add "design-repo.zip" to the PROJECT-ROOT .gitignore.
+# NOTE: design-repo.zip lives OUTSIDE this folder (project root) and is listed in the PROJECT-ROOT .gitignore;
+# it is a generated artifact, never tracked.

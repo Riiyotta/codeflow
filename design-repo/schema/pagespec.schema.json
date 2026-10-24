@@ -2,15 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pagespec.schema.json",
   "title": "PageSpec (codeflow waitlist design-repo)",
-  "description": "Machine contract for a page composed from this design-repo. Closed everywhere. Per-(section, variant) node shapes are fully independent oneOf branches (no shared base + additionalProperties trap). Semantic rules live in semantic_validate.py.",
+  "description": "Machine contract for a page composed from this design-repo. Closed everywhere. `mode` (reference | generated) says whether the page is for the source brand or for any other brand; `tokens` names the page-level design tokens by catalog path (tokens/llm/token-catalog.json). Per-(section, variant) node shapes are fully independent oneOf branches (no shared base + additionalProperties trap). Semantic rules (token policy, generated-mode isolation, template cross-reference, compliance) live in semantic_validate.py.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "pageSpecVersion",
+    "mode",
     "template",
     "route",
     "theme",
     "contentProvenance",
+    "tokens",
     "meta",
     "fonts",
     "pageMotion",
@@ -18,7 +20,14 @@
   ],
   "properties": {
     "pageSpecVersion": {
-      "const": "1.1.0"
+      "const": "1.2.0"
+    },
+    "mode": {
+      "enum": [
+        "reference",
+        "generated"
+      ],
+      "description": "reference = a page for the source brand (every asset role available); generated = a page for any other brand (only generation-safe roles, no source brand, copy or hosts). Must agree with contentProvenance. See assets/asset-roles.json modes."
     },
     "template": {
       "enum": [
@@ -72,7 +81,10 @@
                   "$ref": "#/definitions/assetRole"
                 },
                 {
-                  "const": "meta.og-image"
+                  "enum": [
+                    "meta.og-image",
+                    "meta.og-placeholder"
+                  ]
                 }
               ]
             },
@@ -100,7 +112,10 @@
                   "$ref": "#/definitions/assetRole"
                 },
                 {
-                  "const": "meta.favicon"
+                  "enum": [
+                    "meta.favicon",
+                    "meta.favicon-placeholder"
+                  ]
                 }
               ]
             },
@@ -241,6 +256,62 @@
       "items": {
         "$ref": "#/definitions/node"
       }
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Page-level design tokens, each a catalog path (tokens/llm/token-catalog.json). Closed set of slots: tokens/llm/token-policy.json pageSpecTokenSlots. Whether a path is a real, approved, theme-valid token for its slot is checked by schema/semantic_validate.py (TOKEN_* rules); a raw colour, length or font name is rejected there.",
+      "required": [
+        "surface",
+        "text",
+        "fontSans",
+        "fontDisplay",
+        "fontMono",
+        "sectionPadding",
+        "buttonRadius"
+      ],
+      "properties": {
+        "surface": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "border": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "fontSans": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "fontDisplay": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "fontMono": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "sectionPadding": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "buttonRadius": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
     }
   },
   "definitions": {
@@ -259,6 +330,7 @@
     "assetRole": {
       "enum": [
         "brand.logo-mark",
+        "brand.logo-placeholder",
         "endpoint.analytics",
         "endpoint.form-action",
         "font.commercial-sans",
@@ -266,10 +338,16 @@
         "icon.arrow",
         "icon.discord",
         "identity.author-link",
+        "identity.link-placeholder",
         "meta.favicon",
+        "meta.favicon-placeholder",
         "meta.og-image",
+        "meta.og-placeholder",
+        "webgl.colormap-placeholder",
         "webgl.cube-model",
         "webgl.matcap",
+        "webgl.matcap-placeholder",
+        "webgl.model-placeholder",
         "webgl.sticker-colormap"
       ]
     },
@@ -479,7 +557,6 @@
             "intro",
             "versionTag",
             "cta",
-            "communityLink",
             "logo"
           ],
           "properties": {
@@ -549,7 +626,10 @@
                       "$ref": "#/definitions/assetRole"
                     },
                     {
-                      "const": "brand.logo-mark"
+                      "enum": [
+                        "brand.logo-mark",
+                        "brand.logo-placeholder"
+                      ]
                     }
                   ]
                 },
@@ -1277,7 +1357,10 @@
                           "$ref": "#/definitions/assetRole"
                         },
                         {
-                          "const": "identity.author-link"
+                          "enum": [
+                            "identity.author-link",
+                            "identity.link-placeholder"
+                          ]
                         }
                       ]
                     },
@@ -1364,7 +1447,10 @@
                           "$ref": "#/definitions/assetRole"
                         },
                         {
-                          "const": "identity.author-link"
+                          "enum": [
+                            "identity.author-link",
+                            "identity.link-placeholder"
+                          ]
                         }
                       ]
                     },
@@ -1416,7 +1502,10 @@
                           "$ref": "#/definitions/assetRole"
                         },
                         {
-                          "const": "identity.author-link"
+                          "enum": [
+                            "identity.author-link",
+                            "identity.link-placeholder"
+                          ]
                         }
                       ]
                     },
@@ -1446,7 +1535,10 @@
                       "$ref": "#/definitions/assetRole"
                     },
                     {
-                      "const": "brand.logo-mark"
+                      "enum": [
+                        "brand.logo-mark",
+                        "brand.logo-placeholder"
+                      ]
                     }
                   ]
                 },
@@ -1530,7 +1622,10 @@
                       "$ref": "#/definitions/assetRole"
                     },
                     {
-                      "const": "webgl.cube-model"
+                      "enum": [
+                        "webgl.cube-model",
+                        "webgl.model-placeholder"
+                      ]
                     }
                   ]
                 },
@@ -1560,7 +1655,10 @@
                         "$ref": "#/definitions/assetRole"
                       },
                       {
-                        "const": "webgl.matcap"
+                        "enum": [
+                          "webgl.matcap",
+                          "webgl.matcap-placeholder"
+                        ]
                       }
                     ]
                   },
@@ -1591,7 +1689,10 @@
                       "$ref": "#/definitions/assetRole"
                     },
                     {
-                      "const": "webgl.sticker-colormap"
+                      "enum": [
+                        "webgl.sticker-colormap",
+                        "webgl.colormap-placeholder"
+                      ]
                     }
                   ]
                 },

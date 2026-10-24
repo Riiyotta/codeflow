@@ -9,7 +9,8 @@
     "iconSize.logo"
   ],
   "assetRoles": [
-    "brand.logo-mark"
+    "brand.logo-mark",
+    "brand.logo-placeholder"
   ],
   "evidence": [
     "mv.asset.logo",

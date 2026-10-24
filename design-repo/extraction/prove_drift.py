@@ -158,6 +158,239 @@ CASES = [
 ]
 
 
+# ---- token catalog / policy and reference-generated mode -----------------------------------------------
+def edit_catalog(root, fn):
+    """Edit tokens/llm/token-catalog.json keeping the generator's exact formatting, so only the injected change differs."""
+    p = os.path.join(root, "tokens", "llm", "token-catalog.json")
+    with open(p, encoding="utf-8") as f:
+        d = json.load(f)
+    fn(d)
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(json.dumps(d, indent=1, ensure_ascii=False) + "\n")
+
+
+def _ar(root, fn):
+    edit_json(root, "assets/asset-roles.json", fn)
+
+
+GEN = "schema/examples/generated.template.waitlist-landing.pagespec.json"
+
+
+def _gen_node(d, section):
+    return [n for n in d["nodes"] if n["section"] == section][0]["content"]
+
+
+def _pol(root, fn):
+    edit_json(root, "tokens/llm/token-policy.json", fn)
+
+
+def _schema_nav_required_communitylink(d):
+    d["definitions"]["node__shell_nav__default"]["properties"]["content"]["required"].append("communityLink")
+
+
+def _schema_logo_const(d):
+    n = d["definitions"]["node__shell_nav__default"]["properties"]["content"]["properties"]["logo"]["properties"]["assetRole"]
+    n["allOf"][1] = {"const": "brand.logo-mark"}
+
+
+def _noop(root, old, new):
+    """Disable one validator rule in the scratch copy; the anchor must exist, so a refactor cannot turn this into a silent no-op."""
+    p = os.path.join(root, "schema", "semantic_validate.py")
+    with open(p, encoding="utf-8") as f:
+        t = f.read()
+    assert old in t, "anchor not found in semantic_validate.py: " + old
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(t.replace(old, new))
+
+
+TOKEN_MODE_CASES = [
+    # --- the catalog cannot be edited out of sync with the real token files
+    ("catalog value edited by hand", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d["tokens"]["color.base.black"].__setitem__("value", "#000000"))),
+    ("token file edited, catalog not regenerated", "token catalog",
+     lambda r: edit_json(r, "tokens/00-foundation/radius.json", lambda d: d["radius"]["pill"].__setitem__("value", "4em"))),
+    ("token deleted from the catalog by hand", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d["tokens"].pop("spacing.section.padding"))),
+    ("phantom token added to the catalog", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d["tokens"].__setitem__("color.base.neon", {"category": "color", "value": "#39ff14", "evidence": "mv.color.black"}))),
+    ("token file loses a token, catalog not regenerated", "token catalog",
+     lambda r: edit_json(r, "tokens/00-foundation/color.json", lambda d: d["color"]["base"].pop("dark"))),
+    ("token category edited in the catalog", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d["tokens"]["radius.pill"].__setitem__("category", "spacing"))),
+    ("theme resolution edited in the catalog", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d["themes"]["dark"]["resolves"].__setitem__("semantic.text.primary", "#ffffff"))),
+    ("theme file edited, catalog not regenerated", "token catalog",
+     lambda r: edit_json(r, "tokens/themes/dark.json", lambda d: d["resolves"].__setitem__("text.primary", "#ffffff"))),
+    ("token status edited in the catalog", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d["tokens"]["color.base.dark"].pop("status"))),
+    ("catalog version edited alone", "token catalog",
+     lambda r: edit_catalog(r, lambda d: d.__setitem__("version", "2.0.0"))),
+    # --- the policy cannot drift from the catalog
+    ("policy restriction names a category the catalog does not have", "token policy",
+     lambda r: _pol(r, lambda d: d["rules"]["rawValueRestrictions"].__setitem__("shadow", "forbidden"))),
+    ("policy loses a category restriction", "token policy",
+     lambda r: _pol(r, lambda d: d["rules"]["rawValueRestrictions"].pop("spacing"))),
+    ("not-approved list drops an unused token", "token policy",
+     lambda r: _pol(r, lambda d: d["notGenerationApproved"].remove("color.base.dark"))),
+    ("not-approved list gains an approved token", "token policy",
+     lambda r: _pol(r, lambda d: d["notGenerationApproved"].append("semantic.text.primary"))),
+    ("token file marks a token unused, policy not updated", "token policy",
+     lambda r: (edit_json(r, "tokens/00-foundation/color.json", lambda d: d["color"]["base"]["blush"].__setitem__("status", "unused")),
+                edit_catalog(r, lambda d: d["tokens"]["color.base.blush"].__setitem__("status", "unused")))),
+    ("slot allow list widened to a different VALID token (flash colour as surface)", "token policy",
+     lambda r: _pol(r, lambda d: d["pageSpecTokenSlots"]["surface"]["allow"].append("semantic.surface.solveFlash"))),
+    ("slot allows a token the catalog does not have", "token policy",
+     lambda r: _pol(r, lambda d: d["pageSpecTokenSlots"]["text"]["allow"].append("semantic.text.neon"))),
+    ("slot allows a token of the wrong category", "token policy",
+     lambda r: _pol(r, lambda d: d["pageSpecTokenSlots"]["sectionPadding"]["allow"].append("radius.pill"))),
+    ("slot allows a not-approved token", "token policy",
+     lambda r: _pol(r, lambda d: d["pageSpecTokenSlots"]["border"]["allow"].append("semantic.border.inputFocus"))),
+    ("slot removed from the policy", "token policy",
+     lambda r: _pol(r, lambda d: d["pageSpecTokenSlots"].pop("buttonRadius"))),
+    ("slot made optional (different valid value)", "token policy",
+     lambda r: _pol(r, lambda d: d["pageSpecTokenSlots"]["text"].__setitem__("required", False))),
+    ("minimum text contrast lowered to a different valid number", "token policy",
+     lambda r: _pol(r, lambda d: d["themeRules"].__setitem__("minTextContrast", 1.5))),
+    ("schema tokens object gains a slot the policy does not have", "token policy",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["properties"]["tokens"]["properties"].__setitem__("accent", {"type": "string", "minLength": 1, "maxLength": 80}))),
+    ("schema tokens object stops requiring text", "token policy",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["properties"]["tokens"]["required"].remove("text"))),
+    ("schema tokens object opened up", "token policy",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["properties"]["tokens"].__setitem__("additionalProperties", True))),
+    ("schema WebGL clear colour const points at another token", "token policy",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["definitions"]["node__layer_webgl_object__default"]["properties"]["content"]["properties"]["clearColorToken"].__setitem__("const", "color.base.black"))),
+    ("schema theme enum gains a theme with no theme file", "token policy",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["properties"]["theme"]["enum"].append("light"))),
+    ("primitive references a token the catalog does not have", "token policy",
+     lambda r: edit_json(r, "primitives/button-pill.json", lambda d: d["tokens"].append("component.button.glow"))),
+    ("raw hex colour written into a PageSpec example's copy", "token policy",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: _gen_node(d, "hero.course-intro")["priceNote"].__setitem__("line2", "**GUARANTEES** ENTRY #ff00aa"))),
+    ("manifest tokenCatalogVersion drift", "version parity",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d.__setitem__("tokenCatalogVersion", "9.9.9"))),
+    ("manifest tokenPolicyVersion drift", "version parity",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d.__setitem__("tokenPolicyVersion", "9.9.9"))),
+    ("manifest assetRolesVersion drift", "version parity",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d.__setitem__("assetRolesVersion", "9.9.9"))),
+    ("token policy version bumped alone", "version parity",
+     lambda r: _pol(r, lambda d: d.__setitem__("version", "9.9.9"))),
+    ("manifest tokenCategories count drift", "manifest + README counts",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d["counts"].__setitem__("tokenCategories", 12))),
+    ("manifest tokenPolicySlots count drift", "manifest + README counts",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d["counts"].__setitem__("tokenPolicySlots", 8))),
+    ("manifest blockedAssetRoles count drift", "manifest + README counts",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d["counts"].__setitem__("blockedAssetRoles", 2))),
+    ("README pageSpecExamples count drift", "manifest + README counts",
+     lambda r: edit_text(r, "README.md", lambda t: t.replace("| pageSpecExamples | 2 |", "| pageSpecExamples | 3 |"))),
+    ("manifest entry point for a token file that does not exist", "entryPoints self-contained",
+     lambda r: edit_json(r, "registry.manifest.json", lambda d: d["entryPoints"].append("tokens/llm/token-catalog-old.json"))),
+    ("token policy file deleted", "required token/mode files",
+     lambda r: os.remove(os.path.join(r, "tokens", "llm", "token-policy.json"))),
+    ("generated example deleted", "required token/mode files",
+     lambda r: os.remove(os.path.join(r, GEN))),
+    # --- the examples must use approved tokens
+    ("example uses a raw hex colour as its surface", "semantic validator on example",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: d["tokens"].__setitem__("surface", "#0c0c0c"))),
+    ("example uses arbitrary spacing", "semantic validator on example",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: d["tokens"].__setitem__("sectionPadding", "24px"))),
+    ("example names an unsupported font", "semantic validator on example",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: d["tokens"].__setitem__("fontSans", "Comic Sans MS"))),
+    ("example names an unknown token", "semantic validator on example",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: d["tokens"].__setitem__("buttonRadius", "radius.square"))),
+    ("example pairs text with an identical surface", "semantic validator on example",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: d["tokens"].__setitem__("text", "semantic.text.onButtonHover"))),
+    ("generated example uses a not-approved token", "semantic validator on example",
+     lambda r: edit_json(r, GEN, lambda d: d["tokens"].__setitem__("border", "semantic.border.inputFocus"))),
+    # --- the validator itself must keep enforcing (only the canaries can see a no-op validator)
+    ("token checks disabled in the validator", "validator canaries",
+     lambda r: _noop(r, "    check_tokens(spec, repo, report)\n", "    pass\n")),
+    ("mode checks disabled in the validator", "validator canaries",
+     lambda r: _noop(r, "    check_mode(spec, repo, report)\n", "    pass\n")),
+    ("contrast rule disabled", "validator canaries",
+     lambda r: _noop(r, "if r is not None and r < need:", "if False:")),
+    ("reserved-domain rule disabled", "validator canaries",
+     lambda r: _noop(r, "if not host.endswith(reserved):", "if False:")),
+    ("source-host rule disabled", "validator canaries",
+     lambda r: _noop(r, "        for h in hosts:\n            if h in low:", "        for h in []:\n            if h in low:")),
+    ("source-copy whole-string rule disabled", "validator canaries",
+     lambda r: _noop(r, "if len(w) >= ref[\"minw\"] and joined in ref[\"whole\"]:", "if False:")),
+    ("source-copy 4-word-run rule disabled", "validator canaries",
+     lambda r: _noop(r, "elif _shingles(w, ref[\"n\"]) & ref[\"shingles\"]:", "elif False:")),
+    ("source-copy signature-phrase rule disabled", "validator canaries",
+     lambda r: _noop(r, "if ns and (\" \" + ns + \" \") in (\" \" + joined + \" \"):", "if False:")),
+    ("raw-colour classification disabled", "validator canaries",
+     lambda r: _noop(r, "    if is_raw_color(value):\n", "    if False:\n")),
+    ("not-approved rule disabled", "validator canaries",
+     lambda r: _noop(r, "    if value in pol[\"notGenerationApproved\"]:\n", "    if False:\n")),
+    # --- asset availability and modes
+    ("availability outside the closed vocabulary", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["icon.arrow"].__setitem__("availability", "sometimes"))),
+    ("asset role left unclassified (no availability)", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["icon.arrow"].pop("availability"))),
+    ("availabilityValues loses 'blocked'", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["availabilityValues"].remove("blocked"))),
+    ("the source's logo made generation-safe (different valid value)", "asset availability pinned",
+     lambda r: _ar(r, lambda d: (d["roles"]["brand.logo-mark"].__setitem__("availability", "generation-safe"), d["roles"]["brand.logo-mark"].pop("generationSafeSubstitutes")))),
+    ("the author links made generation-safe", "asset availability pinned",
+     lambda r: _ar(r, lambda d: (d["roles"]["identity.author-link"].__setitem__("availability", "generation-safe"), d["roles"]["identity.author-link"].pop("generationSafeSubstitutes")))),
+    ("the blocked Discord glyph made generation-safe", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["icon.discord"].__setitem__("availability", "generation-safe"))),
+    ("the blocked Discord glyph made reference-only", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["icon.discord"].__setitem__("availability", "reference-only"))),
+    ("the placeholder logo made reference-only", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["brand.logo-placeholder"].__setitem__("availability", "reference-only"))),
+    ("a reference-only role loses its substitute", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["meta.og-image"].__setitem__("generationSafeSubstitutes", []))),
+    ("a reference-only role points at a non-substitute", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["meta.favicon"].__setitem__("generationSafeSubstitutes", ["icon.arrow"]))),
+    ("the blocked role gains a substitute", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["icon.discord"].__setitem__("generationSafeSubstitutes", ["icon.arrow"]))),
+    ("a new asset role nobody pinned", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"].__setitem__("brand.logo-extra", dict(d["roles"]["brand.logo-placeholder"])))),
+    ("generatedModeGuidance removed", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["roles"]["icon.arrow"].pop("generatedModeGuidance"))),
+    ("schema mode enum widened", "asset availability pinned",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["properties"]["mode"]["enum"].append("staging"))),
+    ("schema mode made optional", "asset availability pinned",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", lambda d: d["required"].remove("mode"))),
+    ("asset-roles modes block loses 'generated'", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["modes"].pop("generated"))),
+    ("schema logo field stops accepting its substitute", "asset availability pinned",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", _schema_logo_const)),
+    ("blocked community link made required in the nav", "asset availability pinned",
+     lambda r: edit_json(r, "schema/pagespec.schema.json", _schema_nav_required_communitylink)),
+    ("reference example claims mode generated", "asset availability pinned",
+     lambda r: edit_json(r, "schema/example.pagespec.json", lambda d: d.__setitem__("mode", "generated"))),
+    ("generated example claims mode reference", "asset availability pinned",
+     lambda r: edit_json(r, GEN, lambda d: d.__setitem__("mode", "reference"))),
+    ("generated example keeps a reference-only role", "asset availability pinned",
+     lambda r: edit_json(r, GEN, lambda d: _gen_node(d, "shell.nav")["logo"].__setitem__("assetRole", "brand.logo-mark"))),
+    ("source signature phrase that is not in the real source copy", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["signatureCopy"].append("buy now and save big"))),
+    ("source signature phrases cut below six", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"].__setitem__("signatureCopy", d["sourceBrand"]["signatureCopy"][:3]))),
+    ("source host list loses the real site", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["hosts"].remove("thecodeflow.co"))),
+    ("source host that no evidence supports", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["hosts"].append("madeup.dev"))),
+    ("reserved placeholder domains widened to .com", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["reservedPlaceholderDomains"].append(".com"))),
+    ("URL TLD list loses a common TLD", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["urlLikeTlds"].remove("com"))),
+    ("copy-overlap shingle size loosened", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["copyOverlap"].__setitem__("shingleWords", 8))),
+    ("sourceBrand names diverge from the brand denylist", "asset availability pinned",
+     lambda r: _ar(r, lambda d: d["sourceBrand"]["names"].append("Acme Studio"))),
+    ("generated example: source copy reintroduced", "semantic validator on example",
+     lambda r: edit_json(r, GEN, lambda d: _gen_node(d, "hero.course-intro")["cta"].__setitem__("label", "Reserve your Spot"))),
+    ("generated example: real URL reintroduced", "semantic validator on example",
+     lambda r: edit_json(r, GEN, lambda d: _gen_node(d, "shell.footer-wordmark")["credit"].__setitem__("linkLabel", "studio.com"))),
+    ("generated example: source brand reintroduced", "semantic validator on example",
+     lambda r: edit_json(r, GEN, lambda d: d["meta"].__setitem__("title", "Join Waitlist - thecodeflow.co"))),
+]
+
+
+CASES += TOKEN_MODE_CASES
+
 # (name, inject, regex that must appear in the output): the run must still PASS (rc 0), only warn
 WARN_CASES = [
     ("hero 1900px -> warn only", lambda r: edit_json(r, "extraction/measured-values.json", lambda d: set_height(d, "hero.course-intro/default", 1900)),

@@ -1,9 +1,20 @@
 {
-  "pageSpecVersion": "1.1.0",
+  "pageSpecVersion": "1.2.0",
+  "mode": "reference",
   "template": "template.waitlist-landing",
   "route": "/",
   "theme": "dark",
   "contentProvenance": "evidence-reference",
+  "tokens": {
+    "surface": "semantic.surface.page",
+    "text": "semantic.text.primary",
+    "border": "semantic.border.default",
+    "fontSans": "typography.fontFamily.sans",
+    "fontDisplay": "typography.fontFamily.sansCondensed",
+    "fontMono": "typography.fontFamily.mono",
+    "sectionPadding": "spacing.section.padding",
+    "buttonRadius": "radius.pill"
+  },
   "meta": {
     "title": "Join Waitlist — thecodeflow.co",
     "description": "Level up your Webflow game by learning Javascript. Tailored to no-code and Webflow developers specifically, with 10+ hours of content, from zero experience to having no limits on what you can build.",

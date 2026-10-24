@@ -1,0 +1,568 @@
+{
+  "pageSpecVersion": "1.2.0",
+  "mode": "generated",
+  "template": "template.waitlist-landing",
+  "route": "/glaze-club",
+  "theme": "dark",
+  "contentProvenance": "generated",
+  "tokens": {
+    "surface": "semantic.surface.page",
+    "text": "semantic.text.primary",
+    "border": "semantic.border.default",
+    "fontSans": "typography.fontFamily.sans",
+    "fontDisplay": "typography.fontFamily.sansCondensed",
+    "fontMono": "typography.fontFamily.mono",
+    "sectionPadding": "spacing.section.padding",
+    "buttonRadius": "radius.pill"
+  },
+  "meta": {
+    "title": "Harbor Kiln Glaze Club",
+    "description": "A friendly ceramics studio taking early reservations for its first six week clay workshop, with all materials and kiln firings included.",
+    "ogImage": {
+      "assetRole": "meta.og-placeholder",
+      "source": "placeholder",
+      "ref": "placeholder:og-image"
+    },
+    "favicon": {
+      "assetRole": "meta.favicon-placeholder",
+      "source": "placeholder",
+      "ref": "placeholder:favicon"
+    }
+  },
+  "fonts": {
+    "sans": {
+      "assetRole": "font.commercial-sans",
+      "source": "fallback-stack"
+    },
+    "mono": {
+      "assetRole": "font.mono",
+      "source": "fallback-stack"
+    }
+  },
+  "pageMotion": {
+    "patterns": [
+      "page-fade-in",
+      "smooth-scroll-wheel",
+      "anchor-scroll"
+    ],
+    "reducedMotionFallback": "no-fade-native-scroll"
+  },
+  "nodes": [
+    {
+      "section": "shell.nav",
+      "variant": "default",
+      "content": {
+        "intro": "A small **weekend studio** for people who want to make **glazed ceramics** with their hands. From a first pinch pot to a full **dinner set,** with clay, kilns and good company included.",
+        "versionTag": "(season 01)",
+        "cta": {
+          "label": "Save my seat",
+          "href": "#signup"
+        },
+        "logo": {
+          "assetRole": "brand.logo-placeholder",
+          "source": "placeholder",
+          "ref": "placeholder:logo"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "cta-hover"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "hero.course-intro",
+      "variant": "default",
+      "anchorId": "intro",
+      "content": {
+        "eyebrow": "A 6 WEEK CLAY WORKSHOP",
+        "heading": {
+          "lines": [
+            [
+              {
+                "text": "CLAY THAT",
+                "layer": "front"
+              }
+            ],
+            [
+              {
+                "text": "STAYS WITH YOU",
+                "layer": "front"
+              }
+            ],
+            [
+              {
+                "text": "LONG AFTER",
+                "layer": "behind-canvas"
+              }
+            ]
+          ]
+        },
+        "subheading": {
+          "regular": "CERAMICS CLASS FOR",
+          "bold": "COMPLETE BEGINNERS"
+        },
+        "cta": {
+          "label": "Hold a place",
+          "href": "#signup"
+        },
+        "priceNote": {
+          "line1": "*HOLD SEATS AT **$48,**",
+          "line2": "**CONFIRMED** BY EMAIL"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade",
+          "cta-hover"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "list.numbered-topics",
+      "variant": "default",
+      "anchorId": "content",
+      "content": {
+        "heading": "WHAT WE MAKE",
+        "items": [
+          {
+            "text": "PINCH POTS",
+            "layer": "front"
+          },
+          {
+            "text": "COIL BOWLS",
+            "layer": "front"
+          },
+          {
+            "text": "SLAB TILES",
+            "layer": "behind-canvas"
+          },
+          {
+            "text": "WHEEL BASICS",
+            "layer": "front"
+          },
+          {
+            "text": "TRIMMING",
+            "layer": "front"
+          },
+          {
+            "text": "HANDLES",
+            "layer": "front"
+          },
+          {
+            "text": "GLAZE CHEMISTRY",
+            "layer": "front"
+          },
+          {
+            "text": "BRUSH WORK",
+            "layer": "front"
+          },
+          {
+            "text": "DIPPING",
+            "layer": "front"
+          },
+          {
+            "text": "WAX RESIST",
+            "layer": "front"
+          },
+          {
+            "text": "KILN LOADING",
+            "layer": "front"
+          },
+          {
+            "text": "FIRING CURVES",
+            "layer": "behind-canvas"
+          },
+          {
+            "text": "TEST TILES",
+            "layer": "front"
+          },
+          {
+            "text": "MUGS",
+            "layer": "front"
+          },
+          {
+            "text": "PLATES",
+            "layer": "front"
+          },
+          {
+            "text": "VASES",
+            "layer": "front"
+          },
+          {
+            "text": "LAMPS",
+            "layer": "front"
+          },
+          {
+            "text": "PLANTERS",
+            "layer": "front"
+          },
+          {
+            "text": "TEA SETS",
+            "layer": "front"
+          },
+          {
+            "text": "GIFT SETS",
+            "layer": "behind-canvas"
+          }
+        ],
+        "summary": "**Six weeks** of hands-on **studio time,** from raw clay to finished pieces, with every firing included and **tools on loan**"
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "content.block-pairs",
+      "variant": "feature-pairs",
+      "anchorId": "cta",
+      "content": {
+        "rows": [
+          {
+            "left": {
+              "label": "SESSIONS",
+              "headingLines": [
+                "12 EVENINGS",
+                "IN THE STUDIO"
+              ],
+              "body": "Split into **short evening blocks,** you'll practise shaping and glazing in a calm room, and you can still catch up on a missed night with a __weekend open session__.",
+              "monoNote": [
+                "• SMALL GROUPS OF 8",
+                "• ALL CLAY INCLUDED",
+                "• OPEN STUDIO SUNDAYS",
+                "• SHARED KILN LOADS",
+                "• ONE GALA FIRING"
+              ]
+            },
+            "right": {
+              "label": "LEVELS",
+              "headingLines": [
+                "FIRST TIMER",
+                "TO CONFIDENT"
+              ],
+              "body": "**No experience needed.** Each week is paced for people at any stage, so __you can begin from where you are__ and leave with pieces you are proud to use every day.",
+              "monoNote": [
+                "> START ANY SEASON",
+                "< PAUSE ANY TIME"
+              ]
+            }
+          },
+          {
+            "left": {
+              "label": "EXTRAS (1/2)",
+              "headingLines": [
+                "OPEN",
+                "STUDIO"
+              ],
+              "body": "**Practise between classes** with open hours, shared tools and friendly help from the people who run the kilns. Plus guest evenings with __visiting potters__."
+            },
+            "right": {
+              "label": "EXTRAS (2/2)",
+              "headingLines": [
+                "GALA",
+                "FIRING"
+              ],
+              "body": "**Finish with a group firing:** load the big kiln together and open it a few days later to find your pieces transformed."
+            }
+          }
+        ]
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "cta.pitch-timeline",
+      "variant": "default",
+      "anchorId": "cta",
+      "content": {
+        "kicker": "Make something with clay",
+        "heading": {
+          "lines": [
+            [
+              {
+                "text": "MAKE",
+                "layer": "front"
+              },
+              {
+                "text": "A",
+                "layer": "behind-canvas"
+              }
+            ],
+            [
+              {
+                "text": "WHOLE SET",
+                "layer": "front"
+              }
+            ]
+          ]
+        },
+        "cta": {
+          "label": "Hold a place",
+          "href": "#signup"
+        },
+        "priceNote": {
+          "line1": "*HOLD SEATS AT **$48,**",
+          "line2": "**CONFIRMED** BY EMAIL"
+        },
+        "row": {
+          "left": {
+            "label": "SCHEDULE",
+            "headingLines": [
+              "STARTS APRIL",
+              "2027"
+            ],
+            "body": "**Classes begin in early April.** New evenings open each week, with extra open sessions added once the first group has settled in.",
+            "monoNote": [
+              "• WEEK 1 LATE MARCH",
+              "• STUDIO OPEN",
+              "• FIRST GLAZE NIGHT"
+            ]
+          },
+          "right": {
+            "label": "COST",
+            "headingLines": [
+              "HOLD SEATS",
+              "AT $48*"
+            ],
+            "body": "**By joining the list now.** You'll get a reduced deposit before booking opens, so you can plan early, keep a seat in the first group, and pay less.",
+            "monoNote": [
+              "* AFTER LAUNCH EXPECT ABOUT $60"
+            ]
+          }
+        },
+        "timeline": {
+          "cornerLabel": "COST",
+          "columns": [
+            {
+              "title": "LIST AND EARLY DEPOSIT",
+              "date": "MAR 2027"
+            },
+            {
+              "title": "FIRST GROUP BEGINS",
+              "date": "APR 2027"
+            },
+            {
+              "title": "ALL SEASONS OPEN",
+              "date": "LATER IN 2027"
+            }
+          ],
+          "rows": [
+            {
+              "price": "$48",
+              "markerColumn": 1,
+              "bold": true
+            },
+            {
+              "price": "$60+",
+              "markerColumn": 3,
+              "bold": false
+            }
+          ]
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-word",
+          "alpha-fade",
+          "cta-hover",
+          "scale-line",
+          "scale-dot"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "cta.waitlist-form",
+      "variant": "default",
+      "anchorId": "signup",
+      "content": {
+        "headingLines": [
+          "SAVE A",
+          "PLACE"
+        ],
+        "body": "**Hold the early price of $48 and keep a seat in the first group.** We will write rarely, mostly about the start date and open studio hours.",
+        "perks": [
+          "Early deposit at a reduced price",
+          "First pick of studio evenings",
+          "A seat in the first group"
+        ],
+        "fields": {
+          "name": {
+            "label": "Your first name *",
+            "placeholder": "Jo Potter"
+          },
+          "email": {
+            "label": "Where we write *",
+            "placeholder": "you@mail.example"
+          }
+        },
+        "submit": {
+          "label": "Count me in",
+          "waitLabel": "One moment!"
+        },
+        "success": {
+          "heading": "YOU ARE ON THE LIST.",
+          "subline": "See you at the wheel!"
+        },
+        "error": "That did not send. Please try again.",
+        "action": {
+          "assetRole": "endpoint.form-action",
+          "source": "placeholder",
+          "ref": "placeholder:waitlist-endpoint"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "text-reveal-word",
+          "alpha-fade",
+          "scale-line",
+          "scramble-text"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "shell.footer-wordmark",
+      "variant": "default",
+      "content": {
+        "social": {
+          "label": "FOLLOW THE KILN",
+          "link": {
+            "assetRole": "identity.link-placeholder",
+            "source": "placeholder",
+            "ref": "placeholder:social-profile"
+          }
+        },
+        "wordmark": [
+          {
+            "text": "HARBOR",
+            "layer": "front"
+          },
+          {
+            "text": "KILN",
+            "layer": "behind-canvas-deep"
+          },
+          {
+            "text": "CLAY",
+            "layer": "behind-canvas"
+          },
+          {
+            "text": "CLUB",
+            "layer": "front"
+          }
+        ],
+        "siteNav": {
+          "label": "STUDIO",
+          "links": [
+            {
+              "label": "START",
+              "href": "#intro"
+            },
+            {
+              "label": "CLASSES",
+              "href": "#content"
+            },
+            {
+              "label": "EXTRAS",
+              "href": "#cta"
+            },
+            {
+              "label": "RESERVE",
+              "href": "#signup"
+            }
+          ]
+        },
+        "privacy": {
+          "label": "PRIVACY NOTES",
+          "link": {
+            "assetRole": "identity.link-placeholder",
+            "source": "placeholder",
+            "ref": "placeholder:privacy-policy"
+          }
+        },
+        "credit": {
+          "years": "© 2027",
+          "madeBy": "CRAFTED BY",
+          "linkLabel": "STUDIO.EXAMPLE",
+          "link": {
+            "assetRole": "identity.link-placeholder",
+            "source": "placeholder",
+            "ref": "placeholder:author-site"
+          }
+        },
+        "logo": {
+          "assetRole": "brand.logo-placeholder",
+          "source": "placeholder",
+          "ref": "placeholder:logo"
+        }
+      },
+      "motion": {
+        "patterns": [
+          "scramble-text",
+          "text-reveal-char-drop",
+          "alpha-fade",
+          "link-hover-opacity"
+        ],
+        "reducedMotionFallback": "final-state-instant"
+      }
+    },
+    {
+      "section": "layer.webgl-object",
+      "variant": "default",
+      "content": {
+        "model": {
+          "assetRole": "webgl.model-placeholder",
+          "source": "placeholder",
+          "ref": "placeholder:3d-object"
+        },
+        "matcaps": [
+          {
+            "assetRole": "webgl.matcap-placeholder",
+            "source": "placeholder",
+            "ref": "placeholder:matcap-body"
+          },
+          {
+            "assetRole": "webgl.matcap-placeholder",
+            "source": "placeholder",
+            "ref": "placeholder:matcap-stickers"
+          }
+        ],
+        "colorMap": {
+          "assetRole": "webgl.colormap-placeholder",
+          "source": "placeholder",
+          "ref": "placeholder:color-map"
+        },
+        "clearColorToken": "color.webgl.clear"
+      },
+      "motion": {
+        "patterns": [
+          "webgl-drop-in",
+          "webgl-idle-tumble",
+          "webgl-scroll-coupling",
+          "webgl-pointer-inertia",
+          "webgl-click-bump",
+          "webgl-solve",
+          "webgl-cta-hover-darken"
+        ],
+        "reducedMotionFallback": "static-single-frame"
+      }
+    }
+  ]
+}

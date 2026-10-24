@@ -1,6 +1,6 @@
 {
   "$comment": "Rhythm / position / compliance rules JSON Schema cannot express. Each rule id here must exist in schema/semantic_validate.py RULES with the same severity (extraction/verify_all.py checks this).",
-  "graphVersion": "1.1.0",
+  "graphVersion": "1.2.0",
   "nodes": [
     "content.block-pairs",
     "cta.pitch-timeline",
@@ -151,8 +151,8 @@
     {
       "id": "BRAND_PASSOFF",
       "severity": "error",
-      "description": "A PageSpec with contentProvenance 'generated' may not contain the real brand or author identity in any text (brandTextDenylist).",
-      "exception": "contentProvenance 'evidence-reference' (the bundled example) may carry real copy for reference only and must never be published as the real brand."
+      "description": "A PageSpec in mode 'generated' (or with contentProvenance 'generated') may not contain the real brand or author identity in any text or in its route (brandTextDenylist).",
+      "exception": "mode 'reference' / contentProvenance 'evidence-reference' (the bundled example) may carry real copy for reference only and must never be published as the real brand."
     },
     {
       "id": "NO_MARQUEE_SECTION",
@@ -183,6 +183,71 @@
       "id": "SECTION_SOURCE_STRUCTURE",
       "severity": "error",
       "description": "source.lines is a valid 'a-b' range, source.id equals every variant anchorId, and no two sections claim the same source range. verify_all.py checks the range against the real file."
+    },
+    {
+      "id": "TOKEN_UNKNOWN",
+      "severity": "error",
+      "description": "A token named in a PageSpec slot must be a path in tokens/llm/token-catalog.json + token-policy.json (the catalog is rebuilt from the real token files by verify_all). Anything else, including a string that is not a token path, is rejected."
+    },
+    {
+      "id": "TOKEN_RAW_COLOR",
+      "severity": "error",
+      "description": "No token slot may carry a raw colour: hex, rgb()/rgba(), hsl()/hsla(), hwb/lab/lch/oklab/oklch/color(), or a CSS colour name. Name a colour token."
+    },
+    {
+      "id": "TOKEN_ARBITRARY_SPACING",
+      "severity": "error",
+      "description": "A spacing slot may not carry a written length (px, rem, em, vh, vw, %, ch, calc(), a bare number, or a shorthand of them). Name a spacing token."
+    },
+    {
+      "id": "TOKEN_UNSUPPORTED_FONT",
+      "severity": "error",
+      "description": "A font slot may not carry a font name or stack (the source fonts are licence-required). Name a typography.fontFamily token; the font file itself follows the assetRole policy."
+    },
+    {
+      "id": "TOKEN_SLOT_MISMATCH",
+      "severity": "error",
+      "description": "A token must be one the slot accepts (token-policy.json pageSpecTokenSlots.<slot>.allow), and a font slot's token assetRole must equal the assetRole of the matching PageSpec fonts field."
+    },
+    {
+      "id": "TOKEN_THEME_COMBINATION",
+      "severity": "error",
+      "description": "spec.theme must be a theme of the catalog; a theme-resolved slot may only name a semantic token that theme resolves; and the text slot must reach minTextContrast (4.5) against the surface slot as the theme resolves them."
+    },
+    {
+      "id": "TOKEN_NOT_APPROVED",
+      "severity": "error",
+      "description": "A token listed in token-policy.json notGenerationApproved (the catalog tokens whose files mark them 'unused' or 'effectively-invisible') may not be used by a generated page."
+    },
+    {
+      "id": "MODE_PROVENANCE_MISMATCH",
+      "severity": "error",
+      "description": "PageSpec.mode must agree with contentProvenance: reference <-> evidence-reference, generated <-> generated."
+    },
+    {
+      "id": "PINNED_AVAILABILITY",
+      "severity": "error",
+      "description": "Every asset role's availability (reference-only / generation-safe / blocked) must equal the validator's pinned table, and every role must be in it; a move to a different-but-valid availability is caught, not only an invalid value."
+    },
+    {
+      "id": "GENERATED_MODE_REFERENCE_ASSET",
+      "severity": "error",
+      "description": "In mode 'generated' an assetRole must be generation-safe. The source's own assets (reference-only) have placeholder substitutes; the blocked role (icon.discord) must be omitted."
+    },
+    {
+      "id": "GENERATED_MODE_SOURCE_COPY",
+      "severity": "error",
+      "description": "In mode 'generated' no text may repeat a whole 2+ word string of the reference example, share a 4-word run with it, or contain a signature phrase of the source copy (assets/asset-roles.json sourceBrand)."
+    },
+    {
+      "id": "GENERATED_MODE_SOURCE_URL",
+      "severity": "error",
+      "description": "In mode 'generated' no string anywhere (text, label, ref, route, meta) may name one of the source's real hosts (sourceBrand.hosts)."
+    },
+    {
+      "id": "GENERATED_MODE_URL_NOT_RESERVED",
+      "severity": "error",
+      "description": "In mode 'generated' every URL-like string (scheme://host, www.host, or a host on a common TLD) must sit on a reserved .example or .invalid domain."
     }
   ]
 }

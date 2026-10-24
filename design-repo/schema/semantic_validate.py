@@ -5,6 +5,15 @@ Runs the Draft-07 schema first, then every rule JSON Schema cannot express.
 Each rule id in RULES must also exist (same severity) in compatibility/graph.json;
 extraction/verify_all.py checks that the two stay in agreement.
 
+Token rules (TOKEN_*): every token a PageSpec names (the closed `tokens` slots and the WebGL clear colour) must be
+an approved catalog path (tokens/llm/token-catalog.json) that the slot accepts (tokens/llm/token-policy.json), and
+must be valid for the declared theme. Raw colours, arbitrary spacing and unsupported fonts are rejected by name.
+
+Mode rules: PageSpec.mode is `reference` (a page for the source brand) or `generated` (a page for any other
+brand). In `generated` mode only generation-safe asset roles are allowed (GENERATED_MODE_REFERENCE_ASSET), no source
+copy (GENERATED_MODE_SOURCE_COPY), no source host (GENERATED_MODE_SOURCE_URL), every URL-like string on a reserved
+.example/.invalid domain (GENERATED_MODE_URL_NOT_RESERVED), and BRAND_PASSOFF applies to all text and the route.
+
 Usage:  python3 schema/semantic_validate.py [pagespec.json ...]
         (defaults to schema/example.pagespec.json). Exit 1 if any error.
 Requires: jsonschema (pip install jsonschema).
@@ -47,6 +56,19 @@ RULES = {
     "CONVERSION_BLOCK_CLASSED_CTA": "error",
     "RETRIEVAL_ELIGIBILITY_PINNED": "error",
     "SECTION_SOURCE_STRUCTURE": "error",
+    "TOKEN_UNKNOWN": "error",
+    "TOKEN_RAW_COLOR": "error",
+    "TOKEN_ARBITRARY_SPACING": "error",
+    "TOKEN_UNSUPPORTED_FONT": "error",
+    "TOKEN_SLOT_MISMATCH": "error",
+    "TOKEN_THEME_COMBINATION": "error",
+    "TOKEN_NOT_APPROVED": "error",
+    "MODE_PROVENANCE_MISMATCH": "error",
+    "PINNED_AVAILABILITY": "error",
+    "GENERATED_MODE_REFERENCE_ASSET": "error",
+    "GENERATED_MODE_SOURCE_COPY": "error",
+    "GENERATED_MODE_SOURCE_URL": "error",
+    "GENERATED_MODE_URL_NOT_RESERVED": "error",
 }
 # SCHEMA is the Draft-07 layer itself, not a graph rule.
 NON_GRAPH_RULES = {"SCHEMA"}
@@ -66,6 +88,93 @@ PINNED_POLICIES = {
     "endpoint.analytics": "must-not-reuse-live-endpoint",
     "font.commercial-sans": "license-required",
 }
+# Asset availability by mode, pinned (second source of truth next to assets/asset-roles.json `availability`;
+# extraction/verify_all.py keeps its own independent copy). Moving a role to a different-but-valid availability
+# (the source's mark -> generation-safe) must be caught, not just a value outside the closed vocabulary.
+PINNED_AVAILABILITY = {
+    "brand.logo-mark": "reference-only",
+    "identity.author-link": "reference-only",
+    "meta.og-image": "reference-only",
+    "meta.favicon": "reference-only",
+    "webgl.cube-model": "reference-only",
+    "webgl.matcap": "reference-only",
+    "webgl.sticker-colormap": "reference-only",
+    "icon.discord": "blocked",
+    "icon.arrow": "generation-safe",
+    "endpoint.form-action": "generation-safe",
+    "endpoint.analytics": "generation-safe",
+    "font.commercial-sans": "generation-safe",
+    "font.mono": "generation-safe",
+    "brand.logo-placeholder": "generation-safe",
+    "identity.link-placeholder": "generation-safe",
+    "meta.og-placeholder": "generation-safe",
+    "meta.favicon-placeholder": "generation-safe",
+    "webgl.model-placeholder": "generation-safe",
+    "webgl.matcap-placeholder": "generation-safe",
+    "webgl.colormap-placeholder": "generation-safe",
+}
+MODE_PROVENANCE = {"reference": "evidence-reference", "generated": "generated"}
+
+# --- token classification -------------------------------------------------------------------------------
+PATH_RE = re.compile(r"^[A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)+$")
+HEX_RE = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+COLOR_FN_RE = re.compile(r"\b(?:rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color|color-mix)\s*\(", re.I)
+RAW_LENGTH_RE = re.compile(r"^\s*(?:-?\d*\.?\d+(?:px|rem|em|vh|vw|vmin|vmax|%|ch|pt|cm|mm|in)?\s*)+$|\b(?:calc|clamp|min|max|var)\s*\(", re.I)
+NAMED_COLORS = set("""aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown burlywood
+cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray darkgreen
+darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon darkseagreen darkslateblue darkslategray
+darkslategrey darkturquoise darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia
+gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory khaki lavender
+lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow lightgray lightgreen lightgrey lightpink
+lightsalmon lightseagreen lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime limegreen linen magenta
+maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue mediumspringgreen mediumturquoise
+mediumvioletred midnightblue mintcream mistyrose moccasin navajowhite navy oldlace olive olivedrab orange orangered orchid
+palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple rebeccapurple red
+rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue slategray slategrey snow
+springgreen steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke yellow yellowgreen transparent
+currentcolor""".split())
+KIND_CATEGORIES = {"semanticColor": "semanticColor", "color": "color", "fontFamily": "fontFamily", "spacing": "spacing", "radius": "radius"}
+
+
+def is_raw_color(v):
+    t = v.strip()
+    return bool(HEX_RE.search(t) or COLOR_FN_RE.search(t) or t.lower() in NAMED_COLORS)
+
+
+def _lum(hexstr):
+    h = hexstr.strip().lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    if len(h) != 6:
+        return None
+    ch = []
+    for i in (0, 2, 4):
+        c = int(h[i:i + 2], 16) / 255.0
+        ch.append(c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4)
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+
+
+def contrast_ratio(a, b):
+    la, lb = _lum(a), _lum(b)
+    if la is None or lb is None:
+        return None
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+# --- generated-mode text/URL scanning ---------------------------------------------------------------------
+SCHEME_HOST_RE = re.compile(r"\b[a-z][a-z0-9+.-]*://(?:[^\s/@?#\"']*@)?([^\s/:?#\"']+)", re.I)
+WWW_RE = re.compile(r"\b(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)*)", re.I)
+
+
+def _words(s):
+    return re.sub(r"[^a-z0-9]+", " ", s.lower()).split()
+
+
+def _shingles(words, n):
+    return {tuple(words[i:i + n]) for i in range(len(words) - n + 1)}
+
+
 # Section taxonomy, pinned (second source of truth next to each contract's `semantic.category`;
 # extraction/verify_all.py keeps its own independent copy). `semantic` = what the section IS;
 # `source` = where it came from in the real files. They are separate closed objects.
@@ -98,7 +207,7 @@ DOCUMENTED_DUPLICATE_ANCHORS = {
     "cta": {("content.block-pairs", "feature-pairs"), ("cta.pitch-timeline", "default")},
 }
 BEHIND = ("behind-canvas", "behind-canvas-deep")
-NON_TEXT_KEYS = {"assetRole", "source", "ref", "section", "variant", "template", "route", "theme",
+NON_TEXT_KEYS = {"assetRole", "source", "ref", "section", "variant", "template", "route", "theme", "mode", "tokens",
                  "contentProvenance", "pageSpecVersion", "reducedMotionFallback", "patterns", "layer",
                  "href", "clearColorToken", "anchorId"}
 
@@ -117,6 +226,8 @@ def load_repo(root=None):
         "roles": _load("assets/asset-roles.json", root),
         "graph": _load("compatibility/graph.json", root),
         "motion": _load("tokens/llm/motion-patterns.json", root),
+        "catalog": _load("tokens/llm/token-catalog.json", root),
+        "policy": _load("tokens/llm/token-policy.json", root),
         "sections": {},
         "contracts": {},
         "contractSchema": _load("schema/section-contract.schema.json", root),
@@ -128,7 +239,27 @@ def load_repo(root=None):
             repo["sections"][c["id"]] = c
             for vname, v in c["variants"].items():
                 repo["contracts"][(c["id"], vname)] = v
+    repo["reference"] = _reference_corpus(repo, root)
     return repo
+
+
+def _reference_corpus(repo, root):
+    """Normalised copy of the reference example (the source's real text): whole strings of 2+ words and word
+    shingles. A generated page must share neither (GENERATED_MODE_SOURCE_COPY)."""
+    cfg = repo["roles"].get("sourceBrand", {}).get("copyOverlap", {})
+    n = cfg.get("shingleWords", 4)
+    minw = cfg.get("minWholeStringWords", 2)
+    path = os.path.join(root, cfg.get("referenceExample", "schema/example.pagespec.json"))
+    whole, shingles = set(), set()
+    if os.path.isfile(path):
+        with open(path, encoding="utf-8") as f:
+            ref = json.load(f)
+        for t in iter_text(ref):
+            w = _words(t)
+            if len(w) >= minw:
+                whole.add(" ".join(w))
+            shingles |= _shingles(w, n)
+    return {"whole": whole, "shingles": shingles, "n": n, "minw": minw}
 
 
 def word_count(s):
@@ -254,6 +385,133 @@ def check_section_contracts(repo, report):
         sources[key] = sid
 
 
+def iter_strings(obj, path="$"):
+    """Every string in a PageSpec with its path (no key exclusions): text, refs, hrefs, route, meta."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            for x in iter_strings(v, "%s.%s" % (path, k)):
+                yield x
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            for x in iter_strings(v, "%s[%d]" % (path, i)):
+                yield x
+    elif isinstance(obj, str):
+        yield path, obj
+
+
+def classify_token(slot_name, slot, value, repo):
+    """Return (rule, message) if `value` is not an approved token for this slot, else None."""
+    cat, pol = repo["catalog"], repo["policy"]
+    kind = slot["kind"]
+    if is_raw_color(value):
+        return "TOKEN_RAW_COLOR", "%s: raw colour %r; name a token (%s)" % (slot_name, value, ", ".join(slot["allow"][:3]))
+    if kind == "spacing" and RAW_LENGTH_RE.search(value):
+        return "TOKEN_ARBITRARY_SPACING", "%s: arbitrary spacing %r; name a spacing token (%s)" % (slot_name, value, ", ".join(slot["allow"][:3]))
+    if not PATH_RE.match(value):
+        if kind == "fontFamily":
+            return "TOKEN_UNSUPPORTED_FONT", "%s: unsupported font %r; fonts are tokens (%s)" % (slot_name, value, ", ".join(slot["allow"]))
+        return "TOKEN_UNKNOWN", "%s: %r is not a token path" % (slot_name, value)
+    if value not in cat["tokens"]:
+        return "TOKEN_UNKNOWN", "%s: unknown token %r (not in tokens/llm/token-catalog.json)" % (slot_name, value)
+    if value in pol["notGenerationApproved"]:
+        return "TOKEN_NOT_APPROVED", "%s: token %r is in notGenerationApproved (%s)" % (slot_name, value, pol["notGenerationApprovedReason"][:90])
+    if value not in slot["allow"]:
+        return "TOKEN_SLOT_MISMATCH", "%s: token %r (%s) is not accepted by this slot (allowed: %s)" % (slot_name, value, cat["tokens"][value]["category"], ", ".join(slot["allow"]))
+    return None
+
+
+def check_tokens(spec, repo, report):
+    cat, pol = repo["catalog"], repo["policy"]
+    slots = {n: x for n, x in pol["pageSpecTokenSlots"].items() if not n.startswith("$")}
+    given = {}
+    for n, x in slots.items():
+        loc = x["location"]
+        if loc.startswith("tokens."):
+            v = (spec.get("tokens") or {}).get(n)
+        else:
+            vs = [d.get("clearColorToken") for nd in spec["nodes"] if nd["section"] == "layer.webgl-object" for d in [nd["content"]] if "clearColorToken" in d]
+            v = vs[0] if vs else None
+        if isinstance(v, str):
+            given[n] = v
+    ok = {}
+    for n, v in given.items():
+        res = classify_token(n, slots[n], v, repo)
+        if res:
+            report(res[0], res[1])
+        else:
+            ok[n] = v
+    theme = spec["theme"]
+    th = cat["themes"].get(theme)
+    if th is None:
+        report("TOKEN_THEME_COMBINATION", "theme %r is not a theme of the token catalog %s" % (theme, sorted(cat["themes"])))
+    else:
+        for n, v in ok.items():
+            if slots[n].get("themeResolved") and v not in th["semanticTokens"]:
+                report("TOKEN_THEME_COMBINATION", "%s: token %r is not resolved by theme %r" % (n, v, theme))
+        against = slots.get("text", {}).get("contrastAgainst")
+        if against and "text" in ok and against in ok:
+            a = th["resolves"].get(ok["text"], cat["tokens"][ok["text"]]["value"])
+            b = th["resolves"].get(ok[against], cat["tokens"][ok[against]]["value"])
+            if isinstance(a, str) and isinstance(b, str):
+                r = contrast_ratio(a, b)
+                need = pol["themeRules"]["minTextContrast"]
+                if r is not None and r < need:
+                    report("TOKEN_THEME_COMBINATION", "text %r (%s) on %s %r (%s) has contrast %.2f, below the minimum %s in theme %r" % (ok["text"], a, against, ok[against], b, r, need, theme))
+    for n, v in ok.items():
+        af = slots[n].get("assetField")
+        if af:
+            want = (spec.get("fonts", {}).get(af.split(".")[1]) or {}).get("assetRole")
+            have = cat["tokens"][v].get("assetRole")
+            if want != have:
+                report("TOKEN_SLOT_MISMATCH", "%s: font token %r carries assetRole %r but %s is %r" % (n, v, have, af, want))
+
+
+def check_mode(spec, repo, report):
+    mode, prov = spec["mode"], spec["contentProvenance"]
+    if MODE_PROVENANCE.get(mode) != prov:
+        report("MODE_PROVENANCE_MISMATCH", "mode %r requires contentProvenance %r, found %r" % (mode, MODE_PROVENANCE.get(mode), prov))
+    if mode != "generated":
+        return
+    roles = repo["roles"]["roles"]
+    sb = repo["roles"].get("sourceBrand", {})
+    for path, d in iter_dicts(spec):
+        role = d.get("assetRole") if isinstance(d, dict) else None
+        if role in roles and roles[role].get("availability") != "generation-safe":
+            subs = ", ".join(roles[role].get("generationSafeSubstitutes", [])) or "none: omit it"
+            report("GENERATED_MODE_REFERENCE_ASSET", "%s: role %s is %s and cannot appear in a generated page (use: %s)" % (path, role, roles[role].get("availability"), subs))
+    hosts = [h.lower() for h in sb.get("hosts", [])]
+    reserved = tuple(sb.get("reservedPlaceholderDomains", [".example", ".invalid"]))
+    tlds = "|".join(re.escape(t) for t in sorted(sb.get("urlLikeTlds", []), key=len, reverse=True))
+    bare = re.compile(r"(?<![\w.-])((?:[a-z0-9-]+\.)+(?:%s))(?![\w-])" % tlds, re.I) if tlds else None
+    for path, v in iter_strings(spec):
+        if ".tokens." in path or path.endswith(".source"):
+            continue
+        low = v.lower()
+        for h in hosts:
+            if h in low:
+                report("GENERATED_MODE_SOURCE_URL", "%s names the source host %r" % (path, h))
+        found = [m.group(1) for m in SCHEME_HOST_RE.finditer(v)] + [m.group(1) for m in WWW_RE.finditer(v)]
+        if bare is not None:
+            found += [m.group(1) for m in bare.finditer(v)]
+        for host in sorted(set(x.lower().rstrip(".") for x in found)):
+            if not host.endswith(reserved):
+                report("GENERATED_MODE_URL_NOT_RESERVED", "%s: URL-like host %r is not on a reserved %s domain" % (path, host, "/".join(reserved)))
+    ref = repo["reference"]
+    sigs = [(t, " ".join(_words(t))) for t in sb.get("signatureCopy", [])]
+    for t in iter_text(spec):
+        w = _words(t)
+        joined = " ".join(w)
+        if len(w) >= ref["minw"] and joined in ref["whole"]:
+            report("GENERATED_MODE_SOURCE_COPY", "generated text %r repeats a whole string of the source copy" % t[:60])
+        elif _shingles(w, ref["n"]) & ref["shingles"]:
+            report("GENERATED_MODE_SOURCE_COPY", "generated text %r shares a %d-word run with the source copy" % (t[:60], ref["n"]))
+        else:
+            for raw, ns in sigs:
+                if ns and (" " + ns + " ") in (" " + joined + " "):
+                    report("GENERATED_MODE_SOURCE_COPY", "generated text %r contains source signature copy %r" % (t[:60], raw))
+                    break
+
+
 def validate(spec, repo=None):
     repo = repo or load_repo()
     errors, warnings = [], []
@@ -270,6 +528,14 @@ def validate(spec, repo=None):
             report("PINNED_POLICY", "asset role %s must be pinned to %r but asset-roles.json says %r" % (role, expected, actual))
         if not roles.get(role, {}).get("pinned"):
             report("PINNED_POLICY", "asset role %s must be marked pinned:true" % role)
+
+    for role, expected in PINNED_AVAILABILITY.items():
+        actual = roles.get(role, {}).get("availability")
+        if actual != expected:
+            report("PINNED_AVAILABILITY", "asset role %s must be availability %r but asset-roles.json says %r" % (role, expected, actual))
+    for role in roles:
+        if role not in PINNED_AVAILABILITY:
+            report("PINNED_AVAILABILITY", "asset role %s has no pinned availability; add it to PINNED_AVAILABILITY (and verify_all) after review" % role)
 
     # --- section-contract layer (taxonomy / provenance / retrieval eligibility) ----
     check_section_contracts(repo, report)
@@ -303,7 +569,7 @@ def validate(spec, repo=None):
             report("TEMPLATE_SEQUENCE_MATCH", "%s: %s" % (spec["template"], p))
         routes = [r["path"] for r in repo["templates"]["routes"] if r["template"] == spec["template"]]
         # generated pages may live on new routes; evidence-reference pages must sit on a real route
-        if spec["contentProvenance"] == "evidence-reference" and spec["route"] not in routes:
+        if (spec["mode"] == "reference" or spec["contentProvenance"] == "evidence-reference") and spec["route"] not in routes:
             report("TEMPLATE_SEQUENCE_MATCH", "evidence-reference spec route %r is not a real route of %s %s" % (spec["route"], spec["template"], routes))
 
     # --- one per page, keyed on (section, variant) -------------------------------
@@ -437,14 +703,21 @@ def validate(spec, repo=None):
             if hits:
                 report("ASSET_REF_DENYLIST", "%s: ref %r contains real-asset/endpoint term(s) %s" % (path, ref, hits))
 
+    # --- tokens (closed slots, catalog + policy) and mode (reference / generated) ----------------
+    check_tokens(spec, repo, report)
+    check_mode(spec, repo, report)
+
     # --- brand pass-off --------------------------------------------------------------
-    if spec["contentProvenance"] == "generated":
+    if spec["contentProvenance"] == "generated" or spec["mode"] == "generated":
         terms = [(t, _norm(t)) for t in repo["roles"]["brandTextDenylist"]["terms"]]
         for s in iter_text(spec):
             ns = _norm(s)
             for t, nt in terms:
                 if nt and nt in ns:
                     report("BRAND_PASSOFF", "generated text %r contains real brand/author term %r" % (s[:60], t))
+        for t, nt in terms:
+            if nt and nt in _norm(spec["route"]):
+                report("BRAND_PASSOFF", "generated route %r contains real brand/author term %r" % (spec["route"], t))
         wm = [n for n in nodes if n["section"] == "shell.footer-wordmark"]
         for n in wm:
             joined = _norm("".join(s["text"] for s in n["content"]["wordmark"]))

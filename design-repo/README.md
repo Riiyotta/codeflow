@@ -2,7 +2,7 @@
 
 This repo is an AI-ready design contract extracted from a clone of **https://www.thecodeflow.co/**. That site is a single-route Webflow waitlist page for a JavaScript course. The repo gives you tokens, primitives, components, section contracts, one page template, a compatibility graph, a Draft-07 PageSpec schema, a semantic validator and an adversarial suite. A generator uses these to compose pages without inventing colours, copy budgets, sections or assets.
 
-**Status:** `design-review-pending`, `productionApproved: false` (see `registry.manifest.json`). Version 1.1.0.
+**Status:** `design-review-pending`, `productionApproved: false` (see `registry.manifest.json`). Version 1.2.0.
 
 ## Read this first: real, live site
 
@@ -11,7 +11,7 @@ The source is a real site by a real named author, identified on the page only as
 - **Never reproduce or imitate these:** the "THE CODE FLOW. CO" logo, the Rubik's-cube GLB model and its matcap and colour-map textures, the og image and favicon, the author's links (personal site, Twitter redirect, privacy-policy Google Doc), or the Discord trademark glyph. `assets/asset-roles.json` gives each of these the policy `must-not-reproduce`. Only `placeholder` sources are valid.
 - **Never reuse live endpoints.** The original form posts to a live MailChimp list, and the page loads Umami analytics with a real website id. Both have the policy `must-not-reuse-live-endpoint`, and their real hosts and ids are in `refDenylist`. The clone itself has no form `action` (verified: `mv.endpoint.clone-has-no-action`).
 - **Commercial fonts.** Helvetica Neue and Helvetica Neue Condensed have the policy `license-required`. Use the fallback stack or a font the deployer has licensed. Firacode is also `license-required`, because the project has no licence file for it.
-- **Real copy** appears only in `schema/example.pagespec.json`, which has `contentProvenance: "evidence-reference"`. It is reference material, not publishable content. A PageSpec marked `generated` is rejected if any of its text contains the brand or the author identity (`BRAND_PASSOFF`). That includes a footer wordmark spelling the brand.
+- **Real copy** appears only in `schema/example.pagespec.json`, which has `mode: "reference"` and `contentProvenance: "evidence-reference"`. It is reference material, not publishable content. A PageSpec in mode `generated` (or marked `generated`) is rejected if any of its text contains the brand or the author identity (`BRAND_PASSOFF`). That includes a footer wordmark spelling the brand.
 - Eleven compliance-critical roles are **pinned**: `schema/semantic_validate.py` (`PINNED_POLICIES`) compares their policy against a hard-coded table. Changing one of them to a different policy that is still valid gets caught, not only a policy that isn't in the enum.
 - Do not make this repository public.
 
@@ -24,13 +24,16 @@ tokens/10-semantic/         semantic roles -> foundation refs
 tokens/20-component/        pill button, underline input, dot, rule line
 tokens/30-layout/           container / block / timeline widths per breakpoint
 tokens/themes/dark.json     the only theme (the site has no light mode)
-tokens/llm/                 component-allowlist.json (versioned, closed), motion-patterns.json (closed vocabulary + reduced-motion fallbacks)
-assets/asset-roles.json     closed assetRole enum, generation policies, ref / brand denylists
+tokens/llm/                 component-allowlist.json (versioned, closed), motion-patterns.json (closed vocabulary + reduced-motion fallbacks),
+                            token-catalog.json (GENERATED from the token files), token-policy.json (slots, theme rules, not-approved tokens)
+tokens/tokens_lib.py        token loader/resolver shared by build_catalog.py, verify_all.py and the validator's tooling
+tokens/build_catalog.py     regenerates token-catalog.json (--check compares without writing)
+assets/asset-roles.json     closed assetRole enum, generation policies, per-role availability (reference-only / generation-safe / blocked), modes, sourceBrand, ref / brand denylists
 primitives/ components/     10 primitives, 6 components
 sections/                   8 section contracts (8 variants): closed schema, `semantic` {id, category} vs `source` {id, tag, file, lines, citation}, retrievalEligible, maxWords, motion, structured responsive field, quirks
 templates/templates.json    1 template, structured nodes {section, variant, required, repeatable}; route map
-compatibility/graph.json    26 rules with severity; must agree with the validator's RULES (checked)
-schema/                     pagespec.schema.json, section-contract.schema.json (closed), example.pagespec.json, semantic_validate.py, tests/adversarial_test.py
+compatibility/graph.json    39 rules with severity; must agree with the validator's RULES (checked)
+schema/                     pagespec.schema.json, section-contract.schema.json (closed), example.pagespec.json (mode reference), examples/generated.template.waitlist-landing.pagespec.json (mode generated), semantic_validate.py, tests/adversarial_test.py
 extraction/                 measured-values.json (citation ledger + sectionHeights), verify_all.py, prove_drift.py, wrapper_gate.py + wrapper-whitelist.json, measure_sections.mjs (optional)
 ```
 
@@ -45,12 +48,52 @@ extraction/                 measured-values.json (citation ledger + sectionHeigh
 | sectionVariants | 8 |
 | templates | 1 |
 | routes | 1 |
-| assetRoles | 13 |
+| assetRoles | 20 |
 | pinnedAssetRoles | 11 |
 | retrievalIneligibleSections | 1 |
 | motionPatterns | 18 |
-| compatibilityRules | 26 |
+| compatibilityRules | 39 |
 | measuredValueEntries | 95 |
+| tokenCategories | 13 |
+| themes | 1 |
+| typographyRoles | 22 |
+| tokenPolicySlots | 9 |
+| pageSpecExamples | 2 |
+| referenceOnlyAssetRoles | 7 |
+| generationSafeAssetRoles | 12 |
+| blockedAssetRoles | 1 |
+
+## Token catalog and policy
+
+`tokens/llm/token-catalog.json` lists every token (139) by path with its category, resolved value, evidence id, and status / assetRole where the token file records one, plus the theme's resolved semantic tokens. It is generated by `tokens/build_catalog.py` from the real token files; `verify_all.py` rebuilds it in memory and fails if the file differs, so a token file and the catalog cannot be edited apart. Paths follow the contract convention: `color.base.black`, `semantic.surface.page`, `typography.fontFamily.sans`, `typography.role.body`, `spacing.section.padding`, `radius.pill`, `motion.duration.reveal`.
+
+`tokens/llm/token-policy.json` holds the rules: a raw-value restriction per real catalog category, the not-approved tokens (derived by `verify_all.py` from the token files' `status: unused | effectively-invisible`: `color.base.dark`, `color.base.grey`, `semantic.border.inputFocus`, `spacing.unusedVars.px/py`), the theme rules (minimum text contrast 4.5), and `pageSpecTokenSlots`, the closed list of tokens a PageSpec can name.
+
+A PageSpec names tokens in the closed, required `tokens` object (`surface`, `text`, optional `border`, `fontSans`, `fontDisplay`, `fontMono`, `sectionPadding`, `buttonRadius`) and in the existing `clearColorToken`. Each value is a catalog path. Per-section styling is still owned by the section and component contracts; a PageSpec has no other field that can carry a colour, length or font. `schema/semantic_validate.py` enforces:
+
+| rule | rejects |
+|---|---|
+| `TOKEN_UNKNOWN` | a value that is not a catalog path, or a path the catalog does not have |
+| `TOKEN_RAW_COLOR` | hex, `rgb()`, `hsl()`, `oklch()` and the other colour functions, CSS colour names, `transparent`, `currentColor` |
+| `TOKEN_ARBITRARY_SPACING` | a written length in a spacing slot (`24px`, `2rem`, `10vh 3vw 5vh`, `calc()`, a bare number) |
+| `TOKEN_UNSUPPORTED_FONT` | a font name or stack in a font slot (`Comic Sans MS`, `Helvetica Neue`, `Inter, sans-serif`) |
+| `TOKEN_SLOT_MISMATCH` | a real token the slot does not accept (a font in `surface`, `radius.circle` in `buttonRadius`), or a font token whose `assetRole` differs from the PageSpec `fonts` field |
+| `TOKEN_THEME_COMBINATION` | a theme not in the catalog, a semantic token the theme does not resolve, or text/surface pairs under the contrast minimum (`text.primary` on `surface.buttonHover` is the same colour) |
+| `TOKEN_NOT_APPROVED` | a token in `notGenerationApproved` |
+
+## Reference and generated mode
+
+`mode` is a required closed enum on every PageSpec. `reference` is a page for the source brand (clone or fidelity check): every asset role is available. `generated` is a page for any other brand. `contentProvenance` is kept for compatibility and must agree (`MODE_PROVENANCE_MISMATCH`: reference with evidence-reference, generated with generated).
+
+Each asset role has an `availability` in `assets/asset-roles.json`, pinned twice (`PINNED_AVAILABILITY` in `schema/semantic_validate.py` and in `extraction/verify_all.py`):
+
+- `reference-only` (7 roles: logo mark, author links, og image, favicon, cube model, matcap, sticker colour map): the source's own assets. Each names a generation-safe substitute role (`brand.logo-placeholder`, `identity.link-placeholder`, `meta.og-placeholder`, `meta.favicon-placeholder`, `webgl.model-placeholder`, `webgl.matcap-placeholder`, `webgl.colormap-placeholder`), and the schema field accepts both.
+- `generation-safe` (12 roles: the 7 substitutes, the arrow icon, form endpoint, analytics, both font roles): usable in both modes; the generation policy still limits the source (placeholder, generated, fallback stack, licensed by the deployer).
+- `blocked` (1 role: the Discord glyph): a generated page omits it. It has no substitute, and `communityLink` is optional in the schema so omitting it validates.
+
+In mode `generated` the validator rejects: any non-generation-safe role (`GENERATED_MODE_REFERENCE_ASSET`); source copy, meaning a whole 2+ word string of the reference example, a 4-word run shared with it, or a signature phrase listed in `sourceBrand.signatureCopy` (`GENERATED_MODE_SOURCE_COPY`); any string naming a source host (`GENERATED_MODE_SOURCE_URL`); any URL-like string whose host is not on `.example` or `.invalid` (`GENERATED_MODE_URL_NOT_RESERVED`); and the source brand or author in any text or in the route (`BRAND_PASSOFF`, rule id unchanged). The brand names, hosts and signature phrases are derived from the real source and checked against it by `verify_all.py`.
+
+`schema/examples/generated.template.waitlist-landing.pagespec.json` is the generation-safe example: a fictional ceramics studio ("Harbor Kiln"), original copy, placeholder-role assets with `placeholder:` refs, and `.example` URLs. It validates against the same schema and semantic rules as the reference example and is checked for mode, roles and copy by `verify_all.py`. It has not been rendered; it proves the contract, not a finished design.
 
 ## Page shape
 
@@ -111,11 +154,12 @@ Reveals replay every time an element re-enters the viewport. "Mobile" is detecte
 
 ```bash
 pip install -r requirements.txt   # jsonschema, used for the Draft-07 layer
-python3 extraction/verify_all.py            # schema, semantics, parity, versions, counts, citations (range + quote), graph agreement, pins, tokens, hygiene
+python3 extraction/verify_all.py            # schema, semantics, parity, versions, counts, citations (range + quote), graph agreement, pins, token catalog + policy, availability + modes, validator canaries, hygiene
+python3 tokens/build_catalog.py --check     # the token catalog matches the token files (run without --check to regenerate)
 python3 schema/tests/adversarial_test.py    # every mutation rejected with its expected rule, every control passes
 python3 extraction/prove_drift.py           # proves each drift check fails on injected drift (scratch copies in the OS temp dir; --scratch DIR to choose where)
 python3 extraction/wrapper_gate.py          # the whole-page-wrapper gate on its own
-python3 schema/semantic_validate.py my-page.pagespec.json
+python3 schema/semantic_validate.py my-page.pagespec.json   # needs `mode` and `tokens`; defaults to the reference example
 ```
 
 Citation paths in `extraction/measured-values.json` are relative to the source project root, which is the folder that contains `design-repo/`. If this folder ships alone, the citation check downgrades to WARN.
