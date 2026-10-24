@@ -457,11 +457,11 @@ MODE_MUTATIONS = [
     # availability pinned (registry mutated: a DIFFERENT BUT VALID availability, or an invalid one)
     M("pinned availability: source logo -> generation-safe", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("brand.logo-mark", "generation-safe")),
     M("pinned availability: author link -> generation-safe", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("identity.author-link", "generation-safe")),
-    M("pinned availability: cube model -> blocked", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("webgl.cube-model", "blocked")),
+    M("pinned availability: cube model -> blocked", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("webgl.cube-model", "blocked-for-generation")),
     M("pinned availability: Discord glyph -> generation-safe", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.discord", "generation-safe")),
     M("pinned availability: Discord glyph -> reference-only", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.discord", "reference-only")),
     M("pinned availability: placeholder logo -> reference-only", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("brand.logo-placeholder", "reference-only")),
-    M("pinned availability: arrow icon -> blocked", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.arrow", "blocked")),
+    M("pinned availability: arrow icon -> blocked", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.arrow", "blocked-for-generation")),
     M("pinned availability: value outside the closed vocabulary", "mode", "PINNED_AVAILABILITY", lambda s: s, _avail("icon.arrow", "sometimes")),
     M("pinned availability: availability removed", "mode", "PINNED_AVAILABILITY", lambda s: s, lambda r: r["roles"]["roles"]["icon.arrow"].pop("availability")),
     M("pinned availability: a new role nobody pinned", "mode", "PINNED_AVAILABILITY", lambda s: s, _new_role),

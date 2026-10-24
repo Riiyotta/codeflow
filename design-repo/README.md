@@ -28,7 +28,7 @@ tokens/llm/                 component-allowlist.json (versioned, closed), motion
                             token-catalog.json (GENERATED from the token files), token-policy.json (slots, theme rules, not-approved tokens)
 tokens/tokens_lib.py        token loader/resolver shared by build_catalog.py, verify_all.py and the validator's tooling
 tokens/build_catalog.py     regenerates token-catalog.json (--check compares without writing)
-assets/asset-roles.json     closed assetRole enum, generation policies, per-role availability (reference-only / generation-safe / blocked), modes, sourceBrand, ref / brand denylists
+assets/asset-roles.json     closed assetRole enum, generation policies, per-role availability (reference-only / generation-safe / blocked-for-generation), modes, sourceBrand, ref / brand denylists
 primitives/ components/     10 primitives, 6 components
 sections/                   8 section contracts (8 variants): closed schema, `semantic` {id, category} vs `source` {id, tag, file, lines, citation}, retrievalEligible, maxWords, motion, structured responsive field, quirks
 templates/templates.json    1 template, structured nodes {section, variant, required, repeatable}; route map
@@ -89,7 +89,7 @@ Each asset role has an `availability` in `assets/asset-roles.json`, pinned twice
 
 - `reference-only` (7 roles: logo mark, author links, og image, favicon, cube model, matcap, sticker colour map): the source's own assets. Each names a generation-safe substitute role (`brand.logo-placeholder`, `identity.link-placeholder`, `meta.og-placeholder`, `meta.favicon-placeholder`, `webgl.model-placeholder`, `webgl.matcap-placeholder`, `webgl.colormap-placeholder`), and the schema field accepts both.
 - `generation-safe` (12 roles: the 7 substitutes, the arrow icon, form endpoint, analytics, both font roles): usable in both modes; the generation policy still limits the source (placeholder, generated, fallback stack, licensed by the deployer).
-- `blocked` (1 role: the Discord glyph): a generated page omits it. It has no substitute, and `communityLink` is optional in the schema so omitting it validates.
+- `blocked-for-generation` (1 role: the Discord glyph): a generated page omits it. It has no substitute, and `communityLink` is optional in the schema so omitting it validates.
 
 In mode `generated` the validator rejects: any non-generation-safe role (`GENERATED_MODE_REFERENCE_ASSET`); source copy, meaning a whole 2+ word string of the reference example, a 4-word run shared with it, or a signature phrase listed in `sourceBrand.signatureCopy` (`GENERATED_MODE_SOURCE_COPY`); any string naming a source host (`GENERATED_MODE_SOURCE_URL`); any URL-like string whose host is not on `.example` or `.invalid` (`GENERATED_MODE_URL_NOT_RESERVED`); and the source brand or author in any text or in the route (`BRAND_PASSOFF`, rule id unchanged). The brand names, hosts and signature phrases are derived from the real source and checked against it by `verify_all.py`.
 

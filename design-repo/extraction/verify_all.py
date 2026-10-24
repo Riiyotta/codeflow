@@ -42,11 +42,11 @@ EXPECT_RETRIEVAL = {sid: sid != "layer.webgl-object" for sid in EXPECT_TAXONOMY}
 # Pinned ASSET AVAILABILITY by mode (assets/asset-roles.json `availability`). A second copy, independent of
 # schema/semantic_validate.py PINNED_AVAILABILITY: flipping a role to a different-but-valid availability
 # (the source's mark -> generation-safe, the blocked Discord glyph -> generation-safe) must be caught.
-AVAIL_VALUES = ["reference-only", "generation-safe", "blocked"]
+AVAIL_VALUES = ["reference-only", "generation-safe", "blocked-for-generation"]
 PINNED_AVAILABILITY = {
     "brand.logo-mark": "reference-only", "identity.author-link": "reference-only", "meta.og-image": "reference-only",
     "meta.favicon": "reference-only", "webgl.cube-model": "reference-only", "webgl.matcap": "reference-only",
-    "webgl.sticker-colormap": "reference-only", "icon.discord": "blocked",
+    "webgl.sticker-colormap": "reference-only", "icon.discord": "blocked-for-generation",
     "icon.arrow": "generation-safe", "endpoint.form-action": "generation-safe", "endpoint.analytics": "generation-safe",
     "font.commercial-sans": "generation-safe", "font.mono": "generation-safe",
     "brand.logo-placeholder": "generation-safe", "identity.link-placeholder": "generation-safe",
@@ -282,7 +282,7 @@ def main(argv):
         "pageSpecExamples": 1 + len(gen_examples),
         "referenceOnlyAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "reference-only"),
         "generationSafeAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "generation-safe"),
-        "blockedAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "blocked"),
+        "blockedAssetRoles": sum(1 for r in roles["roles"].values() if r.get("availability") == "blocked-for-generation"),
     }
     probs = ["%s: manifest %r != disk %r" % (k, manifest["counts"].get(k), v) for k, v in real.items() if manifest["counts"].get(k) != v]
     probs += ["manifest count %r has no recompute rule" % k for k in manifest["counts"] if k not in real]
@@ -709,7 +709,7 @@ def main(argv):
                 if "const" in e_ or missing:
                     probs.append("schema field for %s does not accept its substitute(s) %s" % (r_, missing or v_.get("generationSafeSubstitutes")))
     for r_, v_ in roles["roles"].items():
-        if v_.get("availability") == "blocked":
+        if v_.get("availability") == "blocked-for-generation":
             for nid, nd in schema["definitions"].items():
                 if not nid.startswith("node__"):
                     continue

@@ -99,7 +99,7 @@ PINNED_AVAILABILITY = {
     "webgl.cube-model": "reference-only",
     "webgl.matcap": "reference-only",
     "webgl.sticker-colormap": "reference-only",
-    "icon.discord": "blocked",
+    "icon.discord": "blocked-for-generation",
     "icon.arrow": "generation-safe",
     "endpoint.form-action": "generation-safe",
     "endpoint.analytics": "generation-safe",

@@ -227,7 +227,7 @@
     {
       "id": "PINNED_AVAILABILITY",
       "severity": "error",
-      "description": "Every asset role's availability (reference-only / generation-safe / blocked) must equal the validator's pinned table, and every role must be in it; a move to a different-but-valid availability is caught, not only an invalid value."
+      "description": "Every asset role's availability (reference-only / generation-safe / blocked-for-generation) must equal the validator's pinned table, and every role must be in it; a move to a different-but-valid availability is caught, not only an invalid value."
     },
     {
       "id": "GENERATED_MODE_REFERENCE_ASSET",

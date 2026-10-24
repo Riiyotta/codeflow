@@ -38,12 +38,12 @@
   "availabilityValues": [
     "reference-only",
     "generation-safe",
-    "blocked"
+    "blocked-for-generation"
   ],
   "availabilityMeaning": {
     "reference-only": "The source's own asset or identity. Available only in mode 'reference'. Must name at least one generation-safe substitute role that a generated page uses in its place.",
     "generation-safe": "Available in both modes. In mode 'generated' the generationPolicy still limits the source (placeholder / generated / fallback-stack / licensed-by-deployer) and the ref denylists still apply.",
-    "blocked": "Available only in mode 'reference'; a generated page must omit it. No substitute exists, and the PageSpec field that carries it must be optional so omitting it validates."
+    "blocked-for-generation": "Available only in mode 'reference'; a generated page must omit it. No substitute exists, and the PageSpec field that carries it must be optional so omitting it validates."
   },
   "modes": {
     "field": "PageSpec.mode (required, closed enum: reference | generated)",
@@ -158,7 +158,7 @@
         "shell.nav"
       ],
       "evidence": "mv.asset.discord",
-      "availability": "blocked",
+      "availability": "blocked-for-generation",
       "generatedModeGuidance": "A third-party trademark in an always-hidden link (mv.structure.discord-hidden). Omit communityLink in a generated page; it has no substitute."
     },
     "webgl.cube-model": {

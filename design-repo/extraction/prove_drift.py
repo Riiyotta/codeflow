@@ -327,7 +327,7 @@ TOKEN_MODE_CASES = [
     ("asset role left unclassified (no availability)", "asset availability pinned",
      lambda r: _ar(r, lambda d: d["roles"]["icon.arrow"].pop("availability"))),
     ("availabilityValues loses 'blocked'", "asset availability pinned",
-     lambda r: _ar(r, lambda d: d["availabilityValues"].remove("blocked"))),
+     lambda r: _ar(r, lambda d: d["availabilityValues"].remove("blocked-for-generation"))),
     ("the source's logo made generation-safe (different valid value)", "asset availability pinned",
      lambda r: _ar(r, lambda d: (d["roles"]["brand.logo-mark"].__setitem__("availability", "generation-safe"), d["roles"]["brand.logo-mark"].pop("generationSafeSubstitutes")))),
     ("the author links made generation-safe", "asset availability pinned",
